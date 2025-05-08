@@ -6,7 +6,6 @@ const session = require('express-session')
 const port = 3000
 
 app
-    
     .use('/static', express.static('static'))
     .use(express.urlencoded({ extended: true }))
     .use(session({
@@ -30,7 +29,7 @@ app
     });
 
 function onHome(req, res) {
-    req.session.userID = 15234;
+    req.session.userID = 95234;
     let userID = req.session.userID; 
-    res.render('home.ejs', {userID});
+    res.render('index.ejs', {userID});
 }
