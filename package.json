@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Oefen opdracht",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"

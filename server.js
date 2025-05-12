@@ -19,7 +19,6 @@ async function connectDB() {
     } catch (error) {
         console.log(error);
     }
-
 }
 
 connectDB();
@@ -41,9 +40,11 @@ app
     .set("views", "view")
 
     .get("/", loadHome)
+    .get("/login", loadLogin)
     .get("/register", loadRegistry)
+    .get("/browse", loadBrowse)
 
-    .post("/register", processRegistery)
+    .post("/login", processLogin)
 
     .listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
@@ -55,19 +56,84 @@ function loadHome(req, res) {
     res.render("index.ejs", { userID });
 }
 
+function loadLogin(req, res) {
+    req.session.userID = 95234;
+    let userID = req.session.userID;
+    res.render("login.ejs", { userID });
+}
+
+async function getPetfinderToken() {
+    const response = await fetch("https://api.petfinder.com/v2/oauth2/token", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            grant_type: "client_credentials",
+            client_id: process.env.PET_FINDER_API_KEY,
+            client_secret: process.env.API_SECRET
+        })
+    });
+
+    const data = await response.json();
+    return data.access_token;
+}
+
+async function loadBrowse(req, res) {
+    try {
+        const token = await getPetfinderToken();
+
+        const petResponse = await fetch("https://api.petfinder.com/v2/animals", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await petResponse.json(); // ✅ This is fine
+        const pets = data.animals;
+
+        //debug output
+        console.log("Petfinder API response:", data);
+        console.log("Animals found:", data.animals?.length);
+        console.log("Token:", token);
+        console.log("Client ID:", process.env.PET_FINDER_API_KEY);
+        console.log("Client Secret:", process.env.API_SECRET);
+
+
+        res.render("browse.ejs", { pets, error: null });
+    } catch (error) {
+        res.status(500).render("browse.ejs", { pets: [], error: "Could not fetch pet data." });
+    }
+}
+
+
+
 function loadRegistry(req, res) {
     req.session.userID = 95234;
     let userID = req.session.userID;
     res.render("register.ejs", { userID });
 }
-function processRegistery(req, res){
-    console.log(req.body); 
-    userCollection.insertOne(req.body);
-    let message = "Registration successful"
-    res.render("register" , {data: message});
+async function processLogin(req, res) {
+    const email = req.body.email;
+
+    try {
+        const existingUser = await userCollection.findOne({ email });
+        if (existingUser) {
+            console.log("This email is already in use.");
+            res.render("login", { data: "Email is already registered" });
+        } else {
+            userCollection.insertOne(req.body);
+            let message = "Registration successful"
+            res.render("login", { data: message });
+        }
+
+    } catch (error) {
+        console.error("Error during registration:", error);
+        res.status(500).render("login", { data: "An error occurred during registration." });
+    }
+
 }
 
-console.log("MongoDB URI: ", process.env.URI);
-console.log("Database Name: ", process.env.DB_NAME);
-console.log("User Collection: ", process.env.USER_COLLECTION);
+
+
 

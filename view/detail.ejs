@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetThing | Sign Up</title>
+</head>
+<body>
+    <h1>Adoptable Pets</h1>
+
+    <% if (error) { %>
+      <p><%= error %></p>
+    <% } else if (pets.length === 0) { %>
+      <p>No pets found.</p>
+    <% } else { %>
+      <ul>
+        <% pets.forEach(pet => { %>
+          <li>
+            <strong><%= pet.name %></strong> — <%= pet.species %><br>
+            <% if (pet.photos[0]) { %>
+              <img src="<%= pet.photos[0].small %>" alt="<%= pet.name %>" style="max-width: 150px;">
+            <% } else { %>
+              <em>No photo available</em>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+    
+
+
+    
+</body>
+</html>
+
