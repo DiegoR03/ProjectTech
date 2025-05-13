@@ -11,6 +11,8 @@ const client = new MongoClient(uri);
 const db = client.db(process.env.DB_NAME);
 const userCollection = db.collection(process.env.USER_COLLECTION)
 
+let loggedIn = false;
+
 async function connectDB() {
     try {
         await client.connect();
@@ -42,9 +44,12 @@ app
     .get("/", loadHome)
     .get("/login", loadLogin)
     .get("/register", loadRegistry)
+    .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
 
     .post("/login", processLogin)
+    .post("/register", processRegistration)
+    .post("/passwordchange", changePassword)
 
     .listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
@@ -60,6 +65,36 @@ function loadLogin(req, res) {
     req.session.userID = 95234;
     let userID = req.session.userID;
     res.render("login.ejs", { userID });
+}
+
+function loadPasswordChange(req, res) {
+    req.session.userID = 95234;
+    let userID = req.session.userID;
+    res.render("passwordchange.ejs", { userID });
+}
+
+async function processLogin(req, res){
+    const email = req.body.email;
+    const password = req.body.password;
+
+    try {
+        const existingemail = await userCollection.findOne({ email });
+        const existingpassword = await userCollection.findOne({ password });
+
+        if (existingemail && existingpassword) {
+            console.log("Log in successfull");
+            loggedIn = true;
+            res.render("browse.ejs");
+        } else {
+            console.log("Log in invalid");
+            loggedIn = false;
+            res.render("login.ejs");
+        }
+
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).render("login", { data: "An error occurred during login." });
+    }
 }
 
 async function getPetfinderToken() {
@@ -106,14 +141,12 @@ async function loadBrowse(req, res) {
     }
 }
 
-
-
 function loadRegistry(req, res) {
     req.session.userID = 95234;
     let userID = req.session.userID;
     res.render("register.ejs", { userID });
 }
-async function processLogin(req, res) {
+async function processRegistration(req, res) {
     const email = req.body.email;
 
     try {
@@ -134,6 +167,27 @@ async function processLogin(req, res) {
 
 }
 
+async function changePassword(req, res){
+    const email = req.body.email;
+    const password = req.body.password;
+    const newpassword = req.body.password_new;
 
+    try {
+        const existingemail = await userCollection.findOne({ email });
+        const existingpassword = await userCollection.findOne({ password });
 
+        if (existingemail && existingpassword) {
+            console.log("Password is changed");
+            userCollection.updateOne({email:email},{$set:{password:newpassword}})
+            console.log(existingemail);
+            res.render("login.ejs");
+        } else {
+            console.log("Change failed");
+            res.render("passwordchange.ejs");
+        }
 
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).render("login", { data: "An error occurred during change." });
+    }
+}
