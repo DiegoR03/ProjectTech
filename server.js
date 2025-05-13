@@ -61,7 +61,7 @@ function loadLogin(req, res) {
     let userID = req.session.userID;
     res.render("login.ejs", { userID });
 }
-
+// Getting API Token /////////////////////////////////////////////////////////////////////
 async function getPetfinderToken() {
     const response = await fetch("https://api.petfinder.com/v2/oauth2/token", {
         method: "POST",
@@ -78,12 +78,85 @@ async function getPetfinderToken() {
     const data = await response.json();
     return data.access_token;
 }
-
+// Rendering API data ///////////////////////////////////////////////////////
 async function loadBrowse(req, res) {
     try {
         const token = await getPetfinderToken();
+        const page = parseInt(req.query.page) || 1;
 
-        const petResponse = await fetch("https://api.petfinder.com/v2/animals", {
+        const params = new URLSearchParams({
+            page,
+            limit: 8
+        });
+
+        const allowedFilters = [
+            "type",        // species
+            "gender",      // gender
+            "size",
+            "age",
+            "coat",
+            "good_with_children",
+            "good_with_dogs",
+            "good_with_cats",
+            "house_trained"
+        ];
+
+        const filterMap = {
+            species: "type",
+            gender: "gender",
+            size: "size",
+            age: "age",
+            coat: "coat",
+            good_with_children: "good_with_children",
+            good_with_dogs: "good_with_dogs",
+            good_with_cats: "good_with_cats",
+            house_trained: "house_trained"
+
+        };
+
+        // Loop through each filter provided in the URL query string
+        for (let queryFilter in req.query) {
+            // Convert the query filter to the correct API filter name (if needed)
+            let apiFilterReq;
+
+            if (filterMap[queryFilter]) {
+                apiFilterReq = filterMap[queryFilter]; // e.g., 'species' → 'type'
+            } else {
+                apiFilterReq = queryFilter;
+            }
+
+            // Check if this is an allowed filter and has a value
+            if (allowedFilters.includes(apiFilterReq) && req.query[queryFilter]) {
+                // Add the valid filter and its value to the API request parameters
+                params.append(apiFilterReq, req.query[queryFilter]);
+            }
+        }
+
+        const activeFilters = [];
+        const filterLabels = {
+            species: "Species",
+            gender: "Gender",
+            size: "Size",
+            age: "Age",
+            coat: "Coat",
+            good_with_children: "Good with children",
+            good_with_dogs: "Good with dogs",
+            good_with_cats: "Good with cats",
+            house_trained: "House trained"
+        };
+
+        for (const activeFilter in req.query) {
+            if (req.query[activeFilter] && filterLabels[activeFilter]) {
+                activeFilters.push({
+                    key: activeFilter,
+                    label: filterLabels[activeFilter],
+                    value: req.query[activeFilter]
+                });
+            }
+        }
+
+        const url = `https://api.petfinder.com/v2/animals?${params.toString()}`;
+        const petResponse = await fetch(url, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -91,18 +164,23 @@ async function loadBrowse(req, res) {
 
         const data = await petResponse.json(); // ✅ This is fine
         const pets = data.animals;
+        const pagination = data.pagination || {};
 
         //debug output
         console.log("Petfinder API response:", data);
         console.log("Animals found:", data.animals?.length);
-        console.log("Token:", token);
-        console.log("Client ID:", process.env.PET_FINDER_API_KEY);
-        console.log("Client Secret:", process.env.API_SECRET);
+        console.log("Pagination info:", pagination);
+
+        console.log(JSON.stringify(pets[0].attributes, null, 2)); // Log the first pet's attributes
+        console.log(JSON.stringify(pets[0].environment, null, 2)); // Log the first pet's environment
+        console.log(JSON.stringify(pets[0].breeds, null, 2)); // Log the first pet's breeds
 
 
-        res.render("browse.ejs", { pets, error: null });
+
+
+        res.render("browse.ejs", { pets, pagination, error: null, request: req, activeFilters });
     } catch (error) {
-        res.status(500).render("browse.ejs", { pets: [], error: "Could not fetch pet data." });
+        res.status(500).render("browse.ejs", { pets: [], pagination: null, error: "Could not fetch pet data.", request: req, activeFilters: [] });
     }
 }
 

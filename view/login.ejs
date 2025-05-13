@@ -3,9 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetThing | Sign Up</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <title>PetThing | Login</title>
 </head>
 <body>
+    <header>
+    <h1>PetThing</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/browse">Browse</a>
+      <a href="/login" class="active">Login</a>
+      <a href="/register">Register</a>
+    </nav>
+  </header>
    
 <form action="/login" method="POST">
     <input type="email" name="email" placeholder="Email">
