@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const validator = require('validator');
 const app = express();
 const session = require("express-session");
 const port = 3000;
@@ -37,6 +38,7 @@ app
     )
 
     .set("view engine", "ejs")
+    .set("views", "view")
 
     .get("/", loadHome)
     .get("/login", loadLogin)
@@ -60,6 +62,7 @@ function loadLogin(req, res) {
     let userID = req.session.userID;
     res.render("login.ejs", { userID });
 }
+
 // Getting API Token /////////////////////////////////////////////////////////////////////
 async function getPetfinderToken() {
     const response = await fetch("https://api.petfinder.com/v2/oauth2/token", {
@@ -77,7 +80,7 @@ async function getPetfinderToken() {
     const data = await response.json();
     return data.access_token;
 }
-// Rendering API data ///////////////////////////////////////////////////////////////////
+
 async function loadBrowse(req, res) {
     try {
         const token = await getPetfinderToken();
