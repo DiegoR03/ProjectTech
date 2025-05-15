@@ -1,0 +1,340 @@
+:root {
+  --primary-color: #46c098;
+  --primary-color-hover: #3da885;
+  --text-color: #333;
+  --background-color: #f2f2f2;
+
+  --active-filters: #46c0975a;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+body>section>p:nth-of-type(1) {
+  text-align: center;
+  margin: 2em;
+  max-width: 55%;
+}
+/* Create search profile ////////////////////////////////////////////////*/
+body>section>a:nth-of-type(1) {
+  text-align: center;
+  display: inline-block;
+  padding: 1rem;
+  margin: 1em auto;
+  background-color: var(--primary-color);
+  color: #FFF;
+  border-radius: 12px;
+  text-decoration: none;
+
+}
+
+body>section>a:nth-of-type(1):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+}
+/* Filters ////////////////////////////////////////////////////////////////*/
+.filters {
+  margin: 2rem auto;
+  display: flex;
+  justify-content: center;
+}
+
+.filters form {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.filters select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  min-width: 120px;
+  margin-top: 1em;
+
+  appearance: none;           /* Remove default styling */
+  -webkit-appearance: none;   
+  -moz-appearance: none;      
+  padding: 0.5rem 2rem 0.5rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%2346c098' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  min-width: 120px;
+  cursor: pointer;
+
+}
+
+.filters button {
+  padding: 0.5rem 1.2rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+
+  align-self: end;
+}
+
+.hidden {
+  display: none;
+}
+
+#advanced-filters.hidden {
+  display: none;
+}
+
+#advanced-filters {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Advanced filters /////////////////////////////////////////////////////// */
+#toggle-advanced {
+  padding: 0.37rem 0.7rem;
+  background-color: #000;
+  color: white;
+  border: 2px solid #000; 
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: end;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+#toggle-advanced:hover {
+  background-color: transparent;
+  color: #000;
+}
+
+#toggle-advanced.openFilters {
+  background-color: transparent;
+  color: #000;
+}
+
+
+.filters button:hover {
+  background-color: var(--primary-color-hover);
+}
+/* Active filters//////////////////////////////////////////////////////////////////// */
+.active-filters {
+  border: 1px 0px solid #cceee2;
+  padding: 1rem 2rem;
+  margin-top: 2rem ;
+  width: fit-content;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.active-filters ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.active-filters li {
+  background-color: var(--active-filters);
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.clear-filters {
+  display: inline-block;
+  margin-top: 1rem;
+  text-decoration: none;
+  color: rgb(150, 150, 150);
+  font-weight: bold;
+}
+
+/* Results ////////////////////////////////////////////////////////// */
+
+
+.results-wrapper {
+ display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ccc;
+}
+
+.results {
+ font-weight: bold;
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0;
+  
+  grid-column: 2;
+  text-align: center;
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+
+  justify-self: end;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2em;
+
+}
+
+/* Card styling /////////////////////////////////////////////////////////*/
+.card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+/* Card content /////////////////////////////////////////////////////////*/
+
+.card-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 12px;
+}
+
+.pet-info {
+  display: grid;
+  gap: 4px;
+}
+
+.card-buttons {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.favoriteBtn,
+.viewDetailBtn {
+  background-color: #000;
+  color: #FFF;
+  padding: 6px 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.
+}
+
+.favoriteBtn {
+    border-radius: 50%;
+}
+.viewDetailBtn{
+  border-radius: 999px;
+}
+
+.viewDetailBtn:hover{
+  border: solid 2px #000;
+  background: transparent;
+  color: #000;
+  transition: 0.2s ease-in-out;
+}
+
+.favoriteBtn:hover {
+    background-color: var(--primary-color);
+    border: solid 2px var(--primary-color-hover);
+
+}
+.pet-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.pet-gender {
+  color: #777;
+  font-size: 1rem;
+}
+
+.pet-breed{
+  font-size: 0.8em;
+  color: #777;
+}
+
+.error,
+.empty {
+  text-align: center;
+  color: #c00;
+  font-weight: bold;
+  margin-top: 2rem;
+}
+/* Pages /////////////////////////////////////////////////////////*/
+
+.pages {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #5c5c5c;
+}
+
+.page-btn {
+  background-color: #FFF;
+  color: var(--primary-color);
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.5em;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.page-btn:hover {
+  background-color: var(--primary-color-hover);
+  color: #FFF;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0 0.5rem;
+}

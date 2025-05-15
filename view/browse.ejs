@@ -1,30 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetThing | Sign Up</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/browseStyling.css">
+
+  <script src="/static/scripts/browse.js" defer></script>
+  <title>PetThing | Browse</title>
 </head>
+
 <body>
-   
-    <h1>Adoptable Pets</h1>
+  <header>
+    <h1>PetThing</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/browse" class="active">Browse</a>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    </nav>
+  </header>
+  <section>
+    <p>Looking for a pet for adoption? Create a search profile and be able to
+      receive more <b>personalised matches!</b> Or continue browsing without a search profile.</p>
 
-    <% if (error) { %>
-        <p><%= error %></p>
-      <% } else if (!pets || pets.length === 0) { %>
-        <p>No pets found.</p>
-      <% } else { %>
+    <a href="">Create a search profile &#8594;</a>
+  </section>
+  <!-- Filters -->
+  <section class="filters">
+    <form action="/browse" method="GET">
+
+      <label>
+        Species:
+        <select name="species">
+          <option value="">Any</option>
+          <option value="Dog">Dog</option>
+          <option value="Cat">Cat</option>
+          <option value="Rabbit">Rabbit</option>
+        </select>
+      </label>
+
+      <label>
+        Gender:
+        <select name="gender">
+          <option value="">Any</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </label>
+
+      <label>
+        Size:
+        <select name="size">
+          <option value="">Any</option>
+          <option value="Small">Small</option>
+          <option value="Medium">Medium</option>
+          <option value="Large">Large</option>
+        </select>
+      </label>
+
+      <!-- Toggle advanced filters -->
+      <button type="button" id="toggle-advanced">&#43; Filters</button>
+
+      <!-- Submit Button -->
+      <button type="submit">Apply</button>
+
+      <!-- Advanced Filters: initially hidden -->
+      <div id="advanced-filters" class="hidden">
+        <label>
+          Age:
+          <select name="age">
+            <option value="">Any</option>
+            <option value="Baby">Baby</option>
+            <option value="Young">Young</option>
+            <option value="Adult">Adult</option>
+            <option value="Senior">Senior</option>
+          </select>
+        </label>
+
+        <label>
+          Coat Length:
+          <select name="coat">
+            <option value="">Any</option>
+            <option value="Short">Short</option>
+            <option value="Medium">Medium</option>
+            <option value="Long">Long</option>
+          </select>
+        </label>
+
+        <label>
+          Good with Children:
+          <select name="good_with_children">
+            <option value="">-no preference-</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </label>
+
+        <label>
+          Good with Dogs:
+          <select name="good_with_dogs">
+            <option value="">-no preference-</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </label>
+
+        <label>
+          House Trained:
+          <select name="house_trained">
+            <option value="">-no preference-</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+      </div>
+
+
+
+    </form>
+    <!-- Active filters -->
+    <% if (activeFilters.length> 0) { %>
+      <div class="active-filters">
+        <p>Filters applied:</p>
         <ul>
-          <% pets.forEach(pet => { %>
-            <li><%= pet.name %> - <%= pet.species %></li>
-          <% }) %>
+          <% activeFilters.forEach(f=> { %>
+            <li><strong>
+                <%= f.label %>:
+              </strong>
+              <%= f.value %>
+            </li>
+            <% }) %>
         </ul>
+        <a href="/browse" class="clear-filters">&#215; Clear</a>
+      </div>
       <% } %>
-      
-    
 
 
+  </section>
+  <!-- Result count -->
+   <div class="results-wrapper">
+  <% if (pagination && pagination.total_count) { %>
+    <p class="results">
+      <%= pagination.total_count %> results found
+    </p>
+
+    <!-- Page controls -->
+    <div class="pages">
+      <% function buildPageLink(pageNum) { const url=new URLSearchParams(request.query); url.set('page',
+                pageNum); return '/browse?' + url.toString(); } %>
+
+    <% if (pagination.current_page > 1) { %>
+      <a class="page-btn" href="<%= buildPageLink(pagination.current_page - 1) %>">&laquo;</a>
+    <% } %>
+
+    <span class="page-info"><%= pagination.current_page %> of <%= pagination.total_pages %></span>
+
+    <% if (pagination.current_page < pagination.total_pages) { %>
+      <a class="page-btn" href="<%= buildPageLink(pagination.current_page + 1) %>">&raquo;</a>
+    <% } %>
+  </div>
+  </div>
+
     
+    <% } else { %>
+      <p>No results found.</p>
+      <% } %>
+
+
+        <% if (error) { %>
+          <p class="error">
+            <%= error %>
+          </p>
+          <% } else if (!pets || pets.length===0) { %>
+            <p class="empty">No pets found.</p>
+            <% } else { %>
+              <div class="grid">
+                <% pets.forEach(pet=> { %>
+                  <a href="#" class="card">
+                    <% if (pet.photos && pet.photos.length> 0) { %>
+                      <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
+                      <% } else { %>
+                        <img src="https://via.placeholder.com/300x180?text=No+Image" alt="No image available" />
+                        <% } %>
+                          <div class="card-content">
+                            <div class="pet-info">
+                              <div class="pet-name">
+                                <%= pet.name %>
+                              </div>
+                              <div class="pet-gender">
+                                <%= pet.gender %>
+                              </div>
+                              <div class="pet-breed">
+                                <%= pet.breeds.primary %>
+                              </div>
+                            </div>
+                            <div class="card-buttons">
+                              <button class="favoriteBtn">&#x2661;</button>
+                              <button class="viewDetailBtn">View &#8594;</button>
+                            </div>
+                          </div>
+
+                  </a>
+                  <% }) %>
+              </div>
+             
+
+
+                <% } %>
+
+
+
 </body>
-</html>
 
+</html>
