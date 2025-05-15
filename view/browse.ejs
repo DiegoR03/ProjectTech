@@ -13,7 +13,6 @@
 </head>
 
 <body>
-
   <header>
     <h1>PetThing</h1>
     <nav>
@@ -113,8 +112,8 @@
           House Trained:
           <select name="house_trained">
             <option value="">-no preference-</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
           </select>
         </label>
       </div>
@@ -142,10 +141,30 @@
 
   </section>
   <!-- Result count -->
+   <div class="results-wrapper">
   <% if (pagination && pagination.total_count) { %>
     <p class="results">
       <%= pagination.total_count %> results found
     </p>
+
+    <!-- Page controls -->
+    <div class="pages">
+      <% function buildPageLink(pageNum) { const url=new URLSearchParams(request.query); url.set('page',
+                pageNum); return '/browse?' + url.toString(); } %>
+
+    <% if (pagination.current_page > 1) { %>
+      <a class="page-btn" href="<%= buildPageLink(pagination.current_page - 1) %>">&laquo;</a>
+    <% } %>
+
+    <span class="page-info"><%= pagination.current_page %> of <%= pagination.total_pages %></span>
+
+    <% if (pagination.current_page < pagination.total_pages) { %>
+      <a class="page-btn" href="<%= buildPageLink(pagination.current_page + 1) %>">&raquo;</a>
+    <% } %>
+  </div>
+  </div>
+
+    
     <% } else { %>
       <p>No results found.</p>
       <% } %>
@@ -187,23 +206,7 @@
                   </a>
                   <% }) %>
               </div>
-              <!-- Total pages -->
-              <% function buildPageLink(pageNum) { const url=new URLSearchParams(request.query); url.set('page',
-                pageNum); return '/browse?' + url.toString(); } %>
-
-                <div class="pages">
-                  <% if (pagination.current_page> 1) { %>
-                    <a class="page-btn" href="<%= buildPageLink(pagination.current_page - 1) %>">&laquo; Previous</a>
-                    <% } %>
-
-                      <span class="page-info">Page <%= pagination.current_page %> of <%= pagination.total_pages %>
-                      </span>
-
-                      <% if (pagination.current_page < pagination.total_pages) { %>
-                        <a class="page-btn" href="<%= buildPageLink(pagination.current_page + 1) %>">Next &raquo;</a>
-                        <% } %>
-                </div>
-
+             
 
 
                 <% } %>

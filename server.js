@@ -37,7 +37,6 @@ app
     )
 
     .set("view engine", "ejs")
-    .set("views", "view")
 
     .get("/", loadHome)
     .get("/login", loadLogin)
@@ -78,7 +77,7 @@ async function getPetfinderToken() {
     const data = await response.json();
     return data.access_token;
 }
-// Rendering API data ///////////////////////////////////////////////////////
+// Rendering API data ///////////////////////////////////////////////////////////////////
 async function loadBrowse(req, res) {
     try {
         const token = await getPetfinderToken();
@@ -90,8 +89,8 @@ async function loadBrowse(req, res) {
         });
 
         const allowedFilters = [
-            "type",        // species
-            "gender",      // gender
+            "type",       
+            "gender",      
             "size",
             "age",
             "coat",
@@ -162,7 +161,7 @@ async function loadBrowse(req, res) {
             }
         });
 
-        const data = await petResponse.json(); // ✅ This is fine
+        const data = await petResponse.json(); 
         const pets = data.animals;
         const pagination = data.pagination || {};
 
@@ -174,8 +173,6 @@ async function loadBrowse(req, res) {
         console.log(JSON.stringify(pets[0].attributes, null, 2)); // Log the first pet's attributes
         console.log(JSON.stringify(pets[0].environment, null, 2)); // Log the first pet's environment
         console.log(JSON.stringify(pets[0].breeds, null, 2)); // Log the first pet's breeds
-
-
 
 
         res.render("browse.ejs", { pets, pagination, error: null, request: req, activeFilters });
@@ -192,7 +189,7 @@ function loadRegistry(req, res) {
     res.render("register.ejs", { userID });
 }
 async function processLogin(req, res) {
-    const email = req.body.email;
+    const email = xss(req.body.email);
 
     try {
         const existingUser = await userCollection.findOne({ email });
@@ -211,7 +208,11 @@ async function processLogin(req, res) {
     }
 
 }
+// SECURITY ////////////////////////////////////////////////////////////////////////////////////////
 
-
+// XSS (detects and blocks scripts in forms)
+var xss = require("xss");
+var html = xss('<script>alert("xss");</script>');
+console.log('look here' + html);
 
 

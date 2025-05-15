@@ -8,9 +8,13 @@ document.addEventListener('DOMContentLoaded', function () {
     advancedFilters.classList.toggle('hidden');
 
     if (advancedFilters.classList.contains('hidden')) {
-      advancedFilterBtn.innerHTML = '&#43;   Filters';
+      advancedFilterBtn.innerHTML = '&#43;   Filters'; //+
+      advancedFilterBtn.classList.remove('openFilters');
+
     } else {
-      advancedFilterBtn.innerHTML = '&#8722;   Filters';
+      advancedFilterBtn.innerHTML = '&#8722;   Filters'; //-
+      advancedFilterBtn.classList.add('openFilters');
+
     }
   });
 
