@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const validator = require('validator');
 const app = express();
 const session = require("express-session");
 const port = 3000;
