@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const helmet = require("helmet");
 const express = require("express");
 const app = express();
 const session = require("express-session");
@@ -37,6 +38,14 @@ app
             secret: process.env.SESSION_SECRET,
         }),
     )
+
+    .use(helmet({
+        contentSecurityPolicy: false,
+        xDownloadOptions: false,
+        xXssProtection: false,
+    }))
+
+    .disable('x-powered-by')
 
     .set("view engine", "ejs")
     .set("views", "view")
