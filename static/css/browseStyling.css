@@ -3,6 +3,8 @@
   --primary-color-hover: #3da885;
   --text-color: #333;
   --background-color: #f2f2f2;
+
+  --active-filters: #46c0975a;
 }
 
 section {
@@ -107,7 +109,7 @@ body>section>a:nth-of-type(1):hover {
   justify-content: center;
 }
 
-/* Advanced filters  */
+/* Advanced filters /////////////////////////////////////////////////////// */
 #toggle-advanced {
   padding: 0.37rem 0.7rem;
   background-color: #000;
@@ -120,6 +122,11 @@ body>section>a:nth-of-type(1):hover {
 }
 
 #toggle-advanced:hover {
+  background-color: transparent;
+  color: #000;
+}
+
+#toggle-advanced.openFilters {
   background-color: transparent;
   color: #000;
 }
@@ -149,10 +156,10 @@ body>section>a:nth-of-type(1):hover {
 }
 
 .active-filters li {
-  background-color: #ffffff;
+  background-color: var(--active-filters);
   padding: 0.4rem 0.8rem;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 999px;
   font-size: 0.9rem;
 }
 
@@ -164,15 +171,35 @@ body>section>a:nth-of-type(1):hover {
   font-weight: bold;
 }
 
+/* Results ////////////////////////////////////////////////////////// */
 
-.results {
-  text-align: center;
-  border-top: 1px solid #ccc;
+
+.results-wrapper {
+ display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   margin-top: 2rem;
   padding-top: 1rem;
-  font-weight: bold;
+  border-top: 1px solid #ccc;
+}
+
+.results {
+ font-weight: bold;
   font-size: 1.1rem;
   color: #333;
+  margin: 0;
+  
+  grid-column: 2;
+  text-align: center;
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+
+  justify-self: end;
 }
 
 .grid {
@@ -206,6 +233,8 @@ body>section>a:nth-of-type(1):hover {
   height: 180px;
   object-fit: cover;
 }
+
+/* Card content /////////////////////////////////////////////////////////*/
 
 .card-content {
   display: grid;
@@ -253,6 +282,8 @@ body>section>a:nth-of-type(1):hover {
 
 .favoriteBtn:hover {
     background-color: var(--primary-color);
+    border: solid 2px var(--primary-color-hover);
+
 }
 .pet-name {
   font-size: 1.2rem;
@@ -278,28 +309,28 @@ body>section>a:nth-of-type(1):hover {
   font-weight: bold;
   margin-top: 2rem;
 }
+/* Pages /////////////////////////////////////////////////////////*/
 
 .pages {
   text-align: center;
-  margin-top: 2rem;
   font-size: 0.8rem;
   color: #5c5c5c;
 }
 
 .page-btn {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 0.6rem 1rem;
+  background-color: #FFF;
+  color: var(--primary-color);
+  padding: 0.4rem 1rem;
   border-radius: 8px;
-  margin: 0 0.5rem;
   text-decoration: none;
   font-weight: bold;
+  font-size: 1.5em;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .page-btn:hover {
   background-color: var(--primary-color-hover);
-  transform: translateY(-2px);
+  color: #FFF;
 }
 
 .page-info {
