@@ -3,9 +3,13 @@ require("dotenv").config();
 const helmet = require("helmet");
 const express = require("express");
 const validator = require('validator');
+const bcrypt = require("bcryptjs")
 const app = express();
 const session = require("express-session");
 const port = 3000;
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const { MongoClient, ObjectId } = require("mongodb");
 const uri = process.env.URI;
@@ -35,6 +39,7 @@ connectDB();
 app
     .use("/static", express.static("static"))
     .use(express.urlencoded({ extended: true }))
+    .use(express.json())
     .use(
         session({
             resave: false,
@@ -63,7 +68,6 @@ app
     .get("/browse", loadBrowse)
 
     .post("/login", processLogin)
-    .post("/register", processRegistration)
     .post("/passwordchange", changePassword)
 
     .listen(port, () => {
@@ -89,15 +93,21 @@ function loadPasswordChange(req, res) {
     res.render("passwordchange.ejs", { userID });
 }
 
-async function processLogin(req, res){
+// login ////////////////////////////////////////////////////////////////////////////////////////
+
+async function processLogin(req, res) {
     const email = req.body.email;
     const password = req.body.password;
 
+    const hashedPassword = await bcrypt.hash(password, 8)
+
     try {
         const existingemail = await userCollection.findOne({ email });
-        const existingpassword = await userCollection.findOne({ password });
 
-        if (existingemail && existingpassword) {
+        const matchingexisitingpassword = bcrypt.compare(password, hashedPassword);
+
+
+        if (existingemail && matchingexisitingpassword) {
             console.log("Log in successfull");
             loggedIn = true;
             res.render("browse.ejs");
@@ -113,7 +123,6 @@ async function processLogin(req, res){
     }
 }
 
-=======
 // Getting API Token /////////////////////////////////////////////////////////////////////
 
 async function getPetfinderToken() {
@@ -144,8 +153,8 @@ async function loadBrowse(req, res) {
         });
 
         const allowedFilters = [
-            "type",       
-            "gender",      
+            "type",
+            "gender",
             "size",
             "age",
             "coat",
@@ -216,7 +225,7 @@ async function loadBrowse(req, res) {
             }
         });
 
-        const data = await petResponse.json(); 
+        const data = await petResponse.json();
         const pets = data.animals;
         const pagination = data.pagination || {};
 
@@ -241,42 +250,101 @@ function loadRegistry(req, res) {
     let userID = req.session.userID;
     res.render("register.ejs", { userID });
 }
-async function processRegistration(req, res) {
-    const email = req.body.email;
 
+// REGISTRATION ////////////////////////////////////////////////////////////////////////////////////////
+
+// Ensure the uploads directory exists
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+// Multer configuration
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "./uploads"); // Make sure this is a relative path
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+        cb(null, file.fieldname + '-' + uniqueSuffix);
+    }
+});
+
+// Initialize Multer
+const uploads = multer({
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype.startsWith("image/")) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only image files are allowed!"), false);
+        }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// Registration route with image upload
+app.post("/register", uploads.single('profileImage'), processRegistration);
+
+async function processRegistration(req, res) {
+    const firstname = req.body.firstName;
+    const lastname = req.body.lastName;
+    const email = req.body.email;
+    const password = req.body.password;
+    const hashedPassword = await bcrypt.hash(password, 8);
 
     try {
         const existingUser = await userCollection.findOne({ email });
         if (existingUser) {
             console.log("This email is already in use.");
-            res.render("login", { data: "Email is already registered" });
-        } else {
-            userCollection.insertOne(req.body);
-            let message = "Registration successful"
-            res.render("login", { data: message });
+            res.render("register", { data: "Email is already registered" });
+            return;
+        }
+        else {
+            // Save image file path if uploaded
+            let profileImagePath = null;
+            if (req.file) {
+                profileImagePath = req.file.path; // Path of uploaded image
+            }
+
+            // Register user with image (if uploaded)
+            const newUser = {
+                firstName: firstname,
+                lastName: lastname,
+                email: email.trim(),
+                password: hashedPassword,
+                profileImage: profileImagePath // Store image path in database
+            };
+
+            await userCollection.insertOne(newUser);
+            console.log("Registration successful:", newUser);
+            res.render("login.ejs", { data: "Registration successful" });
         }
 
     } catch (error) {
         console.error("Error during registration:", error);
         res.status(500).render("login", { data: "An error occurred during registration." });
     }
-
 }
-// SECURITY ////////////////////////////////////////////////////////////////////////////////////////
 
+// CHANGE PASSWORD ////////////////////////////////////////////////////////////////////////////////////////
 
-async function changePassword(req, res){
+async function changePassword(req, res) {
     const email = req.body.email;
     const password = req.body.password;
     const newpassword = req.body.password_new;
 
+    const hashedPassword = await bcrypt.hash(password, 8)
+    const hashedNewPassword = await bcrypt.hash(newpassword, 8)
+
     try {
         const existingemail = await userCollection.findOne({ email });
-        const existingpassword = await userCollection.findOne({ password });
+        const matchingexisitingpassword = bcrypt.compare(password, hashedPassword);
 
-        if (existingemail && existingpassword) {
+        if (existingemail && matchingexisitingpassword) {
             console.log("Password is changed");
-            userCollection.updateOne({email:email},{$set:{password:newpassword}})
+
+            userCollection.updateOne({ email: email }, { $set: { password: hashedNewPassword } })
             console.log(existingemail);
             res.render("login.ejs");
         } else {

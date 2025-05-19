@@ -22,7 +22,7 @@
     flex-wrap: wrap;
     align-content: center;
     grid-column: 4/5;
-    grid-row: 4/5;
+    grid-row: 4/6;
 }
 
 #loginPage h1:first-of-type, #registerPage h1:first-of-type, #passwordPage h1:first-of-type{
@@ -40,7 +40,7 @@
 }
 
 #loginPage a:first-of-type, #registerPage a:first-of-type, #passwordPage a:first-of-type{
-    padding: 0.6em;
+    padding: 1em;
 }
 
 #loginPage a:nth-of-type(2){
