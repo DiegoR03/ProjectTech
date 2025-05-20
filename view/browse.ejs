@@ -8,13 +8,13 @@
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/browseStyling.css">
 
-  <script src="/static/scripts/browse.js" defer></script>
+  <script src="/static/js/browse.js"></script>
   <title>PetThing | Browse</title>
 </head>
 
 <body>
   <header>
-    <h1>PetThing</h1>
+    <h1>PetLink</h1>
     <nav>
       <a href="/">Home</a>
       <a href="/browse" class="active">Browse</a>
@@ -26,7 +26,7 @@
     <p>Looking for a pet for adoption? Create a search profile and be able to
       receive more <b>personalised matches!</b> Or continue browsing without a search profile.</p>
 
-    <a href="">Create a search profile &#8594;</a>
+    <a href="/searchForm">Create a search profile &#8594;</a>
   </section>
   <!-- Filters -->
   <section class="filters">
@@ -149,8 +149,12 @@
 
     <!-- Page controls -->
     <div class="pages">
-      <% function buildPageLink(pageNum) { const url=new URLSearchParams(request.query); url.set('page',
-                pageNum); return '/browse?' + url.toString(); } %>
+      <% function buildPageLink(pageNum) { 
+        
+        const url = new URLSearchParams(request.query); url.set('page', pageNum); 
+                
+        return '/browse?' + url.toString(); 
+      } %>
 
     <% if (pagination.current_page > 1) { %>
       <a class="page-btn" href="<%= buildPageLink(pagination.current_page - 1) %>">&laquo;</a>
@@ -214,5 +218,4 @@
 
 
 </body>
-
 </html>

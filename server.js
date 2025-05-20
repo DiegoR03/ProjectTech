@@ -5,15 +5,18 @@ var xss = require("xss");
 var html = xss('<script>alert("xss");</script>');
 console.log('look here' + html);
 
+//Validator restricts and unifies user input
+const validator = require('validator');
+
+//Hides sensitive info from the browser
+const helmet = require("helmet");
 
 
 // APP SET UP ///////////////////////////////////////////////////////////////////////////
 
 require("dotenv").config();
 
-const helmet = require("helmet");
 const express = require("express");
-const validator = require('validator');
 const app = express();
 const session = require("express-session");
 const port = 3000;
@@ -26,11 +29,7 @@ const userCollection = db.collection(process.env.USER_COLLECTION)
 
 let loggedIn = false;
 
-// XSS (detects and blocks scripts in forms)
-var xss = require("xss");
-var html = xss('<script>alert("xss");</script>');
-console.log('look here' + html);
-
+// Connect to MongoDB
 async function connectDB() {
     try {
         await client.connect();
@@ -40,7 +39,6 @@ async function connectDB() {
         console.log(error);
     }
 }
-
 connectDB();
 
 app
@@ -55,7 +53,6 @@ app
             secret: process.env.SESSION_SECRET,
         }),
     )
-
     .use(helmet({
         contentSecurityPolicy: false,
         xDownloadOptions: false,
@@ -72,14 +69,24 @@ app
     .get("/register", loadRegistry)
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
+    .get("/searchForm", loadSearchForm)
+    .get("/results-search-form", loadResultsSearchForm)
 
     .post("/login", processLogin)
     .post("/register", processRegistration)
     .post("/passwordchange", changePassword)
+    .post("/searchForm", processForm)
 
     .listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
     });
+
+
+
+
+
+
+// RENDERING VIEWS ///////////////////////////////////////////////////////////
 
 function loadHome(req, res) {
     req.session.userID = 95234;
@@ -93,7 +100,11 @@ function loadLogin(req, res) {
     res.render("login.ejs", { userID });
 }
 
-
+function loadRegistry(req, res) {
+    req.session.userID = 95234;
+    let userID = req.session.userID;
+    res.render("register.ejs", { userID });
+}
 
 function loadPasswordChange(req, res) {
     req.session.userID = 95234;
@@ -101,7 +112,72 @@ function loadPasswordChange(req, res) {
     res.render("passwordchange.ejs", { userID });
 }
 
-async function processLogin(req, res){
+function loadSearchForm(req, res) {
+    if (!req.session.userID) {
+        req.session.userID = 95234;
+    }
+    let userID = req.session.userID;
+
+
+    // Retrieves questionlist from 'search-form.js'
+    const {questions, questionLabels} = require('./src/scripts/search-form');
+
+    const questionNum = parseInt(req.query.stepIndex) || 0;
+    const step = questions[questionNum];
+
+    if (!req.session.answers) {
+        req.session.answers = {};
+    } else if (questionNum === 0) {
+        req.session.answers = {};
+    }
+    let userAnswers = req.session.answers;
+
+    console.log("User answers so far:", userAnswers);
+
+    if (!step) {
+        console.log(userAnswers);
+        // return res.redirect("/results-search-form"); // All steps completed
+    }
+
+    const isLastStep = (questionNum === questions.length - 1);
+
+    res.render("searchForm.ejs", {
+        userID,
+        stepTitle: `Stap ${questionNum + 1}`,
+        question: step.question,
+        options: step.options,
+        stepIndex: questionNum,
+        totalSteps: questions.length,
+        isLastStep,
+        fieldName: step.name
+    });
+
+}
+
+function loadResultsSearchForm(req, res) {
+    req.session.userID = 95234;
+
+    let userID = req.session.userID;
+    const userAnswers = req.session.answers || {};
+    const {question, questionLabels } = require('./src/scripts/search-form');
+
+    const groupedAnswers = {
+        "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
+        "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
+        "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
+    };
+
+
+    res.render("results-search-form.ejs", { userID, userAnswers, groupedAnswers, questionLabels });
+}
+
+
+
+
+
+
+//  PROCESS FUNCTIONS //////////////////////////////////////////////////////////
+async function processLogin(req, res) {
     const email = req.body.email;
     const password = req.body.password;
 
@@ -125,8 +201,81 @@ async function processLogin(req, res){
     }
 }
 
+async function processRegistration(req, res) {
+    const email = req.body.email;
 
-// Getting API Token /////////////////////////////////////////////////////////////////////
+
+    try {
+        const existingUser = await userCollection.findOne({ email });
+        if (existingUser) {
+            console.log("This email is already in use.");
+            res.render("login", { data: "Email is already registered" });
+        } else {
+            userCollection.insertOne(req.body);
+            let message = "Registration successful"
+            res.render("login", { data: message });
+        }
+
+    } catch (error) {
+        console.error("Error during registration:", error);
+        res.status(500).render("login", { data: "An error occurred during registration." });
+    }
+
+}
+function processForm(req, res) {
+    const { option, stepIndex, } = req.body;
+    const step = parseInt(stepIndex);
+
+    if (!req.session.answers) {
+        req.session.answers = {};
+    }
+
+    // Load questions
+    const {questions, questionLabels} = require('./src/scripts/search-form');
+    const currentQuestion = questions[step];
+
+    if (currentQuestion && currentQuestion.name) {
+        // Save the answer using the field name as key
+        req.session.answers[currentQuestion.name] = option;
+    }
+
+    const nextStep = step + 1;
+    if (nextStep >= questions.length) {
+        // All steps completed, redirect to browse (or results page)
+        return res.redirect("/results-search-form");
+    }
+
+    res.redirect(`/searchForm?stepIndex=${nextStep}`);
+};
+
+
+async function changePassword(req, res) {
+    const email = req.body.email;
+    const password = req.body.password;
+    const newpassword = req.body.password_new;
+
+    try {
+        const existingemail = await userCollection.findOne({ email });
+        const existingpassword = await userCollection.findOne({ password });
+
+        if (existingemail && existingpassword) {
+            console.log("Password is changed");
+            userCollection.updateOne({ email: email }, { $set: { password: newpassword } })
+            console.log(existingemail);
+            res.render("login.ejs");
+        } else {
+            console.log("Change failed");
+            res.render("passwordchange.ejs");
+        }
+
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).render("login", { data: "An error occurred during change." });
+    }
+}
+
+
+// GETTING API TOKEN /////////////////////////////////////////////////////////////////////
 
 async function getPetfinderToken() {
     const response = await fetch("https://api.petfinder.com/v2/oauth2/token", {
@@ -145,10 +294,12 @@ async function getPetfinderToken() {
     return data.access_token;
 }
 
+
+// REQUEST API QUERY & FILTERING ////////////////////////////////////////////////////////
 async function loadBrowse(req, res) {
     try {
         const token = await getPetfinderToken();
-        const petsPerPage = 10;
+        const petsPerPage = 8;
         const page = parseInt(req.query.page) || 1;
         const apiBatch = new URLSearchParams({
             limit: 100 // fetch in batches (max allowed by Petfinder)
@@ -197,6 +348,8 @@ async function loadBrowse(req, res) {
                 headers: { Authorization: `Bearer ${token}` }
             }).then(res => res.json()));
         }
+
+        console.log("THE API IS BEING HIT!!!")
 
         const unfilteredPageResults = await Promise.all(pagePromises);
 
@@ -263,55 +416,4 @@ async function loadBrowse(req, res) {
 }
 
 
-function loadRegistry(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
-    res.render("register.ejs", { userID });
-}
-async function processRegistration(req, res) {
-    const email = req.body.email;
 
-
-    try {
-        const existingUser = await userCollection.findOne({ email });
-        if (existingUser) {
-            console.log("This email is already in use.");
-            res.render("login", { data: "Email is already registered" });
-        } else {
-            userCollection.insertOne(req.body);
-            let message = "Registration successful"
-            res.render("login", { data: message });
-        }
-
-    } catch (error) {
-        console.error("Error during registration:", error);
-        res.status(500).render("login", { data: "An error occurred during registration." });
-    }
-
-}
-
-
-async function changePassword(req, res){
-    const email = req.body.email;
-    const password = req.body.password;
-    const newpassword = req.body.password_new;
-
-    try {
-        const existingemail = await userCollection.findOne({ email });
-        const existingpassword = await userCollection.findOne({ password });
-
-        if (existingemail && existingpassword) {
-            console.log("Password is changed");
-            userCollection.updateOne({email:email},{$set:{password:newpassword}})
-            console.log(existingemail);
-            res.render("login.ejs");
-        } else {
-            console.log("Change failed");
-            res.render("passwordchange.ejs");
-        }
-
-    } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).render("login", { data: "An error occurred during change." });
-    }
-}
