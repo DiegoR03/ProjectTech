@@ -1,9 +1,4 @@
-:root {
-  --primary-color: #46c098;
-  --primary-color-hover: #3da885;
-  --text-color: #333;
-  --background-color: #f2f2f2;
-}
+@import url(style.css);
 
 section {
   display: flex;

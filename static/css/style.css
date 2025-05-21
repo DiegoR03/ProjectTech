@@ -1,6 +1,7 @@
 :root {
-  --primary-color: #46c098;
-  --primary-color-hover: #3da885;
+  --primary-color: #90A5EC;
+  --primary-color-hover: #7387CC;
+  --primary-color-action: #F47429; 
   --text-color: #333;
   --background-color: #f2f2f2;
 }
@@ -33,7 +34,7 @@ header {
 header h1 {
   font-size: 1.8rem;
   margin: 0;
-  color: #333;
+  color: var(--text-color);
 }
 
 header nav {
@@ -43,7 +44,7 @@ header nav {
 
 header nav a {
   text-decoration: none;
-  color: #555;
+  color: var(--text-color);
   font-weight: 500;
   padding: 0.5rem 0.75rem;
   transition: color 0.2s ease, background 0.2s ease;

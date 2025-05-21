@@ -43,6 +43,7 @@ app
     .get("/login", loadLogin)
     .get("/register", loadRegistry)
     .get("/browse", loadBrowse)
+    .get("/fave", loadFave)
 
     .post("/login", processLogin)
 
@@ -61,6 +62,13 @@ function loadLogin(req, res) {
     let userID = req.session.userID;
     res.render("login.ejs", { userID });
 }
+
+function loadFave(req, res){
+    req.session.userID = 95234;
+    let userID = req.session.userID;
+    res.render("fave.ejs", { userID });
+}
+
 // Getting API Token /////////////////////////////////////////////////////////////////////
 async function getPetfinderToken() {
     const response = await fetch("https://api.petfinder.com/v2/oauth2/token", {
@@ -212,6 +220,31 @@ async function processLogin(req, res) {
 
 }
 
+//Fave page linking with API///////////////////////////////////////////////////////////////
+async function loadFave(req, res) {
+    try {
+        const userID = req.session.userID;
 
+        const user = await userCollection.findOne({ _id: new ObjectId(userID) });
 
+        const pets = user?.favorites || [];
 
+        res.render("fave.ejs", {
+            pets,
+            pagination: null,
+            error: null,
+            request: req,
+            activeFilters: []
+        });
+
+    } catch (error) {
+        console.error("Error loading favorites:", error);
+        res.status(500).render("fave.ejs", {
+            pets: [],
+            pagination: null,
+            error: "Kon favorieten niet laden.",
+            request: req,
+            activeFilters: []
+        });
+    }
+}
