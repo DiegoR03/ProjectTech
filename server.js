@@ -180,9 +180,7 @@ async function loadDetail(req, res) {
 async function loadFave(req, res) {
     try {
         const userID = req.session.userID;
-
         const user = await userCollection.findOne({ _id: new ObjectId(userID) });
-
         const pets = user?.favorites || [];
 
         res.render("fave.ejs", {
@@ -202,9 +200,11 @@ async function loadFave(req, res) {
             request: req,
             activeFilters: []
         });
-      
-      
-      function loadSearchForm(req, res) {
+    }
+}
+
+
+function loadSearchForm(req, res) {
     if (!req.session.userID) {
         req.session.userID = 95234;
     }
@@ -212,7 +212,7 @@ async function loadFave(req, res) {
 
 
     // Retrieves questionlist from 'search-form.js'
-    const {questions, questionLabels} = require('./static/js/search-form');
+    const { questions, questionLabels } = require('./static/js/search-form');
 
     const questionNum = parseInt(req.query.stepIndex) || 0;
     const step = questions[questionNum];
@@ -224,21 +224,6 @@ async function loadFave(req, res) {
 
     }
     let userAnswers = req.session.answers;
-
-
-function ensureAuthenticated(req, res, next) {
-    if (req.session.userID) {
-        next();
-    } else {
-        res.redirect("/login");
-    }
-}
-
-app.get("/account", ensureAuthenticated, loadAccount);
-
-
-    console.log("User answers so far:", userAnswers);
-
 
     const isLastStep = (questionNum === questions.length - 1);
 
@@ -252,15 +237,25 @@ app.get("/account", ensureAuthenticated, loadAccount);
         isLastStep,
         fieldName: step.name
     });
-
 }
+
+
+function ensureAuthenticated(req, res, next) {
+    if (req.session.userID) {
+        next();
+    } else {
+        res.redirect("/login");
+    }
+}
+
+app.get("/account", ensureAuthenticated, loadAccount);
 
 function loadResultsSearchForm(req, res) {
     req.session.userID = 95234;
 
     let userID = req.session.userID;
     const userAnswers = req.session.answers || {};
-    const {question, questionLabels } = require('./static/js/search-form');
+    const { question, questionLabels } = require('./static/js/search-form');
 
     const groupedAnswers = {
         "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
@@ -271,6 +266,7 @@ function loadResultsSearchForm(req, res) {
 
     res.render("results-search-form.ejs", { userID, userAnswers, groupedAnswers, questionLabels });
 }
+
 function loadRegistry(req, res) {
     req.session.userID = 95234;
     let userID = req.session.userID;
@@ -299,40 +295,83 @@ async function processLogin(req, res) {
         res.status(500).render("login", { data: "An error occurred during login." });
 
 
+        // Ensure the uploads directory exists
+        const uploadDir = path.join(__dirname, "uploads");
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir);
+        }
 
+        // Multer configuration
+        const storage = multer.diskStorage({
+            destination: function (req, file, cb) {
+                cb(null, "./uploads"); // Make sure this is a relative path
+            },
+            filename: function (req, file, cb) {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+                cb(null, file.fieldname + '-' + uniqueSuffix);
+            }
+        });
 
-// Ensure the uploads directory exists
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+        // Initialize Multer
+        const uploads = multer({
+            storage: storage,
+            fileFilter: function (req, file, cb) {
+                if (file.mimetype.startsWith("image/")) {
+                    cb(null, true);
+                } else {
+                    cb(new Error("Only image files are allowed!"), false);
+                }
+            },
+            limits: { fileSize: 5 * 1024 * 1024 }
+        });
+        
+        app.post("/register", uploads.single('profileImage'), processRegistration);
+    }
 }
 
-// Multer configuration
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "./uploads"); // Make sure this is a relative path
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
-        cb(null, file.fieldname + '-' + uniqueSuffix);
-    }
-});
-
-// Initialize Multer
-const uploads = multer({
-    storage: storage,
-    fileFilter: function (req, file, cb) {
-        if (file.mimetype.startsWith("image/")) {
-            cb(null, true);
-        } else {
-            cb(new Error("Only image files are allowed!"), false);
-        }
-    },
-    limits: { fileSize: 5 * 1024 * 1024 }
-});
-
 // Registration route with image upload
-app.post("/register", uploads.single('profileImage'), processRegistration);
+
+function processForm(req, res) {
+    const { option, stepIndex, } = req.body;
+    const step = parseInt(stepIndex);
+
+    if (!req.session.answers) {
+        req.session.answers = {};
+    }
+
+    // Load questions
+    const { questions, questionLabels } = require('./static/js/search-form');
+    const currentQuestion = questions[step];
+
+    if (currentQuestion && currentQuestion.name) {
+        // Save the answer using the field name as key
+        req.session.answers[currentQuestion.name] = option;
+    }
+
+    const nextStep = step + 1;
+    if (nextStep >= questions.length) {
+        // All steps completed, redirect to browse (or results page)
+        return res.redirect("/results-search-form");
+    }
+
+    res.redirect(`/searchForm?stepIndex=${nextStep}`);
+};
+
+app.post('/results-search-form', (req, res) => {
+    const newAnswers = req.body;
+
+    if (!req.session.answers) {
+        req.session.answers = {};
+    }
+
+
+    for (let key in newAnswers) {
+        const cleanKey = xss(key);
+        const cleanValue = xss(newAnswers[key]);
+        req.session.answers[cleanKey] = cleanValue;
+    }
+    res.status(200).send('Answers updated');
+});
 
 async function processRegistration(req, res) {
     const firstname = req.body.firstName;
@@ -352,21 +391,21 @@ async function processRegistration(req, res) {
             // Save image file path if uploaded
             let profileImagePath = null;
             if (req.file) {
-            const inputPath = req.file.path;
-            const outputPath = path.join("uploads", "square-" + req.file.filename);
+                const inputPath = req.file.path;
+                const outputPath = path.join("uploads", "square-" + req.file.filename);
 
-            await sharp(inputPath)
-                .resize(800, 800, {
-                    fit: sharp.fit.cover,
-                    position: sharp.strategy.entropy
-                })
-                .toFile(outputPath);
+                await sharp(inputPath)
+                    .resize(800, 800, {
+                        fit: sharp.fit.cover,
+                        position: sharp.strategy.entropy
+                    })
+                    .toFile(outputPath);
 
-            profileImagePath = "/" + outputPath.replace(/\\/g, "/"); // Normalize path for all OS
+                profileImagePath = "/" + outputPath.replace(/\\/g, "/"); // Normalize path for all OS
 
-            // Optionally: delete the original uploaded file if not needed
-            fs.unlinkSync(inputPath);
-        } else {
+                // Optionally: delete the original uploaded file if not needed
+                fs.unlinkSync(inputPath);
+            } else {
                 // Randomly choose a default profile image
                 const defaultImages = [
                     "/uploads/standard/default1.png",
@@ -382,7 +421,7 @@ async function processRegistration(req, res) {
                 lastName: lastname,
                 email: email.trim(),
                 password: hashedPassword,
-                profileImage: profileImagePath, 
+                profileImage: profileImagePath,
                 userStory: "A short story about you"
             };
 
@@ -397,47 +436,6 @@ async function processRegistration(req, res) {
         res.status(500).render("login", { data: "An error occurred during registration." });
     }
 }
-function processForm(req, res) {
-    const { option, stepIndex, } = req.body;
-    const step = parseInt(stepIndex);
-
-    if (!req.session.answers) {
-        req.session.answers = {};
-    }
-
-    // Load questions
-    const {questions, questionLabels} = require('./static/js/search-form');
-    const currentQuestion = questions[step];
-
-    if (currentQuestion && currentQuestion.name) {
-        // Save the answer using the field name as key
-        req.session.answers[currentQuestion.name] = option;
-    }
-
-    const nextStep = step + 1;
-    if (nextStep >= questions.length) {
-        // All steps completed, redirect to browse (or results page)
-        return res.redirect("/results-search-form");
-    }
-
-    res.redirect(`/searchForm?stepIndex=${nextStep}`);
-};
-
-app.post('/results-search-form', (req, res) =>{
-    const newAnswers = req.body;
-
-  if (!req.session.answers) {
-    req.session.answers = {};
-  }
-
-
-for (let key in newAnswers) {
-  const cleanKey = xss(key);
-  const cleanValue = xss(newAnswers[key]);
-  req.session.answers[cleanKey] = cleanValue;
-}
-  res.status(200).send('Answers updated');
-});
 
 
 // CHANGE PASSWORD ////////////////////////////////////////////////////////////////////////////////////////
@@ -514,7 +512,7 @@ async function changeStory(req, res) {
 
         if (existingemail) {
             console.log("Story is changed");
-            userCollection.updateOne({ email: email },{ $set: { userStory: newstory } })
+            userCollection.updateOne({ email: email }, { $set: { userStory: newstory } })
             console.log(newstory);
             res.redirect("/account");
         }
@@ -522,6 +520,8 @@ async function changeStory(req, res) {
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).redirect("login", { data: "An error occurred during change." });
+    }
+}
 
 
 // GETTING API TOKEN /////////////////////////////////////////////////////////////////////
@@ -624,8 +624,8 @@ async function loadBrowse(req, res) {
                 }
             }
 
-  
-            
+
+
             req.session.petsCache[filterKey] = petsWithImages;
         }
 
@@ -686,6 +686,3 @@ async function loadBrowse(req, res) {
         });
     }
 }
-    }
-}
-
