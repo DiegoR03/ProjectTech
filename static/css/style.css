@@ -1,37 +1,45 @@
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../fonts/Montserrat-VariableFont_wght.ttf');
+}
+
 :root {
-  --primary-color: #46c098;
-  --primary-color-hover: #3da885;
+  --primary-color: #90A5EC;
+  --primary-color-hover: #6979af;
+  --primary-color-2: #F47429;
+  --primary-color-hover-2: #c05c23;
   --text-color: #333;
+  --text-color-2: #fff;
   --background-color: #f2f2f2;
   --footer-text: #8E8E8E;
+  --active-filters: #46c0975a;
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Montserrat';
   background-color: var(--background-color);
   margin: 0;
-  max-width: 80%;
-  margin-inline: auto;
 
 }
 /* Header styling ////////////////////////////////////////////////////////// */
 header {
-  background: #fff;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  background: var(--text-color-2);
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  padding: 1rem 2rem;
-  display: flex;
+  padding: 1rem 5rem;
+  /* display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; */
   position: sticky;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10;
-
-  width: 100%;
 }
 
 header h1 {
+  text-align: left;
   font-size: 1.8rem;
   margin: 0;
   color: #333;
@@ -51,29 +59,23 @@ header nav a {
 }
 
 header nav a:hover {
-  color: var(--primary-color);
-  border-bottom: solid 2px var(--primary-color);
-
-  
+  color: var(--primary-color-hover-2);
+  border-bottom: solid 3px var(--primary-color-hover-2);
 }
 
-.active {
-  color: var(--primary-color);
-  font-weight: 600;
-  border-bottom: solid 2px var(--primary-color);
+header .active {
+  color: var(--primary-color-2);
+  font-weight: 700;
+  border-bottom: solid 3px var(--primary-color-2);
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 2rem;
-}
 
 /* Footer Styling */
 
 footer {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
-  padding: 1rem 1rem;
+  padding: 3rem 5rem;
   background-color: #fff;
 }
 
@@ -83,13 +85,22 @@ footer ul {
   list-style: none;
 }
 
-footer ul li:nth-of-type(1){
-  color: #000000;
-  font-weight: 700;
+footer ul li {
+  margin-top: 0.5em;
+}
+footer ul li a{
+  color: var(--footer-text);
+  margin-top: 0.5em;
+  text-decoration: none;
 }
 
-footer ul li{
-  color: var(--footer-text);
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
+footer ul li:nth-of-type(1) a {
+  color: #000000;
+  font-weight: 700;
+
+}
+
+footer ul li:nth-of-type(1) a {
+  color: #000000;
+  font-weight: 700;
 }
