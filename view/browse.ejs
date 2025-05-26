@@ -8,14 +8,20 @@
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/browseStyling.css">
 
+
   <script src="/static/scripts/browse.js" defer></script>
   <title>PetMatch | Browse</title>
+
+  <script src="/static/js/browse.js"></script>
+  <title>PetThing | Browse</title>
 </head>
 
-<body>
 
+<body>
   <header>
-    <h1>PetMatch</h1>
+
+    <h1>PetLink</h1>
+
     <nav>
       <a href="/">Home</a>
       <a href="/browse" class="active">Browse</a>
@@ -23,15 +29,16 @@
       <a href="/register">Register</a>
     </nav>
   </header>
+  <main>
   <section>
     <p>Looking for a pet for adoption? Create a search profile and be able to
       receive more <b>personalised matches!</b> Or continue browsing without a search profile.</p>
 
-    <a href="">Create a search profile &#8594;</a>
+    <a href="/searchForm">Create a search profile &#8594;</a>
   </section>
   <!-- Filters -->
   <section class="filters">
-    <form action="/browse" method="GET">
+    <form id="filter-form" action="/browse" method="GET">
 
       <label>
         Species:
@@ -113,8 +120,8 @@
           House Trained:
           <select name="house_trained">
             <option value="">-no preference-</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
           </select>
         </label>
       </div>
@@ -142,75 +149,123 @@
 
   </section>
   <!-- Result count -->
-  <% if (pagination && pagination.total_count) { %>
-    <p class="results">
-      <%= pagination.total_count %> results found
-    </p>
-    <% } else { %>
-      <p>No results found.</p>
-      <% } %>
+  <div class="results-wrapper">
+    <!-- Loading state -->
+  <div id="loaderDiv" class="">
+  <img src="/static/images/Animation - 1747919735912.gif" alt="Loading..." /> 
+  <img class="secImg" src="/static/images/Animation - 1747919735912.gif" alt="Loading..." />
+  <!-- source: https://lottiefiles.com/free-animations/loading -->
+
+</div>
+    
+    <% if (pagination && pagination.total_count) { %>
+      <p class="results">
+        <%= pagination.total_count %> results found
+      </p>
+
+      <!-- Page controls -->
+      <div class="pages">
+        <% function buildPageLink(pageNum) { const url=new URLSearchParams(request.query); url.set('page', pageNum);
+          return '/browse?' + url.toString(); } %>
+
+          <% if (pagination.current_page> 1) { %>
+            <a class="page-btn" href="<%= buildPageLink(pagination.current_page - 1) %>">&laquo;</a>
+            <% } %>
+
+              <span class="page-info">
+                <%= pagination.current_page %> of <%= pagination.total_pages %>
+              </span>
+
+              <% if (pagination.current_page < pagination.total_pages) { %>
+                <a class="page-btn" href="<%= buildPageLink(pagination.current_page + 1) %>">&raquo;</a>
+                <% } %>
+      </div>
+  </div>
 
 
-        <% if (error) { %>
-          <p class="error">
-            <%= error %>
-          </p>
-          <% } else if (!pets || pets.length===0) { %>
-            <p class="empty">No pets found.</p>
-            <% } else { %>
-              <div class="grid">
-                <% pets.forEach(pet=> { %>
-                  <a href="#" class="card">
-                    <% if (pet.photos && pet.photos.length> 0) { %>
-                      <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
-                      <% } else { %>
-                        <img src="https://via.placeholder.com/300x180?text=No+Image" alt="No image available" />
-                        <% } %>
-                          <div class="card-content">
-                            <div class="pet-info">
-                              <div class="pet-name">
-                                <%= pet.name %>
-                              </div>
-                              <div class="pet-gender">
-                                <%= pet.gender %>
-                              </div>
-                              <div class="pet-breed">
-                                <%= pet.breeds.primary %>
-                              </div>
+  <% } else { %>
+    <p>No results found.</p>
+    <% } %>
+
+
+      <% if (error) { %>
+        <p class="error">
+          <%= error %>
+        </p>
+        <% } else if (!pets || pets.length===0) { %>
+          <p class="empty">No pets found.</p>
+          <% } else { %>
+            <div class="grid" id="result-grid">
+              <% pets.forEach(pet=> { %>
+                <a href="#" class="card">
+                  <% if (pet.photos && pet.photos.length> 0) { %>
+                    <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
+                    <% } else { %>
+                      <img src="https://via.placeholder.com/300x180?text=No+Image" alt="No image available" />
+                      <% } %>
+                        <div class="card-content">
+                          <div class="pet-info">
+                            <div class="pet-name">
+                              <%= pet.name %>
                             </div>
+
                             <div class="card-links">
                               <a href="/fave" class="favorite">&#x2661;</a>
                               <a href="/detail/:id" class="viewDetail">View &#8594;</a>
                              <!-- <button class="viewDetailBtn">View &#8594;</button>  Gaat stuk als ik met a link, omdat die 2 niet samen kunnen dus ik heb hier a van gemaakt-->
+
+                            <div class="pet-gender">
+                              <%= pet.gender %>
+                            </div>
+                            <div class="pet-breed">
+                              <%= pet.breeds.primary %>
                             </div>
                           </div>
+                          <div class="card-buttons">
+                            <button class="favoriteBtn">&#x2661;</button>
+                            <button class="viewDetailBtn">View &#8594;</button>
+                          </div>
+                        </div>
 
-                  </a>
-                  <% }) %>
-              </div>
-              <!-- Total pages -->
-              <% function buildPageLink(pageNum) { const url=new URLSearchParams(request.query); url.set('page',
-                pageNum); return '/browse?' + url.toString(); } %>
-
-                <div class="pages">
-                  <% if (pagination.current_page> 1) { %>
-                    <a class="page-btn" href="<%= buildPageLink(pagination.current_page - 1) %>">&laquo; Previous</a>
-                    <% } %>
-
-                      <span class="page-info">Page <%= pagination.current_page %> of <%= pagination.total_pages %>
-                      </span>
-
-                      <% if (pagination.current_page < pagination.total_pages) { %>
-                        <a class="page-btn" href="<%= buildPageLink(pagination.current_page + 1) %>">Next &raquo;</a>
-                        <% } %>
-                </div>
+                </a>
+                <% }) %>
+            </div>
 
 
 
-                <% } %>
+            <% } %>
 
 
+  </main>
 
+  <footer>
+    <ul>
+      <li></li>
+      <li>logo</li>
+    </ul>
+
+    <ul>
+      <li><a href="#">Pets</a></li>
+      <li><a href="#">Dogs</a></li>
+      <li><a href="#">Cats</a></li>
+      <li><a href="#">Rabbits</a></li>
+    </ul>
+
+    <ul>
+      <li><a href="#">Account</a></li>
+      <li><a href="#">Login</a></li>
+      <li><a href="#">Register</a></li>
+      <li><a href="#">Forgot your password</a></li>
+    </ul>
+
+    <ul>
+      <li><a href="#">Contact</a></li>
+      <li><a href="#">Wibautstraat 100</a></li>
+      <li><a href="#">1018 FH </a></li>
+      <li><a href="#">Amsterdam</a></li>
+    </ul>
+  </footer>
+  
 </body>
 
 </html>

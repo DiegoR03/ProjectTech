@@ -27,8 +27,20 @@
 
 <a href="/register">I don't have an account yet</a>
 
+    <link href="/static/css/loginstyle.css" rel="stylesheet" type="text/css">
+    <title>PetThing | Sign Up</title>
+</head>
+<body id="loginPage">
+    <h1>LOGIN</h1>
+    <button name="backButton" onclick="history.back()">Go back</button>
 
-    
+    <form method="POST">
+        <input type="email" name="email" placeholder="Email">
+        <input type="password" name="password" placeholder="Password">
+        <input type="submit" placeholder="Button" value="Login">
+    </form>
+    <a href="/register">I don't have an account yet</a>
+    <hr>
+    <a href="/passwordchange">Forgot password?</a>
 </body>
 </html>
-

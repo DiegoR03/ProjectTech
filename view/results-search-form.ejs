@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/searchForm.css">
+  <title>Result page</title>
+</head>
+
+<body>
+  <header>
+    <h1>PetLink</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/browse" class="active">Browse</a>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    </nav>
+  </header>
+
+
+
+  <% if (Object.keys(userAnswers).length===0) { %>
+    <p>No answers submitted yet. <a href="/searchForm">Start now</a>.</p>
+    <% } else { %>
+      <h1>One last check:</h1>
+      <div id="results-and-buttons-container">
+        <div id="answers-list">
+          <% for (let group in groupedAnswers) { %>
+            <section class="answer-group" data-group="<%= group %>">
+              <h3>
+                <%= group %>
+              </h3>
+              <ul class="group-list">
+                <% groupedAnswers[group].forEach(key=> {
+                  const currentValue = userAnswers[key];
+                  %>
+                  <li data-key="<%= key %>" data-value="<%= currentValue %>">
+                    <div class="answer-row static-view">
+                      <span><strong>
+                          <%= questionLabels[key] || key %>
+                        </strong></span>
+                      <span>
+                        <%= currentValue==='true' ? 'Yes' : currentValue==='false' ? 'No' : currentValue %>
+                      </span>
+                    </div>
+                    <div class="edit-view" style="display: none;">
+                      <label><strong>
+                          <%= questionLabels[key] || key %>
+                        </strong></label>
+                      <div class="radio-options" data-key="<%= key %>"></div>
+                    </div>
+                  </li>
+                  <% }) %>
+              </ul>
+
+              <div class="group-actions static-view">
+                <button class="edit-group-btn" onclick="startEditing('<%= group %>')">Edit</button>
+              </div>
+
+              <form class="group-actions edit-view" style="display: none;" data-group="<%= group %>">
+                <button type="submit" class="save-action">Save changes</button>
+                <button type="button" class="cancel-action" onclick="cancelEditing('<%= group %>')">Cancel</button>
+              </form>
+            </section>
+            <% } %>
+
+        </div>
+
+        <div class="sticky-buttons">
+          <button class="primary-action" onclick="window.location.href='/results'">Find my match</button>
+          <button class="danger-action" onclick="deleteAnswers()">Delete answers</button>
+        </div>
+      </div>
+      <% } %>
+
+
+
+
+
+
+        <script>
+
+          const userAnswers = {
+            type: 'dog',
+            size: 'medium',
+            gender: 'male',
+            isCastrated: 'false',
+            coat: 'long',
+            hasKids: 'true',
+            hasCats: 'true',
+            hasDogs: 'false',
+            isAloneOften: 'true',
+            floor: 'upperfloor-w-elevator',
+            hasGarden: 'false',
+            activity: 'false',
+            isHousetrained: 'false',
+            isComfystrangers: 'false',
+            isPlayful: 'false',
+            isPaired: 'false'
+          };
+
+          const questionLabels = {
+            type: 'Animal type',
+            size: 'Size',
+            gender: 'Gender',
+            isCastrated: 'Castrated',
+            coat: 'Coat type',
+            hasKids: 'Has children',
+            hasCats: 'Has cats',
+            hasDogs: 'Has dogs',
+            isAloneOften: 'Home alone often',
+            floor: 'Living situation',
+            hasGarden: 'Has a garden',
+            activity: 'Active household',
+            isHousetrained: 'Needs to be housetrained',
+            isComfystrangers: 'Comfortable with strangers',
+            isPlayful: 'Looking for a playful pet',
+            isPaired: 'Wants a bonded pair',
+          };
+
+          const groupedAnswers = {
+            "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
+            "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
+            "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
+          };
+
+
+
+
+          const answerOptions = {
+            type: ['Dog', 'Cat', 'Rabbit'],
+            size: ['Small', 'Medium', 'Large', 'No preference'],
+            gender: ['Male', 'Female', 'No preference'],
+            isCastrated: ['true', 'false', 'No preference'],
+            coat: ['Short', 'Medium', 'Long', 'No preference'],
+            hasKids: ['true', 'false'],
+            hasCats: ['true', 'false'],
+            hasDogs: ['true', 'false'],
+            isAloneOften: ['true', 'false'],
+            floor: ['Groundfloor', 'Upperfloor with elevator', 'Upperfloor without elevator'],
+            hasGarden: ['true', 'false'],
+            activity: ['true', 'false'],
+            isHousetrained: ['true', 'false'],
+            isComfystrangers: ['true', 'false'],
+            isPlayful: ['true', 'false'],
+            isPaired: ['true', 'false']
+          };
+
+          function formatOptionLabel(value) {
+            if (value === 'true') return 'Yes';
+            if (value === 'false') return 'No';
+            if (value === 'no preference') return 'No preference';
+            return value.charAt(0).toUpperCase() + value.slice(1);
+          }
+
+          function startEditing(groupName) {
+            const section = document.querySelector(`[data-group="${groupName}"]`);
+            section.querySelectorAll('.static-view').forEach(el => el.style.display = 'none');
+            section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'block');
+
+            section.querySelectorAll('li').forEach(li => {
+              const key = li.getAttribute('data-key');
+              const currentValue = li.getAttribute('data-value');
+              const container = li.querySelector(`.radio-options[data-key="${key}"]`);
+
+              container.innerHTML = ''; // Clear existing buttons
+
+              const options = answerOptions[key] || [];
+              options.forEach(opt => {
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = key;
+                input.value = opt;
+                if (opt === currentValue) input.checked = true;
+
+                const label = document.createElement('label');
+                label.textContent = formatOptionLabel(opt);
+                label.prepend(input);
+
+                container.appendChild(label);
+              });
+            });
+          }
+
+
+          // Save changes ////////////////////////////////////////////////////////////////////////////////////
+
+
+          document.querySelectorAll('.group-actions.edit-view').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+              e.preventDefault();
+
+              const group = form.getAttribute('data-group');
+              const section = document.querySelector(`[data-group="${group}"]`);
+              const updatedAnswers = {};
+
+              section.querySelectorAll('.radio-options').forEach(container => {
+                const key = container.getAttribute('data-key');
+                const selected = container.querySelector('input[type="radio"]:checked');
+                if (selected) {
+                  updatedAnswers[key] = selected.value;
+                }
+              });
+
+              try {
+                const res = await fetch('/results-search-form', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(updatedAnswers)
+                });
+
+                if (res.ok) {
+                  window.location.reload(); // Refresh to see updated values
+                } else {
+                  console.error('Update failed');
+                }
+              } catch (err) {
+                console.error(err);
+              }
+            });
+          });
+
+          function cancelEditing(groupName) {
+            const section = document.querySelector(`[data-group="${groupName}"]`);
+            section.querySelectorAll('.static-view').forEach(el => {
+              if (el.classList.contains('group-actions')) {
+                el.style.display = 'block'
+              } else {
+                el.style.display = 'flex'
+              }
+            });
+            section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'none');
+          }
+
+          function deleteAnswers(req, res) {
+            res.render("/browse")
+          }
+        </script>
+
+
+</body>
+
+</html>

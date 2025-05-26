@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
     <link rel="stylesheet" href="/static/css/style.css">
 
@@ -27,10 +29,26 @@
     <button>Sign up</button>
 </form>
 
-<a href="/login">I already have an account</a>
+    <link href="/static/css/loginstyle.css" rel="stylesheet" type="text/css">
+    <title>PetThing | Sign Up</title>
+</head>
+<body id="registerPage">
+
+    <h1>REGISTER</h1>
 
 
-    
+    <button name="backButton" onclick="history.back()">Go back</button>
+
+    <form action="/register" method="POST" enctype="multipart/form-data">
+        <input type="text" name="firstName" placeholder="First name">
+        <input type="text" name="lastName" placeholder="Last name">
+        <input type="email" name="email" placeholder="Email">
+        <input type="password" name="password" placeholder="Password">
+        <input type="file" name="profileImage" accept="image/*" />
+        <input type="submit" placeholder="Button" value="Create account">
+    </form>
+    <a href="/login">I already have an account</a>
+
 </body>
-</html>
 
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/searchForm.css">
+    <title>
+        <%= stepTitle %>
+    </title>
+</head>
+
+<body>
+    <header>
+        <h1>PetLink</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/browse" class="active">Browse</a>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        </nav>
+    </header>
+    <!-- Go back knop -->
+    <a href="/browse" class="back-button">← Browse</a>
+
+    <div class="step-container">
+
+
+        <!-- Progress bar -->
+        <section class='progress-section'>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"
+                    style="--progress: <%= Math.round((stepIndex + 1) / totalSteps * 100) %>%">
+                </div>
+            </div>
+           <p class="questionCounter"> <%= stepIndex + 1 %> / <%= totalSteps %></p>
+        </section>
+            <p class="step-question">
+                <%= question %>
+            </p>
+
+            <div class="options-container">
+                <% options.forEach(opt=> { %>
+                    <form action="/searchForm" method="POST" class="inline-form">
+                        <input type="hidden" name="option" value="<%= opt.value %>">
+                        <input type="hidden" name="stepIndex" value="<%= stepIndex %>">
+                        <button type="submit" class="option-button">
+                            <%= opt.label %>
+                        </button>
+                    </form>
+                    <% }) %>
+            </div>
+
+    </div>
+</body>
+
+</html>
