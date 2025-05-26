@@ -1,8 +1,23 @@
+// SECURITY ////////////////////////////////////////////////////////////////////////////////////////
+
+// XSS (detects and blocks scripts in forms)
+var xss = require("xss");
+var html = xss('<script>alert("xss");</script>');
+console.log('look here' + html);
+
+//Validator restricts and unifies user input
+const validator = require('validator');
+
+//Hides sensitive info from the browser
+const helmet = require("helmet");
+
+
+// APP SET UP ///////////////////////////////////////////////////////////////////////////
+
 require("dotenv").config();
 
-const helmet = require("helmet");
 const express = require("express");
-const validator = require('validator');
+
 const bcrypt = require("bcryptjs")
 const app = express();
 const session = require("express-session");
@@ -20,11 +35,7 @@ const userCollection = db.collection(process.env.USER_COLLECTION)
 
 let loggedIn = false;
 
-// XSS (detects and blocks scripts in forms)
-var xss = require("xss");
-var html = xss('<script>alert("xss");</script>');
-console.log('look here' + html);
-
+// Connect to MongoDB
 async function connectDB() {
     try {
         await client.connect();
@@ -34,7 +45,6 @@ async function connectDB() {
         console.log(error);
     }
 }
-
 connectDB();
 
 app
@@ -50,7 +60,6 @@ app
             secret: process.env.SESSION_SECRET,
         }),
     )
-
     .use(helmet({
         contentSecurityPolicy: false,
         xDownloadOptions: false,
@@ -72,19 +81,34 @@ app
     .get("/register", loadRegistry)
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
+
     .get("/account", loadAccount)
     .get("/logout", (req, res) => {
         req.session.destroy();
         res.redirect("/login");
     })
+    .get("/detail/:id", loadDetail)
+    .get("/fave", loadFave)
+
+    .get("/searchForm", loadSearchForm)
+    .get("/results-search-form", loadResultsSearchForm)
+
 
     .post("/login", processLogin)
     .post("/account", changeStory)
     .post("/passwordchange", changePassword)
+    .post("/searchForm", processForm)
 
     .listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
     });
+
+
+
+
+
+
+// RENDERING VIEWS ///////////////////////////////////////////////////////////
 
 function loadHome(req, res) {
     req.session.userID = 95234;
@@ -99,11 +123,162 @@ function loadLogin(req, res) {
 }
 
 
+function loadRegistry(req, res) {
+    req.session.userID = 95234;
+    let userID = req.session.userID;
+    res.render("register.ejs", { userID });
+}
+
 function loadPasswordChange(req, res) {
     req.session.userID = 95234;
     let userID = req.session.userID;
     res.render("passwordchange.ejs", { userID });
 }
+
+//Detail pgina///////////////////////////////////////////////////////////////////////
+async function loadDetail(req, res) {
+    const petId = req.params.id;
+    const userID = req.session.userID || 95234;
+    console.log("Fetching pet ID:", petId);
+
+    try {
+        const token = await getPetfinderToken();
+        const url = `https://api.petfinder.com/v2/animals/${petId}`;
+        console.log("API Request:", url);
+
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+        console.log("Petfinder Response:", data);
+
+        const pet = data.animal;
+
+        if (!pet) {
+            throw new Error("Pet not found");
+        }
+
+        res.render("detail.ejs", {
+            pet,
+            userID
+        });
+
+    } catch (error) {
+        console.error("Error fetching pet detail:", error);
+        res.status(500).render("detail.ejs", {
+            pet: null,
+            error: "Could not load pet details.",
+            userID
+        });
+    }
+}
+
+//Fave page ///////////////////////////////////////////////////////////////
+async function loadFave(req, res) {
+    try {
+        const userID = req.session.userID;
+
+        const user = await userCollection.findOne({ _id: new ObjectId(userID) });
+
+        const pets = user?.favorites || [];
+
+        res.render("fave.ejs", {
+            pets,
+            pagination: null,
+            error: null,
+            request: req,
+            activeFilters: []
+        });
+
+    } catch (error) {
+        console.error("Error loading favorites:", error);
+        res.status(500).render("fave.ejs", {
+            pets: [],
+            pagination: null,
+            error: "Couldn't catch favourites.",
+            request: req,
+            activeFilters: []
+        });
+      
+      
+      function loadSearchForm(req, res) {
+    if (!req.session.userID) {
+        req.session.userID = 95234;
+    }
+    let userID = req.session.userID;
+
+
+    // Retrieves questionlist from 'search-form.js'
+    const {questions, questionLabels} = require('./static/js/search-form');
+
+    const questionNum = parseInt(req.query.stepIndex) || 0;
+    const step = questions[questionNum];
+
+    if (!req.session.answers) {
+        req.session.answers = {};
+    } else if (questionNum === 0) {
+        req.session.answers = {};
+
+    }
+    let userAnswers = req.session.answers;
+
+
+function ensureAuthenticated(req, res, next) {
+    if (req.session.userID) {
+        next();
+    } else {
+        res.redirect("/login");
+    }
+}
+
+app.get("/account", ensureAuthenticated, loadAccount);
+
+
+    console.log("User answers so far:", userAnswers);
+
+
+    const isLastStep = (questionNum === questions.length - 1);
+
+    res.render("searchForm.ejs", {
+        userID,
+        stepTitle: `Stap ${questionNum + 1}`,
+        question: step.question,
+        options: step.options,
+        stepIndex: questionNum,
+        totalSteps: questions.length,
+        isLastStep,
+        fieldName: step.name
+    });
+
+}
+
+function loadResultsSearchForm(req, res) {
+    req.session.userID = 95234;
+
+    let userID = req.session.userID;
+    const userAnswers = req.session.answers || {};
+    const {question, questionLabels } = require('./static/js/search-form');
+
+    const groupedAnswers = {
+        "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
+        "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
+        "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
+    };
+
+
+    res.render("results-search-form.ejs", { userID, userAnswers, groupedAnswers, questionLabels });
+}
+function loadRegistry(req, res) {
+    req.session.userID = 95234;
+    let userID = req.session.userID;
+    res.render("register.ejs", { userID });
+}
+
+
+// PROCESS FUNCTIONS ////////////////////////////////////////////////////////////////////////////////////////
 
 // LOGIN ////////////////////////////////////////////////////////////////////////////////////////
 async function processLogin(req, res) {
@@ -122,148 +297,9 @@ async function processLogin(req, res) {
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).render("login", { data: "An error occurred during login." });
-    }
-}
-
-function ensureAuthenticated(req, res, next) {
-    if (req.session.userID) {
-        next();
-    } else {
-        res.redirect("/login");
-    }
-}
-
-app.get("/account", ensureAuthenticated, loadAccount);
-
-// Getting API Token /////////////////////////////////////////////////////////////////////
-
-async function getPetfinderToken() {
-    const response = await fetch("https://api.petfinder.com/v2/oauth2/token", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            grant_type: "client_credentials",
-            client_id: process.env.PET_FINDER_API_KEY,
-            client_secret: process.env.API_SECRET
-        })
-    });
-
-    const data = await response.json();
-    return data.access_token;
-}
-
-async function loadBrowse(req, res) {
-    try {
-        const token = await getPetfinderToken();
-        const page = parseInt(req.query.page) || 1;
-
-        const params = new URLSearchParams({
-            page,
-            limit: 8
-        });
-
-        const allowedFilters = [
-            "type",
-            "gender",
-            "size",
-            "age",
-            "coat",
-            "good_with_children",
-            "good_with_dogs",
-            "good_with_cats",
-            "house_trained"
-        ];
-
-        const filterMap = {
-            species: "type",
-            gender: "gender",
-            size: "size",
-            age: "age",
-            coat: "coat",
-            good_with_children: "good_with_children",
-            good_with_dogs: "good_with_dogs",
-            good_with_cats: "good_with_cats",
-            house_trained: "house_trained"
-
-        };
-
-        // Loop through each filter provided in the URL query string
-        for (let queryFilter in req.query) {
-            // Convert the query filter to the correct API filter name (if needed)
-            let apiFilterReq;
-
-            if (filterMap[queryFilter]) {
-                apiFilterReq = filterMap[queryFilter]; // e.g., 'species' → 'type'
-            } else {
-                apiFilterReq = queryFilter;
-            }
-
-            // Check if this is an allowed filter and has a value
-            if (allowedFilters.includes(apiFilterReq) && req.query[queryFilter]) {
-                // Add the valid filter and its value to the API request parameters
-                params.append(apiFilterReq, req.query[queryFilter]);
-            }
-        }
-
-        const activeFilters = [];
-        const filterLabels = {
-            species: "Species",
-            gender: "Gender",
-            size: "Size",
-            age: "Age",
-            coat: "Coat",
-            good_with_children: "Good with children",
-            good_with_dogs: "Good with dogs",
-            good_with_cats: "Good with cats",
-            house_trained: "House trained"
-        };
-
-        for (const activeFilter in req.query) {
-            if (req.query[activeFilter] && filterLabels[activeFilter]) {
-                activeFilters.push({
-                    key: activeFilter,
-                    label: filterLabels[activeFilter],
-                    value: req.query[activeFilter]
-                });
-            }
-        }
-
-        const url = `https://api.petfinder.com/v2/animals?${params.toString()}`;
-        const petResponse = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-
-        const data = await petResponse.json();
-        const pets = data.animals;
-        const pagination = data.pagination || {};
-
-        //debug output
-        console.log("Petfinder API response:", data);
-        console.log("Animals found:", data.animals?.length);
-        console.log("Pagination info:", pagination);
-
-        console.log(JSON.stringify(pets[0].attributes, null, 2)); // Log the first pet's attributes
-        console.log(JSON.stringify(pets[0].environment, null, 2)); // Log the first pet's environment
-        console.log(JSON.stringify(pets[0].breeds, null, 2)); // Log the first pet's breeds
 
 
-        res.render("browse.ejs", { pets, pagination, error: null, request: req, activeFilters });
-    } catch (error) {
-        res.status(500).render("browse.ejs", { pets: [], pagination: null, error: "Could not fetch pet data.", request: req, activeFilters: [] });
-    }
-}
 
-function loadRegistry(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
-    res.render("register.ejs", { userID });
-}
-
-// REGISTRATION ////////////////////////////////////////////////////////////////////////////////////////
 
 // Ensure the uploads directory exists
 const uploadDir = path.join(__dirname, "uploads");
@@ -361,6 +397,48 @@ async function processRegistration(req, res) {
         res.status(500).render("login", { data: "An error occurred during registration." });
     }
 }
+function processForm(req, res) {
+    const { option, stepIndex, } = req.body;
+    const step = parseInt(stepIndex);
+
+    if (!req.session.answers) {
+        req.session.answers = {};
+    }
+
+    // Load questions
+    const {questions, questionLabels} = require('./static/js/search-form');
+    const currentQuestion = questions[step];
+
+    if (currentQuestion && currentQuestion.name) {
+        // Save the answer using the field name as key
+        req.session.answers[currentQuestion.name] = option;
+    }
+
+    const nextStep = step + 1;
+    if (nextStep >= questions.length) {
+        // All steps completed, redirect to browse (or results page)
+        return res.redirect("/results-search-form");
+    }
+
+    res.redirect(`/searchForm?stepIndex=${nextStep}`);
+};
+
+app.post('/results-search-form', (req, res) =>{
+    const newAnswers = req.body;
+
+  if (!req.session.answers) {
+    req.session.answers = {};
+  }
+
+
+for (let key in newAnswers) {
+  const cleanKey = xss(key);
+  const cleanValue = xss(newAnswers[key]);
+  req.session.answers[cleanKey] = cleanValue;
+}
+  res.status(200).send('Answers updated');
+});
+
 
 // CHANGE PASSWORD ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -376,6 +454,8 @@ async function changePassword(req, res) {
 
         if (existingemail && newpassword == confirmpassword) {
             console.log("Password is changed");
+            userCollection.updateOne({ email: email }, { $set: { password: newpassword } })
+
 
             userCollection.updateOne({ email: email }, { $set: { password: hashedNewPassword } })
             console.log(existingemail);
@@ -391,6 +471,7 @@ async function changePassword(req, res) {
         res.status(500).render("login", { data: "An error occurred during change." });
     }
 }
+
 
 // ONLY USE UPLOADED IMAGES TO "/uploads"
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -441,6 +522,170 @@ async function changeStory(req, res) {
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).redirect("login", { data: "An error occurred during change." });
+
+
+// GETTING API TOKEN /////////////////////////////////////////////////////////////////////
+
+async function getPetfinderToken() {
+    const response = await fetch("https://api.petfinder.com/v2/oauth2/token", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            grant_type: "client_credentials",
+            client_id: process.env.PET_FINDER_API_KEY,
+            client_secret: process.env.API_SECRET
+        })
+    });
+
+    const data = await response.json();
+    return data.access_token;
+}
+
+
+// REQUEST API QUERY & FILTERING ////////////////////////////////////////////////////////
+async function loadBrowse(req, res) {
+    try {
+
+        res.locals.isFetching = true; // Set flag before API call
+        const token = await getPetfinderToken();
+        const petsPerPage = 8;
+        const page = parseInt(req.query.page) || 1;
+
+        const allowedFilters = [
+            "type", "gender", "size", "age", "coat",
+            "good_with_children", "good_with_dogs",
+            "good_with_cats", "house_trained"
+        ];
+
+        const filterMap = {
+            species: "type",
+            gender: "gender",
+            size: "size",
+            age: "age",
+            coat: "coat",
+            good_with_children: "good_with_children",
+            good_with_dogs: "good_with_dogs",
+            good_with_cats: "good_with_cats",
+            house_trained: "house_trained"
+        };
+
+        // Step 1: Build query filters string
+        const appliedFilters = {};
+        const apiBatch = new URLSearchParams({ limit: "100" });
+
+        for (let key in req.query) {
+            const apiKey = filterMap[key] || key;
+            if (allowedFilters.includes(apiKey) && req.query[key]) {
+                apiBatch.append(apiKey, req.query[key]);
+                appliedFilters[apiKey] = req.query[key];
+            }
+        }
+
+        // Step 2: Create a unique key for current filter combo
+        const filterKey = JSON.stringify(appliedFilters);
+        req.session.petsCache = req.session.petsCache || {};
+
+        let petsWithImages = [];
+
+        // Step 3: Check session cache first
+        if (req.session.petsCache[filterKey]) {
+            petsWithImages = req.session.petsCache[filterKey];
+        } else {
+            // Step 4: Fetch data from API
+            const totalApiBatches = 4;
+            const pagePromises = [];
+
+            for (let i = 1; i <= totalApiBatches; i++) {
+                const pageParams = new URLSearchParams(apiBatch.toString());
+                pageParams.set("page", i);
+
+                const url = `https://api.petfinder.com/v2/animals?${pageParams.toString()}`;
+
+                pagePromises.push(
+                    fetch(url, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }).then(res => {
+                        if (!res.ok) throw new Error(`API error: ${res.status}`);
+                        return res.json();
+                    })
+                );
+            }
+
+            const allApiResults = await Promise.all(pagePromises);
+
+            for (const page of allApiResults) {
+                if (page.animals) {
+                    const petsWithPhotos = page.animals.filter(pet => pet.photos && pet.photos.length > 0);
+                    petsWithImages.push(...petsWithPhotos);
+                }
+            }
+
+  
+            
+            req.session.petsCache[filterKey] = petsWithImages;
+        }
+
+        // Step 5: In-memory pagination
+        const totalPets = petsWithImages.length;
+        const totalPages = Math.ceil(totalPets / petsPerPage);
+        const startIndex = (page - 1) * petsPerPage;
+        const endIndex = startIndex + petsPerPage;
+        const displayedPets = petsWithImages.slice(startIndex, endIndex);
+
+        // Step 6: Build activeFilters for UI
+        const filterLabels = {
+            species: "Species",
+            gender: "Gender",
+            size: "Size",
+            age: "Age",
+            coat: "Coat",
+            good_with_children: "Good with children",
+            good_with_dogs: "Good with dogs",
+            good_with_cats: "Good with cats",
+            house_trained: "House trained"
+        };
+
+        const activeFilters = [];
+        for (const key in req.query) {
+            if (req.query[key] && filterLabels[key]) {
+                activeFilters.push({
+                    key,
+                    label: filterLabels[key],
+                    value: req.query[key]
+                });
+            }
+        }
+
+        res.render("browse.ejs", {
+            pets: displayedPets,
+            pagination: {
+                current_page: page,
+                total_pages: totalPages,
+                total_count: totalPets
+            },
+            error: null,
+            request: req,
+            activeFilters,
+            isFetching: false
+        });
+
+    } catch (error) {
+        console.error("Browse error:", error);
+        res.status(500).render("browse.ejs", {
+            pets: [],
+            pagination: null,
+            error: "Could not fetch pet data.",
+            request: req,
+            activeFilters: [],
+            isFetching: false
+
+        });
+    }
+}
     }
 }
 

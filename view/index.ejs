@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/static/css/style.css">
+
+  <link rel="stylesheet" href="/static/css/homeStyling.css">
+    <title>PetMatch | Home</title>
+
+  <link rel="stylesheet" href="/static/css/indexStyling.css">
     <title>FetchFinder</title>
+
 </head>
 <body>
     <header>
-    <h1>PetThing</h1>
+    <h1>PetMatch</h1>
     <nav>
       <a href="/" class="active">Home</a>
       <a href="/browse">Browse</a>
@@ -16,10 +22,141 @@
       <a href="/register">Register</a>
     </nav>
   </header>
-    <p>
-        <%= userID %>
-    </p>
+  <main>
 
+    <section>
+      <div class="text-box">
+        <h2>Search profile</h2>
+        <p>At PetMatch, we simplify pet adoption by connecting you with your ideal furry friend through a smart, personalized platform. Together, we create joyful, lasting relationships while giving shelter animals the loving homes they deserve.</p>
+        <p>Discover your ideal pet companion through our matching algorithm that considers your lifestyle and preferences to find the perfect match for you.</p>
+        <a href="">Get started</a>
+      </div>
+     <img src="static/photos/catenhondhome.jpeg" alt="Cat and dog in grass">
+    </section>
+  
+  </main>
+  <footer>
+
+  </footer>
     
+
+    <section>
+      <div>
+        <h1>Looking for a pet to adopt?</h1>
+        <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hessitate to adopt one of these lovely pets.</p>
+        <button>Browse pets</button>
+      </div>
+      <div>
+        <img src="/static/images/pets.jpg" alt="Dog">
+      </div>
+    </section>
+    <section>
+      <h2>Which Pet Suits You?</h2>
+      <button id="start-btn">Find out which pet</button>
+
+      <div id="quiz-container">
+        <div class="tabs" id="tab-headers">
+          <div class="tab active" data-tab="1">1. Activity Level</div>
+          <div class="tab" data-tab="2">2. Time Commitment</div>
+          <div class="tab" data-tab="3">3. Living Space</div>
+          <div class="tab" data-tab="4">4. Sociability</div>
+          <div class="tab" data-tab="5">5. Budget</div>
+        </div>
+
+        <form id="quiz-form">
+          <div class="tab-content active" data-content="1">
+            <p><strong>1. How active are you?</strong></p>
+            <div class="options">
+              <label><input type="radio" name="q1" value="dog"> Very active, I love the outdoors</label>
+              <label><input type="radio" name="q1" value="cat"> Moderately active, I like a mix</label>
+              <label><input type="radio" name="q1" value="rodent"> I prefer to stay cozy at home</label>
+            </div>
+          </div>
+
+          <div class="tab-content" data-content="2">
+            <p><strong>2. How much time can you dedicate daily to a pet?</strong></p>
+            <div class="options">
+              <label><input type="radio" name="q2" value="dog"> 1–2+ hours</label>
+              <label><input type="radio" name="q2" value="cat"> 30–60 minutes</label>
+              <label><input type="radio" name="q2" value="rodent"> 10–20 minutes</label>
+            </div>
+          </div>
+
+          <div class="tab-content" data-content="3">
+            <p><strong>3. What kind of space do you have?</strong></p>
+            <div class="options">
+              <label><input type="radio" name="q3" value="dog"> A big yard or park nearby</label>
+              <label><input type="radio" name="q3" value="cat"> An apartment or house, indoors/outdoors optional</label>
+              <label><input type="radio" name="q3" value="rodent"> A small room or desk space</label>
+            </div>
+          </div>
+
+          <div class="tab-content" data-content="4">
+            <p><strong>4. How social do you want your pet to be?</strong></p>
+            <div class="options">
+              <label><input type="radio" name="q4" value="dog"> Very social, loves attention</label>
+              <label><input type="radio" name="q4" value="cat"> Independent but friendly</label>
+              <label><input type="radio" name="q4" value="rodent"> Low-key, minimal handling</label>
+            </div>
+          </div>
+
+          <div class="tab-content" data-content="5">
+            <p><strong>5. What’s your budget for pet care?</strong></p>
+            <div class="options">
+              <label><input type="radio" name="q5" value="dog"> Higher (food, vet, gear)</label>
+              <label><input type="radio" name="q5" value="cat"> Moderate</label>
+              <label><input type="radio" name="q5" value="rodent"> Lower</label>
+            </div>
+          </div>
+
+          <button type="button" id="submit-btn">See Your Result</button>
+        </form>
+
+        <div id="result"></div>
+      </div>
+    </section>
+    <section>
+      <div>
+        <img src="/static/images/pets.jpg" alt="Image 1">
+        <p>Dogs</p>
+      </div>
+      <div>
+        <img src="/static/images/pets.jpg" alt="Image 2">
+        <p>Cats</p>
+      </div>
+      <div>
+        <img src="/static/images/pets.jpg" alt="Image 3">
+        <p>Rodents</p>
+      </div>
+    </section>
+  </main>
+    <footer>
+      <ul>
+        <li></li>
+        <li>logo</li>
+      </ul>
+
+      <ul>
+        <li><a href="#">Pets</a></li>
+        <li><a href="#">Dogs</a></li>
+        <li><a href="#">Cats</a></li>
+        <li><a href="#">Rabbits</a></li>
+      </ul>
+
+      <ul>
+        <li><a href="#">Account</a></li>
+        <li><a href="#">Login</a></li>
+        <li><a href="#">Register</a></li>
+        <li><a href="#">Forgot your password</a></li>
+      </ul>
+
+      <ul>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Wibautstraat 100</a></li>
+        <li><a href="#">1018 FH </a></li>
+        <li><a href="#">Amsterdam</a></li>
+      </ul>
+    </footer>
+    <script src="/static/scripts/index.js" defer></script>
 </body>
 </html>

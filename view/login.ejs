@@ -4,6 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <title>PetMatch | Login</title>
+</head>
+<body>
+    <header>
+    <h1>PetMatch</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/browse">Browse</a>
+      <a href="/login" class="active">Login</a>
+      <a href="/register">Register</a>
+    </nav>
+  </header>
+   
+<form action="/login" method="POST">
+    <input type="email" name="email" placeholder="Email">
+    <input type="password" name="password" placeholder="Password">
+    <button>Login</button>
+</form>
+
+<a href="/register">I don't have an account yet</a>
+
     <link href="/static/css/loginstyle.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="/static/css/browseStyling.css">
     <link rel="stylesheet" href="/static/css/style.css">
