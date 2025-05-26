@@ -1,0 +1,111 @@
+:root {
+  --primary-color: #46c098;
+  --primary-color-hover: #3da885;
+  --text-color: #F47429;
+  --button-text-color: #ffffff;
+  --button-select-color: #ffffff;
+  --active-filters: #46c0975a;
+}
+
+#accountNav {
+    grid-template-rows: 7vh 6vh;
+    display: grid;
+    background-color: #90A5EC;
+    text-align: left;
+    padding: 1rem;
+}
+
+#accountNav h2{
+    color: var(--button-text-color);
+    padding: 0 2rem;
+}
+
+#accountNav div{
+    display: flex;
+    justify-content: flex-start;
+    position: sticky;
+    padding: 0 1rem;
+}
+
+#accountNav div button{
+    width: auto;
+    height: auto;
+    padding: 0.7rem 1.5rem;
+    text-decoration: inherit;
+    color: var(--button-text-color);
+    background-color: #90A5EC;
+    border-style: none;
+}
+
+#accountNav div button.active-button{
+    color: var(--text-color);
+    background-color: var(--button-select-color);
+    border-radius: 2rem;
+}
+
+#myInfo {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+#myInfo img{
+    position: relative;
+    margin: auto;
+    width: 30vw;
+    height: auto;
+    top: 2.5rem;
+    text-align: center;
+    border-radius: 50%;
+    box-shadow: #b8b8b8 4px 4px 10px;
+}
+
+#myInfo fieldset{
+    position: relative;
+    border-style: none;
+    top: 2rem;
+}
+
+#myInfo fieldset form{
+    position: relative;
+    display: inline-block;
+    top: 2rem;
+    border-style: none;
+    width: 45vw;
+}
+
+#myInfo fieldset label {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+#myInfo fieldset p {
+    font-size: 1.2rem;
+    padding-left: 1rem;
+}
+
+#myInfo form textarea{
+    display: inline-block;
+    border-radius: 1rem;
+    padding: 1rem;
+    border-style: none;
+    width: 40vw;
+    height: 30vh;
+    margin: 1rem;
+}
+
+#myInfo input[type=submit]{
+    width: auto;
+    height: auto;
+    text-decoration: inherit;
+    color: var(--text-color);
+    background-color: var(--button-select-color);
+    border-radius: .5rem;
+    padding: .5rem;
+    border-style: none;
+    box-shadow: #000000 1px 1px 3px;
+}
+
+.toggle-section {
+  display: none; /* All hidden by default */
+}
+

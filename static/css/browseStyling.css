@@ -1,3 +1,6 @@
+
+@import url(style.css);
+
 :root {
     --primary-color: #90A5EC;
     --primary-color-hover: #90A5EC;
@@ -66,7 +69,7 @@ body>section>a:nth-of-type(1) {
   padding: 1rem;
   margin: 1em auto;
   background-color: var(--primary-color);
-  color: #FFF;
+  color: var(--white);
   border-radius: 12px;
   text-decoration: none;
 
@@ -125,7 +128,7 @@ body>section>a:nth-of-type(1):hover {
 .filters button {
   padding: 0.5rem 1.2rem;
   background-color: var(--primary-color);
-  color: white;
+  color: var(--white);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -154,7 +157,7 @@ body>section>a:nth-of-type(1):hover {
 #toggle-advanced {
   padding: 0.37rem 0.7rem;
   background-color: #000;
-  color: white;
+  color: var(--white);
   border: 2px solid #000; 
   border-radius: 6px;
   cursor: pointer;
@@ -197,6 +200,9 @@ body>section>a:nth-of-type(1):hover {
 }
 
 .active-filters li {
+
+  background-color: var(--white);
+
   background-color: var(--active-filters);
   padding: 0.4rem 0.8rem;
   border: 1px solid #ccc;
@@ -255,7 +261,7 @@ body>section>a:nth-of-type(1):hover {
 
 /* Card styling /////////////////////////////////////////////////////////*/
 .card {
-  background: white;
+  background: var(--white);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -292,16 +298,16 @@ body>section>a:nth-of-type(1):hover {
   gap: 4px;
 }
 
-.card-buttons {
+.card-links {
   display: grid;
   gap: 8px;
   justify-items: end;
 }
 
-.favoriteBtn,
-.viewDetailBtn {
+.favorite,
+.viewDetail {
   background-color: #000;
-  color: #FFF;
+  color: var(--white);
   padding: 6px 10px;
   border-radius: 50%;
   cursor: pointer;
@@ -309,21 +315,23 @@ body>section>a:nth-of-type(1):hover {
   transition: background 0.
 }
 
-.favoriteBtn {
-    border-radius: 50%;
+.favorite {
+  border-radius: 50%;
+  text-decoration: none;
 }
-.viewDetailBtn{
+.viewDetail{
   border-radius: 999px;
+  text-decoration: none;
 }
 
-.viewDetailBtn:hover{
+.viewDetail:hover{
   border: solid 2px #000;
   background: transparent;
   color: #000;
   transition: 0.2s ease-in-out;
 }
 
-.favoriteBtn:hover {
+.favorite:hover {
     background-color: var(--primary-color);
     border: solid 2px var(--primary-color-hover);
 
@@ -361,9 +369,15 @@ body>section>a:nth-of-type(1):hover {
 }
 
 .page-btn {
+
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 0.6rem 1rem;
+
   background-color: #FFF;
   color: var(--primary-color);
   padding: 0.4rem 1rem;
+
   border-radius: 8px;
   text-decoration: none;
   font-weight: bold;

@@ -5,15 +5,23 @@
 
 :root {
   --primary-color: #90A5EC;
+
+  --primary-color-hover: #7387CC;
+  --primary-color-action: #F47429; 
+
   --primary-color-hover: #6979af;
   --primary-color-2: #F47429;
   --primary-color-hover-2: #c05c23;
-  --text-color: #333333;
+  --text-color: #333;
   --text-color-2: #fff;
   --background-color: #f2f2f2;
+
+  --white: #fff;
+
   --footer-text: #8E8E8E;
   --footer-background: #fff;
   --active-filters: #46c0975a;
+
 }
 
 body {
@@ -21,9 +29,21 @@ body {
   background-color: var(--background-color);
   margin: 0;
   margin-top: 5rem;
+
+
+
+  margin-top: 5rem;
+  max-width: 70%;
+
+  margin-inline: auto;
+  margin-bottom: 10rem;
+
 }
 /* Header styling ////////////////////////////////////////////////////////// */
 header {
+
+  background: var(--white);
+
   display: grid;
   grid-template-columns: 2fr 1fr;
   background: var(--text-color-2);
@@ -36,8 +56,16 @@ header {
   left: 0;
   right: 0;
   z-index: 12;
-
 }
+
+
+header h1 {
+  text-align: left;
+  font-size: 1.8rem;
+  margin: 0;
+  color: var(--text-color);
+}
+
 
 header nav {
   display: flex;
@@ -46,7 +74,7 @@ header nav {
 
 header nav a {
   text-decoration: none;
-  color: #555;
+  color: var(--text-color);
   font-weight: 500;
   padding: 0.5rem 0.75rem;
   transition: color 0.2s ease, background 0.2s ease;

@@ -25,6 +25,7 @@ const port = 3000;
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const sharp = require("sharp");
 
 const { MongoClient, ObjectId } = require("mongodb");
 const uri = process.env.URI;
@@ -65,6 +66,11 @@ app
         xXssProtection: false,
     }))
 
+    .use((req, res, next) => {
+        res.locals.loggedIn = req.session.userID ? true : false;
+        next();
+    })
+
     .disable('x-powered-by')
 
     .set("view engine", "ejs")
@@ -75,10 +81,21 @@ app
     .get("/register", loadRegistry)
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
+
+    .get("/account", loadAccount)
+    .get("/logout", (req, res) => {
+        req.session.destroy();
+        res.redirect("/login");
+    })
+    .get("/detail/:id", loadDetail)
+    .get("/fave", loadFave)
+
     .get("/searchForm", loadSearchForm)
     .get("/results-search-form", loadResultsSearchForm)
 
+
     .post("/login", processLogin)
+    .post("/account", changeStory)
     .post("/passwordchange", changePassword)
     .post("/searchForm", processForm)
 
@@ -105,6 +122,7 @@ function loadLogin(req, res) {
     res.render("login.ejs", { userID });
 }
 
+
 function loadRegistry(req, res) {
     req.session.userID = 95234;
     let userID = req.session.userID;
@@ -117,8 +135,76 @@ function loadPasswordChange(req, res) {
     res.render("passwordchange.ejs", { userID });
 }
 
+//Detail pgina///////////////////////////////////////////////////////////////////////
+async function loadDetail(req, res) {
+    const petId = req.params.id;
+    const userID = req.session.userID || 95234;
+    console.log("Fetching pet ID:", petId);
 
-function loadSearchForm(req, res) {
+    try {
+        const token = await getPetfinderToken();
+        const url = `https://api.petfinder.com/v2/animals/${petId}`;
+        console.log("API Request:", url);
+
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+        console.log("Petfinder Response:", data);
+
+        const pet = data.animal;
+
+        if (!pet) {
+            throw new Error("Pet not found");
+        }
+
+        res.render("detail.ejs", {
+            pet,
+            userID
+        });
+
+    } catch (error) {
+        console.error("Error fetching pet detail:", error);
+        res.status(500).render("detail.ejs", {
+            pet: null,
+            error: "Could not load pet details.",
+            userID
+        });
+    }
+}
+
+//Fave page ///////////////////////////////////////////////////////////////
+async function loadFave(req, res) {
+    try {
+        const userID = req.session.userID;
+
+        const user = await userCollection.findOne({ _id: new ObjectId(userID) });
+
+        const pets = user?.favorites || [];
+
+        res.render("fave.ejs", {
+            pets,
+            pagination: null,
+            error: null,
+            request: req,
+            activeFilters: []
+        });
+
+    } catch (error) {
+        console.error("Error loading favorites:", error);
+        res.status(500).render("fave.ejs", {
+            pets: [],
+            pagination: null,
+            error: "Couldn't catch favourites.",
+            request: req,
+            activeFilters: []
+        });
+      
+      
+      function loadSearchForm(req, res) {
     if (!req.session.userID) {
         req.session.userID = 95234;
     }
@@ -135,10 +221,24 @@ function loadSearchForm(req, res) {
         req.session.answers = {};
     } else if (questionNum === 0) {
         req.session.answers = {};
+
     }
     let userAnswers = req.session.answers;
 
+
+function ensureAuthenticated(req, res, next) {
+    if (req.session.userID) {
+        next();
+    } else {
+        res.redirect("/login");
+    }
+}
+
+app.get("/account", ensureAuthenticated, loadAccount);
+
+
     console.log("User answers so far:", userAnswers);
+
 
     const isLastStep = (questionNum === questions.length - 1);
 
@@ -171,51 +271,35 @@ function loadResultsSearchForm(req, res) {
 
     res.render("results-search-form.ejs", { userID, userAnswers, groupedAnswers, questionLabels });
 }
-
-
-
-
-
-
-//  PROCESS FUNCTIONS //////////////////////////////////////////////////////////
-
-// login ////////////////////////////////////////////////////////////////////////////////////////
-
-async function processLogin(req, res) {
-    const email = req.body.email;
-    const password = req.body.password;
-
-    const hashedPassword = await bcrypt.hash(password, 8)
-
-    try {
-        const existingemail = await userCollection.findOne({ email });
-
-        const matchingexisitingpassword = bcrypt.compare(password, hashedPassword);
-
-
-        if (existingemail && matchingexisitingpassword) {
-            console.log("Log in successfull");
-            loggedIn = true;
-            res.render("browse.ejs");
-        } else {
-            console.log("Log in invalid");
-            loggedIn = false;
-            res.render("login.ejs");
-        }
-
-    } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).render("login", { data: "An error occurred during login." });
-    }
-}
-
 function loadRegistry(req, res) {
     req.session.userID = 95234;
     let userID = req.session.userID;
     res.render("register.ejs", { userID });
 }
 
-// REGISTRATION ////////////////////////////////////////////////////////////////////////////////////////
+
+// PROCESS FUNCTIONS ////////////////////////////////////////////////////////////////////////////////////////
+
+// LOGIN ////////////////////////////////////////////////////////////////////////////////////////
+async function processLogin(req, res) {
+    const email = req.body.email;
+    const password = req.body.password;
+    try {
+        const user = await userCollection.findOne({ email });
+        if (user && await bcrypt.compare(password, user.password)) {
+            req.session.userID = user._id;
+            loggedIn = true;
+            res.redirect("/account");
+        } else {
+            loggedIn = false;
+            res.render("login.ejs", { data: "Invalid credentials" });
+        }
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).render("login", { data: "An error occurred during login." });
+
+
+
 
 // Ensure the uploads directory exists
 const uploadDir = path.join(__dirname, "uploads");
@@ -244,7 +328,7 @@ const uploads = multer({
             cb(new Error("Only image files are allowed!"), false);
         }
     },
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 // Registration route with image upload
@@ -268,7 +352,28 @@ async function processRegistration(req, res) {
             // Save image file path if uploaded
             let profileImagePath = null;
             if (req.file) {
-                profileImagePath = req.file.path; // Path of uploaded image
+            const inputPath = req.file.path;
+            const outputPath = path.join("uploads", "square-" + req.file.filename);
+
+            await sharp(inputPath)
+                .resize(800, 800, {
+                    fit: sharp.fit.cover,
+                    position: sharp.strategy.entropy
+                })
+                .toFile(outputPath);
+
+            profileImagePath = "/" + outputPath.replace(/\\/g, "/"); // Normalize path for all OS
+
+            // Optionally: delete the original uploaded file if not needed
+            fs.unlinkSync(inputPath);
+        } else {
+                // Randomly choose a default profile image
+                const defaultImages = [
+                    "/uploads/standard/default1.png",
+                    "/uploads/standard/default2.png",
+                    "/uploads/standard/default3.png"
+                ];
+                profileImagePath = defaultImages[Math.floor(Math.random() * defaultImages.length)];
             }
 
             // Register user with image (if uploaded)
@@ -277,12 +382,14 @@ async function processRegistration(req, res) {
                 lastName: lastname,
                 email: email.trim(),
                 password: hashedPassword,
-                profileImage: profileImagePath // Store image path in database
+                profileImage: profileImagePath, 
+                userStory: "A short story about you"
             };
 
             await userCollection.insertOne(newUser);
             console.log("Registration successful:", newUser);
-            res.render("login.ejs", { data: "Registration successful" });
+            res.redirect("/login");
+            return;
         }
 
     } catch (error) {
@@ -337,24 +444,23 @@ for (let key in newAnswers) {
 
 async function changePassword(req, res) {
     const email = req.body.email;
-    const password = req.body.password;
     const newpassword = req.body.password_new;
+    const confirmpassword = req.body.password_confirm;
 
-    const hashedPassword = await bcrypt.hash(password, 8)
     const hashedNewPassword = await bcrypt.hash(newpassword, 8)
 
     try {
         const existingemail = await userCollection.findOne({ email });
-        const matchingexisitingpassword = bcrypt.compare(password, hashedPassword);
 
-        if (existingemail && matchingexisitingpassword) {
+        if (existingemail && newpassword == confirmpassword) {
             console.log("Password is changed");
             userCollection.updateOne({ email: email }, { $set: { password: newpassword } })
 
 
             userCollection.updateOne({ email: email }, { $set: { password: hashedNewPassword } })
             console.log(existingemail);
-            res.render("login.ejs");
+            res.redirect("/login");
+            return;
         } else {
             console.log("Change failed");
             res.render("passwordchange.ejs");
@@ -365,6 +471,57 @@ async function changePassword(req, res) {
         res.status(500).render("login", { data: "An error occurred during change." });
     }
 }
+
+
+// ONLY USE UPLOADED IMAGES TO "/uploads"
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// PROFILE ///////////////////////////////////////////////////////
+async function loadAccount(req, res) {
+    if (!req.session.userID) {
+        res.redirect("/login");
+        return;
+    }
+
+    try {
+        const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+        if (!user) {
+            return res.status(404).render("account.ejs", { error: "User not found." });
+        }
+        else {
+            res.render("account.ejs", {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                profileImage: user.profileImage,
+                userStory: user.userStory
+            });
+        }
+
+
+    } catch (error) {
+        console.error("Error loading account:", error);
+        res.status(500).redirect("account.ejs", { error: "An error occurred while loading your account." });
+    }
+}
+
+async function changeStory(req, res) {
+    try {
+        const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+        const email = user.email;
+        const newstory = req.body.story;
+        const existingemail = await userCollection.findOne({ email });
+
+        if (existingemail) {
+            console.log("Story is changed");
+            userCollection.updateOne({ email: email },{ $set: { userStory: newstory } })
+            console.log(newstory);
+            res.redirect("/account");
+        }
+
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).redirect("login", { data: "An error occurred during change." });
 
 
 // GETTING API TOKEN /////////////////////////////////////////////////////////////////////
@@ -467,7 +624,7 @@ async function loadBrowse(req, res) {
                 }
             }
 
-            console.log("api hit");
+  
             
             req.session.petsCache[filterKey] = petsWithImages;
         }
@@ -529,3 +686,6 @@ async function loadBrowse(req, res) {
         });
     }
 }
+    }
+}
+

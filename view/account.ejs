@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/browseStyling.css">
+    <link rel="stylesheet" href="/static/css/accountstyle.css">
+    <title>PetThing | Account</title>
+</head>
+
+<body>
+    <header>
+        <h1>PetThing</h1>
+        <nav>
+            <% if (loggedIn) { %>
+                <a href="/browse">Browse Pets</a>
+                <a href="/favourites">Favourites</a>
+                <a href="/account" class="active">Account</a>
+                <a href="/logout">Logout</a>
+                <% } else { %>
+                    <a href="/browse">Browse Pets</a>
+                    <a href="/login">Favourites</a>
+                    <a href="/login">Login</a>
+                    <% } %>
+        </nav>
+    </header>
+
+    <nav id="accountNav">
+        <h2>Welcome back <%= firstName %>
+        </h2>
+        <div>
+            <button id="myInfoButton" class="active-button" onclick="showSection('myInfo', 'myInfoButton')">My Info</button>
+            <button id="ViewedButton" onclick="showSection('recentlyViewed', 'ViewedButton')">Recently Viewed</button>
+            <button id="PostPetsButton" onclick="showSection('postAPet', 'PostPetsButton')">Post a pet</button>
+            <button id="MyPetsButton" onclick="showSection('myPets', 'MyPetsButton')">My Pets</button>
+            <button id="SearchButton" onclick="showSection('searchProfiles', 'SearchButton')">Search Profiles</button>
+        </div>
+    </nav>
+
+    <section id="myInfo" class="toggle-section">
+        <img src="<%= profileImage %>" alt="Profile Image">
+
+            <fieldset>
+                <label>
+                    Full name: 
+                    <button id="editProfile">Hello</button>
+                </label>
+                <p>
+                    <%= firstName %>
+                        <%= lastName %>
+                </p>
+                <label>My story:</label>
+                <form action="/account" method="POST">
+                    <textarea type="text" name="story" placeholder="<%= userStory %>"></textarea>
+                    <input type="submit">
+                </form>  
+            </fieldset>
+    </section>
+
+    <section id="recentlyViewed" class="toggle-section">
+        <h2>Recently Viewed</h2>
+    </section>
+
+    <section id="postAPet" class="toggle-section">
+        <h2>Post a pet</h2>
+    </section>
+
+    <section id="myPets" class="toggle-section">
+        <h2>My pets</h2>
+    </section>
+
+    <section id="searchProfiles" class="toggle-section">
+        <h2>Search profiles</h2>
+    </section>
+
+
+
+
+    <script>
+        function showSection(targetId, buttonID) {
+            const sections = document.querySelectorAll('.toggle-section');
+            const buttons = document.querySelectorAll('button');
+
+            sections.forEach(section => {
+                if (section.id === targetId) {
+                    section.style.display = 'grid';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            buttons.forEach(btn => {
+                if (btn.id === buttonID) {
+                    btn.classList.add('active-button');
+                } else {
+                    btn.classList.remove('active-button')
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

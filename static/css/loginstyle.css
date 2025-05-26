@@ -1,82 +1,198 @@
-#loginPage, #registerPage, #passwordPage{
+/* GENERAL STYLES */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#navLogin {
+    position: absolute;
+}
+
+
+#navLogin nav a.active,
+#navLogin nav a:hover {
+    background-color: #bde9fd;
+    color: black;
+    border-radius: 1rem;
+}
+
+/* LOGIN AND REGISTER PAGES */
+#loginPage,
+#registerPage,
+#passwordPage {
     display: grid;
-    background-color: rgb(205, 205, 205);
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    align-items: center;
+    justify-content: center;
+}
+
+#loginPage {
+    background-image: url('/static/img/Login_Background.jpg');
+}
+
+#registerPage {
+    background-image: url('/static/img/Register_Background.jpg');
+    display: none;
+}
+
+#passwordPage {
+    background-image: url('/static/img/Passwordchange_Background.jpg');
+}
+
+/* FORM STYLES */
+#loginPage form,
+#registerPage form,
+#passwordPage form {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 1em;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    height: 70%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#loginPage h1:first-of-type,
+#registerPage h1:first-of-type,
+#passwordPage h1:first-of-type {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
     text-align: center;
 }
 
-#loginPage, #passwordPage{
-    grid-template-columns: 15vw 15vw 10vw 20vw 10vw 15vw 15vw;
-    grid-template-rows: 10vh 10vh 5vh 40vh 5vh 10vh 10vh;
-}
-
-#registerPage{
-    grid-template-columns: 15vw 15vw 10vw 20vw 10vw 15vw 15vw;
-    grid-template-rows: 10vh 10vh 5vh 45vh 5vh 5vh 10vh;
-}
-
-#loginPage form, #registerPage form, #passwordPage form{
-    background-color: rgb(255, 255, 255);
-    border-radius: 1em;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    align-content: center;
-    grid-column: 4/5;
-    grid-row: 4/6;
-}
-
-#loginPage h1:first-of-type, #registerPage h1:first-of-type, #passwordPage h1:first-of-type{
-    grid-column: 4/5;
-    grid-row: 2/3;
-}
- 
-#loginPage h1:first-of-type, #registerPage h1:first-of-type{
-    padding: 0.6em;
-}
-
-#loginPage a:first-of-type, #registerPage a:first-of-type, #passwordPage a:first-of-type{
-    grid-column: 4/5;
-    grid-row: 5/6;
-}
-
-#loginPage a:first-of-type, #registerPage a:first-of-type, #passwordPage a:first-of-type{
-    padding: 1em;
-}
-
-#loginPage a:nth-of-type(2){
-    margin: 0.5em;
-    grid-column: 4/5;
-    grid-row: 6/7;
-}
-
-#loginPage hr{
-    margin: 2.4em;
-    grid-column: 4;
-    grid-row: 5;
-    height: 1px;
-    background-color: rgb(0, 0, 0);
-}
-
-#loginPage input, #registerPage input, #passwordPage input {
-    margin: 1em;
+#loginPage form input:first-of-type, #loginPage form input:nth-of-type(2),
+#registerPage form input:first-of-type, #registerPage form input:nth-of-type(2), #registerPage form input:nth-of-type(3), #registerPage form input:nth-of-type(4),#registerPage form input:nth-of-type(5),
+#passwordPage form input {
+    position: relative;
     width: 80%;
-    height: 4vh;
-    border-radius: 0.4em;
-    border-width: 0.6px;
-    border-color: rgb(163, 163, 163);
-}
-
-#loginPage input[type=submit], #registerPage input[type=submit], #passwordPage input[type=submit] {
-    border: none;
-    background-color: rgb(0, 179, 255);
-    width: 80%;
-}
-
-#loginPage button[name=backButton], #registerPage button[name=backButton], #passwordPage button[name=backButton] {
-    margin: auto;
-    background-color: rgb(236, 236, 236);
+    padding: 0.8em;
+    margin: 0.5em 0;
     border-radius: 0.6em;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    background-color: #e3e3e3;
+}
+
+#loginPage input[type=submit],
+#registerPage input[type=submit],
+#passwordPage input[type=submit] {
+    background-color: #99dcfd;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
     border: none;
-    width: 80%;
-    height: 60%;
+    cursor: pointer;
+    width: 60%;
+    padding: 0.8em;
+    margin: 0.5em 0;
+    border-radius: 0.6em;
+}
+
+#loginPage input[type=submit]:hover,
+#registerPage input[type=submit]:hover,
+#passwordPage input[type=submit]:hover {
+    background-color: #7fcdf9;
+}
+
+#loginPage a,
+#registerPage a,
+#passwordPage a {
+    color: #007bc7;
+    font-size: 0.9rem;
+    text-decoration: none;
+    margin-top: 0.8rem;
+}
+
+#registerPage a {
+    margin-top: 1rem;
+}
+
+/* TOGGLE SECTIONS */
+.toggle-section {
+    display: none;
+}
+
+/* BACK BUTTON */
+#passwordPage button[name=backButton] {
+    position: relative;
+    top: -6rem;
+    left: -12rem;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* FILE INPUT */
+#registerPage form input[type=file] {
+    background-color: transparent;
+    border-style: none;
+}
+
+#registerPage form input::file-selector-button {
+    background-color: #99dcfd;
+    color: white;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    width: 40%;
+}
+
+.custom-file-upload {
+    padding: 10px;
+    cursor: auto;
+    background-color: #F47429;
+    color: #fff;
+    border-radius: 5px;
+    margin: 1rem;
+}
+
+.custom-file-upload:hover {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #a7a7a7;
+    color: #fff;
+}
+
+#loginPage button,
+#registerPage button {
+    text-align: center;
+    margin-top: 1rem;
+    color: #007bc7;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+#registerButton,
+#accountButton {
+    color: #007bc7;
+    margin-top: 1rem;
+    background-color: transparent;
+    border-style: none;
+    font-size: 0.9rem;
+    text-decoration: none;
+    margin-top: 1rem;
+}
+
+hr {
+    width: 100%;
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 1rem 0;
 }

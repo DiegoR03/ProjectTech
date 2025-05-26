@@ -1,0 +1,61 @@
+@import url(style.css);
+
+section{
+    display: grid;
+    grid-template-columns:repeat(2, 1fr);
+    grid-gap:1em;
+    grid-template-rows:10em max-content;
+}
+
+section img {
+    grid-column:1/-1;
+    grid-row-start:1;
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    z-index: 0; /* deze functie zorgt er voor dat de img onder de tekst komt zonder dat hij raar in de ESJ staat*/
+    border-radius: 0 0 20px 20px;
+}
+
+.text-box {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    background-color: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 30px 30px 30px 70px;
+    z-index: 1;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1em;
+}
+
+.text-box h2 {
+    color: var(--primary-color-action);
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.text-box p {
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.text-box a {
+    text-align: center;
+    color: white;
+    background-color: var(--primary-color-action);
+    padding: 1rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.text-box a:hover {
+    color: var(--primary-color-action);
+    background-color: white;
+    border: 2px solid var(--primary-color-action);
+}

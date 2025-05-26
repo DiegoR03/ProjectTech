@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/browseStyling.css">
 
+
+  <script src="/static/scripts/browse.js" defer></script>
+  <title>PetMatch | Browse</title>
+
   <script src="/static/js/browse.js"></script>
   <title>PetThing | Browse</title>
 </head>
@@ -15,6 +19,7 @@
 
 <body>
   <header>
+
     <div class="logo">
       <svg height="100px" width="100px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
  viewBox="0 0 48.839 48.839" xml:space="preserve">
@@ -40,6 +45,17 @@
     <a href="/register">Register</a>
   </nav>
 </header>
+
+
+    <h1>PetLink</h1>
+
+    <nav>
+      <a href="/">Home</a>
+      <a href="/browse" class="active">Browse</a>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    </nav>
+  </header>
   <main>
   <section>
     <p>Looking for a pet for adoption? Create a search profile and be able to
@@ -219,6 +235,12 @@
                             <div class="pet-name">
                               <%= pet.name %>
                             </div>
+
+                            <div class="card-links">
+                              <a href="/fave" class="favorite">&#x2661;</a>
+                              <a href="/detail/:id" class="viewDetail">View &#8594;</a>
+                             <!-- <button class="viewDetailBtn">View &#8594;</button>  Gaat stuk als ik met a link, omdat die 2 niet samen kunnen dus ik heb hier a van gemaakt-->
+
                             <div class="pet-gender">
                               <%= pet.gender %>
                             </div>
