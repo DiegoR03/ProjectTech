@@ -12,9 +12,11 @@
 
 
 main {
-  max-width: 80%;
+  max-width: 70%;
   margin-inline: auto;
+  margin-bottom: 10rem;
 }
+
 /* Loading state */
 #loaderDiv {
   position: absolute;
