@@ -54,8 +54,7 @@
     border-radius: 6px;
     text-decoration: none;
     color: var(--text-color);
-    font-weight: bold;
-    font-size: 250%;
+    font-size: 100%;
     transition: background-color 0.3s ease;
 }
 
@@ -96,6 +95,15 @@
 
 /* RESULTS PAGE //////////////////////////////////////////////////// */
 
+h1 {
+  text-align: left;
+  margin-bottom: -1em;
+  font-size: 1.4em;
+}
+h3{
+  color: var(--primary-color);
+
+}
 #answers-list {
   list-style: none;
   padding: 0;
@@ -208,8 +216,8 @@ h3{
 .save-action,
 .cancel-action {
   float: right;
-  padding: 0.5rem;
-  font-size: 1rem;
+  padding: 0.3rem;
+  font-size: 0.9rem;
   border-radius: 8px;
   cursor: pointer;
   border: none;
@@ -221,11 +229,15 @@ h3{
 .save-action {
   background-color: var(--primary-color);
   color: #FFF;
+  padding: 0.4rem 0.3rem;
 }
-
+.save-action:hover {
+  background-color: var(--primary-color-hover);
+}
 .cancel-action{
   background-color: #000;
   color: #FFF;
+  border: solid 2px #000;
 
 }
 

@@ -21,9 +21,12 @@
     </nav>
   </header>
 
+
+
   <% if (Object.keys(userAnswers).length===0) { %>
     <p>No answers submitted yet. <a href="/searchForm">Start now</a>.</p>
     <% } else { %>
+      <h1>One last check:</h1>
       <div id="results-and-buttons-container">
         <div id="answers-list">
           <% for (let group in groupedAnswers) { %>
@@ -58,8 +61,7 @@
                 <button class="edit-group-btn" onclick="startEditing('<%= group %>')">Edit</button>
               </div>
 
-              <form class="group-actions edit-view" action="/wizard/edit/<%= groupedAnswers[group][0] %>" method="POST"
-                style="display: none;">
+              <form class="group-actions edit-view" style="display: none;" data-group="<%= group %>">
                 <button type="submit" class="save-action">Save changes</button>
                 <button type="button" class="cancel-action" onclick="cancelEditing('<%= group %>')">Cancel</button>
               </form>
@@ -184,6 +186,46 @@
             });
           }
 
+
+          // Save changes ////////////////////////////////////////////////////////////////////////////////////
+
+
+          document.querySelectorAll('.group-actions.edit-view').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+              e.preventDefault();
+
+              const group = form.getAttribute('data-group');
+              const section = document.querySelector(`[data-group="${group}"]`);
+              const updatedAnswers = {};
+
+              section.querySelectorAll('.radio-options').forEach(container => {
+                const key = container.getAttribute('data-key');
+                const selected = container.querySelector('input[type="radio"]:checked');
+                if (selected) {
+                  updatedAnswers[key] = selected.value;
+                }
+              });
+
+              try {
+                const res = await fetch('/results-search-form', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(updatedAnswers)
+                });
+
+                if (res.ok) {
+                  window.location.reload(); // Refresh to see updated values
+                } else {
+                  console.error('Update failed');
+                }
+              } catch (err) {
+                console.error(err);
+              }
+            });
+          });
+
           function cancelEditing(groupName) {
             const section = document.querySelector(`[data-group="${groupName}"]`);
             section.querySelectorAll('.static-view').forEach(el => {
@@ -196,15 +238,9 @@
             section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'none');
           }
 
-          function deleteAnswers() {
-            fetch('/wizard/reset', { method: 'POST' })
-              .then(() => window.location.href = '/wizard')
-              .catch(err => console.error(err));
+          function deleteAnswers(req, res) {
+            res.render("/browse")
           }
-
-          document.addEventListener('DOMContentLoaded', () => {
-            // eventueel andere init-code
-          });
         </script>
 
 

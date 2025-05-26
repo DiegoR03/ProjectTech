@@ -18,7 +18,6 @@ require("dotenv").config();
 
 const express = require("express");
 
-const validator = require('validator');
 const bcrypt = require("bcryptjs")
 const app = express();
 const session = require("express-session");
@@ -127,7 +126,7 @@ function loadSearchForm(req, res) {
 
 
     // Retrieves questionlist from 'search-form.js'
-    const {questions, questionLabels} = require('./src/scripts/search-form');
+    const {questions, questionLabels} = require('./static/js/search-form');
 
     const questionNum = parseInt(req.query.stepIndex) || 0;
     const step = questions[questionNum];
@@ -140,11 +139,6 @@ function loadSearchForm(req, res) {
     let userAnswers = req.session.answers;
 
     console.log("User answers so far:", userAnswers);
-
-    if (!step) {
-        console.log(userAnswers);
-        // return res.redirect("/results-search-form"); // All steps completed
-    }
 
     const isLastStep = (questionNum === questions.length - 1);
 
@@ -166,7 +160,7 @@ function loadResultsSearchForm(req, res) {
 
     let userID = req.session.userID;
     const userAnswers = req.session.answers || {};
-    const {question, questionLabels } = require('./src/scripts/search-form');
+    const {question, questionLabels } = require('./static/js/search-form');
 
     const groupedAnswers = {
         "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
@@ -212,131 +206,6 @@ async function processLogin(req, res) {
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).render("login", { data: "An error occurred during login." });
-    }
-}
-
-async function processRegistration(req, res) {
-    const email = req.body.email;
-
-// Getting API Token /////////////////////////////////////////////////////////////////////
-
-async function getPetfinderToken() {
-    const response = await fetch("https://api.petfinder.com/v2/oauth2/token", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            grant_type: "client_credentials",
-            client_id: process.env.PET_FINDER_API_KEY,
-            client_secret: process.env.API_SECRET
-        })
-    });
-
-    const data = await response.json();
-    return data.access_token;
-}
-
-async function loadBrowse(req, res) {
-    try {
-        const token = await getPetfinderToken();
-        const page = parseInt(req.query.page) || 1;
-
-        const params = new URLSearchParams({
-            page,
-            limit: 8
-        });
-
-        const allowedFilters = [
-            "type",
-            "gender",
-            "size",
-            "age",
-            "coat",
-            "good_with_children",
-            "good_with_dogs",
-            "good_with_cats",
-            "house_trained"
-        ];
-
-        const filterMap = {
-            species: "type",
-            gender: "gender",
-            size: "size",
-            age: "age",
-            coat: "coat",
-            good_with_children: "good_with_children",
-            good_with_dogs: "good_with_dogs",
-            good_with_cats: "good_with_cats",
-            house_trained: "house_trained"
-
-        };
-
-        // Loop through each filter provided in the URL query string
-        for (let queryFilter in req.query) {
-            // Convert the query filter to the correct API filter name (if needed)
-            let apiFilterReq;
-
-            if (filterMap[queryFilter]) {
-                apiFilterReq = filterMap[queryFilter]; // e.g., 'species' → 'type'
-            } else {
-                apiFilterReq = queryFilter;
-            }
-
-            // Check if this is an allowed filter and has a value
-            if (allowedFilters.includes(apiFilterReq) && req.query[queryFilter]) {
-                // Add the valid filter and its value to the API request parameters
-                params.append(apiFilterReq, req.query[queryFilter]);
-            }
-        }
-
-        const activeFilters = [];
-        const filterLabels = {
-            species: "Species",
-            gender: "Gender",
-            size: "Size",
-            age: "Age",
-            coat: "Coat",
-            good_with_children: "Good with children",
-            good_with_dogs: "Good with dogs",
-            good_with_cats: "Good with cats",
-            house_trained: "House trained"
-        };
-
-        for (const activeFilter in req.query) {
-            if (req.query[activeFilter] && filterLabels[activeFilter]) {
-                activeFilters.push({
-                    key: activeFilter,
-                    label: filterLabels[activeFilter],
-                    value: req.query[activeFilter]
-                });
-            }
-        }
-
-        const url = `https://api.petfinder.com/v2/animals?${params.toString()}`;
-        const petResponse = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-
-        const data = await petResponse.json();
-        const pets = data.animals;
-        const pagination = data.pagination || {};
-
-        //debug output
-        console.log("Petfinder API response:", data);
-        console.log("Animals found:", data.animals?.length);
-        console.log("Pagination info:", pagination);
-
-        console.log(JSON.stringify(pets[0].attributes, null, 2)); // Log the first pet's attributes
-        console.log(JSON.stringify(pets[0].environment, null, 2)); // Log the first pet's environment
-        console.log(JSON.stringify(pets[0].breeds, null, 2)); // Log the first pet's breeds
-
-
-        res.render("browse.ejs", { pets, pagination, error: null, request: req, activeFilters });
-    } catch (error) {
-        res.status(500).render("browse.ejs", { pets: [], pagination: null, error: "Could not fetch pet data.", request: req, activeFilters: [] });
     }
 }
 
@@ -430,7 +299,7 @@ function processForm(req, res) {
     }
 
     // Load questions
-    const {questions, questionLabels} = require('./src/scripts/search-form');
+    const {questions, questionLabels} = require('./static/js/search-form');
     const currentQuestion = questions[step];
 
     if (currentQuestion && currentQuestion.name) {
@@ -446,6 +315,22 @@ function processForm(req, res) {
 
     res.redirect(`/searchForm?stepIndex=${nextStep}`);
 };
+
+app.post('/results-search-form', (req, res) =>{
+    const newAnswers = req.body;
+
+  if (!req.session.answers) {
+    req.session.answers = {};
+  }
+
+
+for (let key in newAnswers) {
+  const cleanKey = xss(key);
+  const cleanValue = xss(newAnswers[key]);
+  req.session.answers[cleanKey] = cleanValue;
+}
+  res.status(200).send('Answers updated');
+});
 
 
 // CHANGE PASSWORD ////////////////////////////////////////////////////////////////////////////////////////
@@ -505,19 +390,18 @@ async function getPetfinderToken() {
 // REQUEST API QUERY & FILTERING ////////////////////////////////////////////////////////
 async function loadBrowse(req, res) {
     try {
+
+        res.locals.isFetching = true; // Set flag before API call
         const token = await getPetfinderToken();
         const petsPerPage = 8;
         const page = parseInt(req.query.page) || 1;
-        const apiBatch = new URLSearchParams({
-            limit: 100 // fetch in batches (max allowed by Petfinder)
-        });
 
-        // Apply query filters
         const allowedFilters = [
             "type", "gender", "size", "age", "coat",
             "good_with_children", "good_with_dogs",
             "good_with_cats", "house_trained"
         ];
+
         const filterMap = {
             species: "type",
             gender: "gender",
@@ -530,47 +414,72 @@ async function loadBrowse(req, res) {
             house_trained: "house_trained"
         };
 
+        // Step 1: Build query filters string
+        const appliedFilters = {};
+        const apiBatch = new URLSearchParams({ limit: "100" });
+
         for (let key in req.query) {
             const apiKey = filterMap[key] || key;
             if (allowedFilters.includes(apiKey) && req.query[key]) {
                 apiBatch.append(apiKey, req.query[key]);
+                appliedFilters[apiKey] = req.query[key];
             }
         }
 
-        // Custom pagination logic
-        const startPageIndex = (page - 1) * petsPerPage;
-        const endPageIndex = page * petsPerPage;
+        // Step 2: Create a unique key for current filter combo
+        const filterKey = JSON.stringify(appliedFilters);
+        req.session.petsCache = req.session.petsCache || {};
+
         let petsWithImages = [];
 
-        const totalApiBatches = 4;
-        const pagePromises = [];
+        // Step 3: Check session cache first
+        if (req.session.petsCache[filterKey]) {
+            petsWithImages = req.session.petsCache[filterKey];
+        } else {
+            // Step 4: Fetch data from API
+            const totalApiBatches = 4;
+            const pagePromises = [];
 
+            for (let i = 1; i <= totalApiBatches; i++) {
+                const pageParams = new URLSearchParams(apiBatch.toString());
+                pageParams.set("page", i);
 
-        for (let i = 1; i <= totalApiBatches; i++) {
-            const pageParams = new URLSearchParams(apiBatch);
-            pageParams.set("page", i);
+                const url = `https://api.petfinder.com/v2/animals?${pageParams.toString()}`;
 
-            const url = `https://api.petfinder.com/v2/animals?${pageParams.toString()}`;
-            pagePromises.push(fetch(url, {
-                headers: { Authorization: `Bearer ${token}` }
-            }).then(res => res.json()));
-        }
-
-        console.log("THE API IS BEING HIT!!!")
-
-        const unfilteredPageResults = await Promise.all(pagePromises);
-
-        // Filters out pets that don't have images
-        for (const page of unfilteredPageResults) {
-            if (page.animals) {
-                const petsWithPhotos = page.animals.filter(pet => pet.photos && pet.photos.length > 0);
-                petsWithImages.push(...petsWithPhotos);
+                pagePromises.push(
+                    fetch(url, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }).then(res => {
+                        if (!res.ok) throw new Error(`API error: ${res.status}`);
+                        return res.json();
+                    })
+                );
             }
+
+            const allApiResults = await Promise.all(pagePromises);
+
+            for (const page of allApiResults) {
+                if (page.animals) {
+                    const petsWithPhotos = page.animals.filter(pet => pet.photos && pet.photos.length > 0);
+                    petsWithImages.push(...petsWithPhotos);
+                }
+            }
+
+            console.log("api hit");
+            
+            req.session.petsCache[filterKey] = petsWithImages;
         }
 
-        const pets = petsWithImages.slice(startPageIndex, endPageIndex);
+        // Step 5: In-memory pagination
+        const totalPets = petsWithImages.length;
+        const totalPages = Math.ceil(totalPets / petsPerPage);
+        const startIndex = (page - 1) * petsPerPage;
+        const endIndex = startIndex + petsPerPage;
+        const displayedPets = petsWithImages.slice(startIndex, endIndex);
 
-        // Build activeFilters array for UI
+        // Step 6: Build activeFilters for UI
         const filterLabels = {
             species: "Species",
             gender: "Gender",
@@ -594,19 +503,17 @@ async function loadBrowse(req, res) {
             }
         }
 
-        // Custom pagination UI values
-        const totalPages = Math.ceil(petsWithImages.length / petsPerPage);
-
         res.render("browse.ejs", {
-            pets,
+            pets: displayedPets,
             pagination: {
                 current_page: page,
                 total_pages: totalPages,
-                total_count: petsWithImages.length
+                total_count: totalPets
             },
             error: null,
             request: req,
-            activeFilters
+            activeFilters,
+            isFetching: false
         });
 
     } catch (error) {
@@ -616,8 +523,9 @@ async function loadBrowse(req, res) {
             pagination: null,
             error: "Could not fetch pet data.",
             request: req,
-            activeFilters: []
+            activeFilters: [],
+            isFetching: false
+
         });
     }
-
-} }
+}

@@ -43,7 +43,7 @@ const questions = [
       { value: "Medium", label: "Long" },
       { value: "No preference", label: "No preference" },
     ]
-  }, 
+  },
   {
     question: "Do you have kids living at home?",
     name: "hasKids",
@@ -77,7 +77,7 @@ const questions = [
       { value: "No", label: "Almost never" },
     ]
   },
-   {
+  {
     question: "On what floor do you live?",
     name: "floor",
     options: [
@@ -120,7 +120,7 @@ const questions = [
       { value: "No", label: "Not very important" },
     ]
   },
- {
+  {
     question: "Do you want a playful pet?",
     name: "isPlayful",
     options: [
@@ -176,4 +176,107 @@ const questionLabels = {
   isPaired: 'Bonded pair',
 };
 
-module.exports = {questions, questionLabels}
+module.exports = { questions, questionLabels }
+
+
+
+const userAnswers = {
+  type: 'dog',
+  size: 'medium',
+  gender: 'male',
+  isCastrated: 'false',
+  coat: 'long',
+  hasKids: 'true',
+  hasCats: 'true',
+  hasDogs: 'false',
+  isAloneOften: 'true',
+  floor: 'upperfloor-w-elevator',
+  hasGarden: 'false',
+  activity: 'false',
+  isHousetrained: 'false',
+  isComfystrangers: 'false',
+  isPlayful: 'false',
+  isPaired: 'false'
+};
+
+const groupedAnswers = {
+  "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
+  "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
+  "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
+};
+
+
+
+
+const answerOptions = {
+  type: ['Dog', 'Cat', 'Rabbit'],
+  size: ['Small', 'Medium', 'Large', 'No preference'],
+  gender: ['Male', 'Female', 'No preference'],
+  isCastrated: ['true', 'false', 'No preference'],
+  coat: ['Short', 'Medium', 'Long', 'No preference'],
+  hasKids: ['true', 'false'],
+  hasCats: ['true', 'false'],
+  hasDogs: ['true', 'false'],
+  isAloneOften: ['true', 'false'],
+  floor: ['Groundfloor', 'Upperfloor with elevator', 'Upperfloor without elevator'],
+  hasGarden: ['true', 'false'],
+  activity: ['true', 'false'],
+  isHousetrained: ['true', 'false'],
+  isComfystrangers: ['true', 'false'],
+  isPlayful: ['true', 'false'],
+  isPaired: ['true', 'false']
+};
+
+function formatOptionLabel(value) {
+  if (value === 'true') return 'Yes';
+  if (value === 'false') return 'No';
+  if (value === 'no preference') return 'No preference';
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function startEditing(groupName) {
+  const section = document.querySelector(`[data-group="${groupName}"]`);
+  section.querySelectorAll('.static-view').forEach(el => el.style.display = 'none');
+  section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'block');
+
+  section.querySelectorAll('li').forEach(li => {
+    const key = li.getAttribute('data-key');
+    const currentValue = li.getAttribute('data-value');
+    const container = li.querySelector(`.radio-options[data-key="${key}"]`);
+
+    container.innerHTML = ''; // Clear existing buttons
+
+    const options = answerOptions[key] || [];
+    options.forEach(opt => {
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = key;
+      input.value = opt;
+      if (opt === currentValue) input.checked = true;
+
+      const label = document.createElement('label');
+      label.textContent = formatOptionLabel(opt);
+      label.prepend(input);
+
+      container.appendChild(label);
+    });
+  });
+}
+
+function cancelEditing(groupName) {
+  const section = document.querySelector(`[data-group="${groupName}"]`);
+  section.querySelectorAll('.static-view').forEach(el => {
+    if (el.classList.contains('group-actions')) {
+      el.style.display = 'block'
+    } else {
+      el.style.display = 'flex'
+    }
+  });
+  section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'none');
+}
+
+function deleteAnswers() {
+  fetch('/wizard/reset', { method: 'POST' })
+    .then(() => window.location.href = '/wizard')
+    .catch(err => console.error(err));
+}
