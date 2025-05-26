@@ -4,7 +4,6 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* HEADER */
 #navLogin {
     position: absolute;
 }
@@ -32,16 +31,16 @@ body {
 }
 
 #loginPage {
-    background-image: url('/static/img/Login_Background.png');
+    background-image: url('/static/img/Login_Background.jpg');
 }
 
 #registerPage {
-    background-image: url('/static/img/Register_Background.png');
+    background-image: url('/static/img/Register_Background.jpg');
     display: none;
 }
 
 #passwordPage {
-    background-image: url('/static/img/Passwordchange_Background.png');
+    background-image: url('/static/img/Passwordchange_Background.jpg');
 }
 
 /* FORM STYLES */
@@ -171,7 +170,6 @@ body {
     color: #fff;
 }
 
-/* HIDE DEFAULT BUTTON STYLES */
 #loginPage button,
 #registerPage button {
     text-align: center;
@@ -192,7 +190,6 @@ body {
     margin-top: 1rem;
 }
 
-/* UTILITY */
 hr {
     width: 100%;
     border: none;

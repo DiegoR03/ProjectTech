@@ -346,7 +346,7 @@ async function processRegistration(req, res) {
                 lastName: lastname,
                 email: email.trim(),
                 password: hashedPassword,
-                profileImage: profileImagePath, // Store image path in database
+                profileImage: profileImagePath, 
                 userStory: "A short story about you"
             };
 
