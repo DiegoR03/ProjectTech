@@ -8,10 +8,11 @@
   --primary-color-hover: #6979af;
   --primary-color-2: #F47429;
   --primary-color-hover-2: #c05c23;
-  --text-color: #333;
+  --text-color: #333333;
   --text-color-2: #fff;
   --background-color: #f2f2f2;
   --footer-text: #8E8E8E;
+  --footer-background: #fff;
   --active-filters: #46c0975a;
 }
 
@@ -20,7 +21,6 @@ body {
   background-color: var(--background-color);
   margin: 0;
   margin-top: 5rem;
-
 }
 /* Header styling ////////////////////////////////////////////////////////// */
 header {
@@ -37,13 +37,6 @@ header {
   right: 0;
   z-index: 12;
 
-}
-
-header h1 {
-  text-align: left;
-  font-size: 1.8rem;
-  margin: 0;
-  color: #333;
 }
 
 header nav {
@@ -82,9 +75,10 @@ header .active {
 }
 
 .logo h1 {
-  font-family: var(--font-heading);
+  text-align: left;
+  margin: 0;
   font-size: 1.5rem;
-  color: var(--color-text);
+  color: var(--text-color);
 }
 
 
@@ -94,7 +88,7 @@ footer {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   padding: 3rem 5rem;
-  background-color: #fff;
+  background-color: var(--footer-background);
 }
 
 footer ul {
@@ -113,12 +107,12 @@ footer ul li a{
 }
 
 footer ul li:nth-of-type(1) a {
-  color: #000000;
+  color: var(--text-color);
   font-weight: 700;
 
 }
 
 footer ul li:nth-of-type(1) a {
-  color: #000000;
+  color: var(--text-color);
   font-weight: 700;
 }
