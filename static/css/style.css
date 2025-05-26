@@ -20,6 +20,11 @@ body {
   background-color: var(--background-color);
   margin: 0;
 
+  margin-top: 5rem;
+  max-width: 70%;
+  margin-inline: auto;
+  margin-bottom: 10rem;
+
 }
 /* Header styling ////////////////////////////////////////////////////////// */
 header {
@@ -28,14 +33,14 @@ header {
   background: var(--text-color-2);
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   padding: 1rem 5rem;
-  /* display: flex;
-  justify-content: space-between;
-  align-items: center; */
-  position: sticky;
+ 
+  align-items: center;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
+  z-index: 12;
+
 }
 
 header h1 {
