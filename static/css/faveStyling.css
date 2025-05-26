@@ -22,7 +22,7 @@ ul {
 }
 
 li {
-    background-color: #fff;
+    background-color: var(--white);
     padding:calc(var(--whiteSpace) / 2);
     grid-column-gap:calc(var(--whiteSpace) / 4);
     border-radius:calc(var(--whiteSpace) / 2);

@@ -3,14 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetThing | Sign Up</title>
+    <title>PetMatch | Sign Up</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/detailStyling.css">
 </head>
 <body>
-    <h1>Adoptable Pets</h1>
+    <header>
+        <h1>PetMatch</h1>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/browse" class="active">Browse</a>
+          <a href="/login">Login</a>
+          <a href="/register">Register</a>
+        </nav>
+    </header>
+    <main>
+        <% if (pet) { %>
+            <h1><%= pet.name %></h1>
+            <img src="<%= pet.photos[0]?.medium || '/static/default.jpg' %>" alt="Pet photo">
+            <p>Breed: <%= pet.breeds.primary %></p>
+            <p>Age: <%= pet.age %></p>
+            <p>Gender: <%= pet.gender %></p>
+            <p>Description: <%= pet.description %></p>
+          <% } else { %>
+            <p class="error"><%= error %></p>
+          <% } %>
+    </main>
+    <footer>
 
-    
-
-    
+    </footer>
+    <script src="/static/scripts/detail.js"></script>
 </body>
 </html>
 

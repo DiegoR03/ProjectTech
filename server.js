@@ -43,6 +43,7 @@ app
     .get("/login", loadLogin)
     .get("/register", loadRegistry)
     .get("/browse", loadBrowse)
+    .get("/detail/:id", loadDetail)
     .get("/fave", loadFave)
 
     .post("/login", processLogin)
@@ -61,12 +62,6 @@ function loadLogin(req, res) {
     req.session.userID = 95234;
     let userID = req.session.userID;
     res.render("login.ejs", { userID });
-}
-
-function loadFave(req, res){
-    req.session.userID = 95234;
-    let userID = req.session.userID;
-    res.render("fave.ejs", { userID });
 }
 
 // Getting API Token /////////////////////////////////////////////////////////////////////
@@ -219,6 +214,46 @@ async function processLogin(req, res) {
     }
 
 }
+//Detail pgina///////////////////////////////////////////////////////////////////////
+async function loadDetail(req, res) {
+    const petId = req.params.id;
+    const userID = req.session.userID || 95234;
+    console.log("Fetching pet ID:", petId);
+
+    try {
+        const token = await getPetfinderToken();
+        const url = `https://api.petfinder.com/v2/animals/${petId}`;
+        console.log("API Request:", url);
+
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+        console.log("Petfinder Response:", data);
+
+        const pet = data.animal;
+
+        if (!pet) {
+            throw new Error("Pet not found");
+        }
+
+        res.render("detail.ejs", {
+            pet,
+            userID
+        });
+
+    } catch (error) {
+        console.error("Error fetching pet detail:", error);
+        res.status(500).render("detail.ejs", {
+            pet: null,
+            error: "Could not load pet details.",
+            userID
+        });
+    }
+}
 
 //Fave page linking with API///////////////////////////////////////////////////////////////
 async function loadFave(req, res) {
@@ -242,7 +277,7 @@ async function loadFave(req, res) {
         res.status(500).render("fave.ejs", {
             pets: [],
             pagination: null,
-            error: "Kon favorieten niet laden.",
+            error: "Couldn't catch favourites.",
             request: req,
             activeFilters: []
         });
