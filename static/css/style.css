@@ -29,8 +29,10 @@ body {
   background-color: var(--background-color);
   margin: 0;
 
+
   margin-top: 5rem;
   max-width: 70%;
+
   margin-inline: auto;
   margin-bottom: 10rem;
 
@@ -52,7 +54,6 @@ header {
   left: 0;
   right: 0;
   z-index: 12;
-
 }
 
 header h1 {
