@@ -352,9 +352,6 @@ function loadSearchForm(req, res) {
 }
 
 
-}
-
-
 function ensureAuthenticated(req, res, next) {
     if (req.session.userID) {
         next();
@@ -443,8 +440,7 @@ function processForm(req, res) {
         return res.redirect("/results-search-form");
     }
 
-        app.post("/register", uploads.single('profileImage'), processRegistration);
-    }
+    app.post("/register", uploads.single('profileImage'), processRegistration);
 }
 
 // Registration route with image upload
