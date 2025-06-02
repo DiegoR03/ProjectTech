@@ -78,7 +78,7 @@ app
 
     .get("/", loadHome)
     .get("/login", loadLogin)
-    .get("/register", loadRegistry)
+   
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
 
@@ -324,7 +324,7 @@ async function processLogin(req, res) {
             },
             limits: { fileSize: 5 * 1024 * 1024 }
         });
-        
+
         app.post("/register", uploads.single('profileImage'), processRegistration);
     }
 }
@@ -686,3 +686,196 @@ async function loadBrowse(req, res) {
         });
     }
 }
+app.get('/match', async (req, res) => {
+    const userAnswers = req.session.answers;
+    if (!userAnswers || Object.keys(userAnswers).length === 0) {
+        return res.status(400).json({ error: "No answers found in session." });
+    }
+
+    try {
+        const token = await getPetfinderToken();
+        const url = `https://api.petfinder.com/v2/animals?limit=100&type=${userAnswers.type || 'dog'}`;
+
+        const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+
+        const data = await response.json();
+        const animals = data.animals || [];
+        // Normalize 'Yes'/'No' to 'true'/'false'
+        for (let key in userAnswers) {
+            if (userAnswers[key] === 'Yes') userAnswers[key] = 'true';
+            if (userAnswers[key] === 'No') userAnswers[key] = 'false';
+        }
+
+        const scored = animals.map(pet => {
+            let score = 0;
+            let reason = [];
+            const hasGarden = userAnswers.hasGarden === 'true';
+            const isActive = userAnswers.activity === 'true';
+            const isOftenAlone = userAnswers.isAloneOften === 'true';
+            const floor = userAnswers.floor; // groundfloor / upperfloor-with-elevator / upperfloor-without-elevator
+
+            // --- 1. ENVIRONMENT DEALBREAKERS ---
+            if (userAnswers.hasKids === 'true') {
+                if (pet.environment?.children === false) {
+                    score -= 10;
+                    reason.push("⚠️ Not suitable for kids");
+                } else if (pet.environment?.children === true) {
+                    score += 2;
+                    reason.push("✅ Good with children");
+                }
+            }
+
+            if (userAnswers.hasDogs === 'true') {
+                if (pet.environment?.dogs === false) {
+                    score -= 5;
+                    reason.push("⚠️ Not dog-friendly");
+                } else if (pet.environment?.dogs === true) {
+                    score += 2;
+                    reason.push("✅ Gets along with other dogs");
+                }
+            }
+
+            if (userAnswers.hasCats === 'true') {
+                if (pet.environment?.cats === false) {
+                    score -= 5;
+                    reason.push("⚠️ Not cat-friendly");
+                } else if (pet.environment?.cats === true) {
+                    score += 2;
+                    reason.push("✅ Gets along with cats");
+                }
+            }
+
+            // --- 2. POSITIVE ENVIRONMENT SYNERGIES ---
+            if (pet.size === 'Large' && hasGarden && isActive) {
+                score += 6;
+                reason.push("✅ Perfect fit: large active dog + garden");
+            }
+
+            if (pet.size === 'Large' && floor === 'groundfloor') {
+                score += 3;
+                reason.push("✅ Large pet and ground floor — easy access");
+            }
+
+            if (pet.size === 'Medium' && floor === 'upperfloor-without-elevator') {
+                score += 3;
+                reason.push("✅ Medium sized pet — easy in stairs");
+            }
+
+            if (pet.size === 'Small' && floor === 'upperfloor-without-elevator') {
+                score -= 3;
+                reason.push("⚠️ Small pet and no elevator — tough match");
+            }
+
+
+            if (hasGarden) {
+                score += 2;
+                reason.push("✅ Garden provides outdoor space");
+            }
+
+            if (!hasGarden && pet.size === 'Small') {
+                score += 2;
+                reason.push("✅ Small dog is fine without garden");
+            }
+
+            // --- 3. LIFESTYLE MATCH ---
+            if (isOftenAlone && pet.tags?.includes('Independent')) {
+                score += 4;
+                reason.push("✅ Independent pet for alone household");
+            }
+
+            if (!isOftenAlone && pet.description?.toLowerCase().includes('attention')) {
+                score += 3;
+                reason.push("✅ Pet needs attention and you're often home");
+            }
+
+            if (isOftenAlone && pet.description?.toLowerCase().includes('attention')) {
+                score -= 3;
+                reason.push("⚠️ Needs attention but owner away often");
+            }
+
+            // --- 4. USER PREFERENCES ---
+            if (pet.gender?.toLowerCase() === userAnswers.gender?.toLowerCase()) {
+                score += 2;
+                reason.push("✅ Preferred gender");
+            }
+
+            if (pet.size?.toLowerCase() === userAnswers.size?.toLowerCase()) {
+                score += 2;
+                reason.push("✅ Preferred size");
+            }
+
+            if (pet.coat?.toLowerCase() === userAnswers.coat?.toLowerCase()) {
+                score += 1;
+                reason.push("✅ Preferred coat type");
+            }
+
+            // --- 5. TRAITS ---
+            if (userAnswers.isHousetrained === 'true' && pet.attributes?.house_trained) {
+                score += 3;
+                reason.push("✅ Already housetrained");
+            }
+
+            if (userAnswers.isCastrated === 'true' && pet.attributes?.spayed_neutered) {
+                score += 1;
+                reason.push("✅ Castrated/neutered");
+            }
+
+            const description = pet.description?.toLowerCase() || "";
+            const tags = pet.tags?.map(t => t.toLowerCase()) || [];
+
+            // Match "playful" personality
+            if (userAnswers.isPlayful === 'true') {
+                if (
+                    description.includes('play') ||
+                    tags.includes('playful') ||
+                    tags.includes('energetic') ||
+                    tags.includes('active')
+                ) {
+                    score += 2;
+                    reason.push("✅ Playful match");
+                } else {
+                    reason.push("ℹ️ Might not be very playful");
+                }
+            }
+
+            // Match "friendly with strangers"
+            if (userAnswers.isComfystrangers === 'true') {
+                if (
+                    description.includes('friendly') ||
+                    tags.includes('friendly') ||
+                    tags.includes('social') ||
+                    tags.includes('affectionate') ||
+                    tags.includes('outgoing')
+                ) {
+                    score += 2;
+                    reason.push("✅ Friendly with strangers");
+                } else {
+                    reason.push("ℹ️ May be shy with strangers");
+                }
+            }
+
+            // --- 6. CONFLICTS ---
+            if (pet.size === 'Large' && floor === 'upperfloor-without-elevator') {
+                score -= 3;
+                reason.push("⚠️ Large pet and no elevator — tough match");
+            }
+
+            return { ...pet, matchScore: score, matchReasons: reason };
+        });
+
+
+        const bestMatches = scored
+            .filter(p => p.photos && p.photos.length > 0)
+            .sort((a, b) => b.matchScore - a.matchScore)
+            .slice(0, 10);
+
+        res.json(bestMatches);
+
+    } catch (error) {
+        console.error("Matching failed:", error);
+        res.status(500).json({ error: "Matching failed." });
+    }
+});
