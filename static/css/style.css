@@ -28,19 +28,18 @@ body {
   font-family: 'Montserrat';
   background-color: var(--background-color);
   margin: 0;
-  margin-top: 5rem;
 
 
-
+/* 
   margin-top: 5rem;
   max-width: 70%;
 
   margin-inline: auto;
-  margin-bottom: 10rem;
+  margin-bottom: 10rem; */
 
 }
 /* Header styling ////////////////////////////////////////////////////////// */
-header {
+/* header {
 
   background: var(--white);
 
@@ -89,15 +88,92 @@ header .active {
   color: var(--primary-color-2);
   font-weight: 700;
   border-bottom: solid 3px var(--primary-color-2);
+} */
+
+
+
+header {
+  position: sticky;
+}
+
+header ul:nth-of-type(1) {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+}
+
+header nav {
+  position: fixed;
+  inset: 0;
+  background-color: #ffffff;
+  z-index: 1;
+  translate: -100%;
+  transition: 0.5s;
+}
+
+header nav.open {
+  translate: 0;
+}
+
+header img {
+  width: 25px;
+  height: 25px;
+
+}
+
+header button {
+  position: relative;
+  z-index: 2;
+  background-color: var(--color-bg);
+  border: none;
+}
+
+header nav ul {
+  padding: 0;
+}
+
+header nav li {
+  list-style: none;
+  margin-left: 1em;
+  padding: 1em;
+}
+
+.navbar {
+  background-color: var(--white);
+}
+
+header nav ul:nth-of-type(1) {
+  display: flex;
+  flex-direction: column;
+  align-items:baseline;
+}
+
+a { 
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+header a:hover {
+  color: var(--primary-color-hover-2);
+  border-bottom: solid 3px var(--primary-color-hover-2);
+}
+
+header a:active {
+  color: var(--primary-color-2);
+  font-weight: 700;
+  border-bottom: solid 3px var(--primary-color-2);
 }
 
 .logo {
   display: flex;
   align-items: center;
+  padding: 0.5em;
 }
 .logo svg { 
-  width: 40px; 
-  height: 40px; 
+  width: 35px; 
+  height: 35px; 
   margin-right: 0.5rem; 
   fill: var(--primary-color-2);
 }
@@ -143,4 +219,30 @@ footer ul li:nth-of-type(1) a {
 footer ul li:nth-of-type(1) a {
   color: var(--text-color);
   font-weight: 700;
+}
+
+@media (width > 800px) {
+  header {
+      padding-right: 3em;
+      padding-left: 3em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  }
+  header nav {
+      position: relative;
+      background-color: none;
+      translate: 0;
+      transition: 0.5s;
+  }
+
+  header nav ul:nth-of-type(1) {
+      flex-direction: unset;
+      align-items: center;
+      justify-content: space-between;
+  }
+
+  header button {
+      display: none;
+  }
 }
