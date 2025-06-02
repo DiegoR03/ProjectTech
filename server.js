@@ -348,7 +348,22 @@ function loadSearchForm(req, res) {
         isLastStep,
         fieldName: step.name
     });
+
 }
+
+
+}
+
+
+function ensureAuthenticated(req, res, next) {
+    if (req.session.userID) {
+        next();
+    } else {
+        res.redirect("/login");
+    }
+}
+
+app.get("/account", ensureAuthenticated, loadAccount);
 
 
 function loadResultsSearchForm(req, res) {
@@ -428,6 +443,36 @@ function processForm(req, res) {
         return res.redirect("/results-search-form");
     }
 
+        app.post("/register", uploads.single('profileImage'), processRegistration);
+    }
+}
+
+// Registration route with image upload
+
+function processForm(req, res) {
+    const { option, stepIndex, } = req.body;
+    const step = parseInt(stepIndex);
+
+    if (!req.session.answers) {
+        req.session.answers = {};
+    }
+
+    // Load questions
+    const { questions, questionLabels } = require('./static/js/search-form');
+    const currentQuestion = questions[step];
+
+    if (currentQuestion && currentQuestion.name) {
+        // Save the answer using the field name as key
+        req.session.answers[currentQuestion.name] = option;
+    }
+
+    const nextStep = step + 1;
+    if (nextStep >= questions.length) {
+        // All steps completed, redirect to browse (or results page)
+        return res.redirect("/results-search-form");
+    }
+
+
     res.redirect(`/searchForm?stepIndex=${nextStep}`);
 };
 
@@ -466,6 +511,7 @@ async function processRegistration(req, res) {
             let profileImagePath = null;
             if (req.file) {
                 const inputPath = req.file.path;
+
                 const outputPath = path.join("uploads/", "square-" + req.file.filename);
 
                 await sharp(inputPath)
@@ -496,7 +542,10 @@ async function processRegistration(req, res) {
                 email: email.trim(),
                 password: hashedPassword,
                 profileImage: profileImagePath,
+
                 userStory: "A short story about you",
+
+
             };
 
             await userCollection.insertOne(newUser);
