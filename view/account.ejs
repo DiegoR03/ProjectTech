@@ -10,96 +10,174 @@
     <title>PetThing | Account</title>
 </head>
 
-<body>
-    <header>
-        <h1>PetThing</h1>
-        <nav>
-            <% if (loggedIn) { %>
+<header>
+    <div class="logo">
+        <svg height="40px" width="40px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48.839 48.839" xml:space="preserve">
+            <g>
+                <path fill="var(--color-primary)" d="M39.041,36.843c2.054,3.234,3.022,4.951,3.022,6.742c0,3.537-2.627,5.252-6.166,5.252
+  c-1.56,0-2.567-0.002-5.112-1.326c0,0-1.649-1.509-5.508-1.354c-3.895-0.154-5.545,1.373-5.545,1.373
+  c-2.545,1.323-3.516,1.309-5.074,1.309c-3.539,0-6.168-1.713-6.168-5.252c0-1.791,0.971-3.506,3.024-6.742
+  c0,0,3.881-6.445,7.244-9.477c2.43-2.188,5.973-2.18,5.973-2.18h1.093v-0.001c0,0,3.698-0.009,5.976,2.181
+  C35.059,30.51,39.041,36.844,39.041,36.843z M16.631,20.878c3.7,0,6.699-4.674,6.699-10.439S20.331,0,16.631,0
+  S9.932,4.674,9.932,10.439S12.931,20.878,16.631,20.878z M10.211,30.988c2.727-1.259,3.349-5.723,1.388-9.971
+  s-5.761-6.672-8.488-5.414s-3.348,5.723-1.388,9.971C3.684,29.822,7.484,32.245,10.211,30.988z M32.206,20.878
+  c3.7,0,6.7-4.674,6.7-10.439S35.906,0,32.206,0s-6.699,4.674-6.699,10.439C25.507,16.204,28.506,20.878,32.206,20.878z
+   M45.727,15.602c-2.728-1.259-6.527,1.165-8.488,5.414s-1.339,8.713,1.389,9.972c2.728,1.258,6.527-1.166,8.488-5.414
+  S48.455,16.861,45.727,15.602z" />
+            </g>
+        </svg>
+        <h1>PetMatch</h1>
+    </div>
+    <nav>
+        <% if (loggedIn) { %>
+            <a href="/browse">Browse</a>
+            <a href="/favourites">Favourites</a>
+            <a href="/account" class="active">Account</a>
+            <a href="/logout">Logout</a>
+            <% } else { %>
                 <a href="/browse">Browse Pets</a>
-                <a href="/favourites">Favourites</a>
-                <a href="/account" class="active">Account</a>
-                <a href="/logout">Logout</a>
-                <% } else { %>
-                    <a href="/browse">Browse Pets</a>
-                    <a href="/login">Favourites</a>
-                    <a href="/login">Login</a>
-                    <% } %>
-        </nav>
-    </header>
-
-    <nav id="accountNav">
-        <h2>Welcome back <%= firstName %>
-        </h2>
-        <div>
-            <button id="myInfoButton" class="active-button" onclick="showSection('myInfo', 'myInfoButton')">My Info</button>
-            <button id="ViewedButton" onclick="showSection('recentlyViewed', 'ViewedButton')">Recently Viewed</button>
-            <button id="PostPetsButton" onclick="showSection('postAPet', 'PostPetsButton')">Post a pet</button>
-            <button id="MyPetsButton" onclick="showSection('myPets', 'MyPetsButton')">My Pets</button>
-            <button id="SearchButton" onclick="showSection('searchProfiles', 'SearchButton')">Search Profiles</button>
-        </div>
+                <a href="/login">Favourites</a>
+                <a href="/login">Login</a>
+                <% } %>
     </nav>
 
-    <section id="myInfo" class="toggle-section">
-        <img src="<%= profileImage %>" alt="Profile Image">
 
-            <fieldset>
+</header>
+
+<nav id="accountNav">
+    <h2>Welcome back <%= firstName %>
+    </h2>
+    <div>
+        <button id="myInfoButton" class="active-button" onclick="toggleObject('myInfo', 'myInfoButton')">My
+            Info</button>
+        <button id="ViewedButton" onclick="toggleObject('recentlyViewed', 'ViewedButton')">Recently Viewed</button>
+        <button id="PostPetsButton" onclick="toggleObject('postAPet', 'PostPetsButton')">Post a pet</button>
+        <button id="MyPetsButton" onclick="toggleObject('myPets', 'MyPetsButton')">My Pets</button>
+        <button id="SearchButton" onclick="toggleObject('searchProfiles', 'SearchButton')">Search Profiles</button>
+    </div>
+</nav>
+
+<section id="myInfo" class="toggle-section">
+    <img src="<%= profileImage %>" alt="Profile Image">
+    <fieldset>
+        <form action="/account" method="POST">
+            <div>
                 <label>
-                    Full name: 
-                    <button id="editProfile">Hello</button>
+                    Full name:
+                    <button type="button" id="editProfileBtn" onclick="toggleEditProfile()">Edit profile</button>
                 </label>
-                <p>
-                    <%= firstName %>
-                        <%= lastName %>
-                </p>
-                <label>My story:</label>
-                <form action="/account" method="POST">
-                    <textarea type="text" name="story" placeholder="<%= userStory %>"></textarea>
-                    <input type="submit">
-                </form>  
-            </fieldset>
-    </section>
 
-    <section id="recentlyViewed" class="toggle-section">
-        <h2>Recently Viewed</h2>
-    </section>
+                <div>
+                    <input type="text" id="firstName" name="firstName" value="<%= firstName %>"
+                        onkeypress="this.style.width = ((this.value.length + 1) * 8) + 'px';" disabled>
+                    <input type="text" id="lastName" name="lastName" value="<%= lastName %>"
+                        onkeypress="this.style.width = ((this.value.length + 1) * 8) + 'px';" disabled>
+                </div>
+            </div>
 
-    <section id="postAPet" class="toggle-section">
-        <h2>Post a pet</h2>
-    </section>
+            <div style="margin-top: 2rem;">
+                <label for="storyTextarea">My story:</label>
+                <div>
+                    <textarea id="storyTextarea" name="story" placeholder="<%= userStory %>"
+                        disabled><%= userStory %></textarea>
+                </div>
 
-    <section id="myPets" class="toggle-section">
-        <h2>My pets</h2>
-    </section>
 
-    <section id="searchProfiles" class="toggle-section">
-        <h2>Search profiles</h2>
-    </section>
+                <input id="storySubmit" type="submit" style="display: none;" value="Save">
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <label>Search profile finds</label>
+
+            </div>
 
 
 
+        </form>
+    </fieldset>
+</section>
 
-    <script>
-        function showSection(targetId, buttonID) {
-            const sections = document.querySelectorAll('.toggle-section');
-            const buttons = document.querySelectorAll('button');
+<section id="recentlyViewed" class="toggle-section">
+    <h2>Recently Viewed Pets</h2>
+<div class="recently-viewed">
+  <% if (recentlyViewed.length === 0) { %>
+    <p>No pets viewed yet.</p>
+  <% } else { %>
+    <% recentlyViewed.forEach(pet => { %>
+    <a href="/detail/<%= pet.id %>">
+        <div class="pet-card">
+            <% if (pet.photo) { %>
+            <img src="<%= pet.photo %>" alt="<%= pet.name %>">
+            <% } else { %>
+            <div class="no-photo">No photo</div>
+            <% } %>
+            <h3><%= pet.name %></h3>
+            <p><%= pet.gender %> - <%= pet.breed %></p>
+        </div>
+    </a>
+    <% }); %>
+  <% } %>
+</div>
 
-            sections.forEach(section => {
-                if (section.id === targetId) {
-                    section.style.display = 'grid';
-                } else {
-                    section.style.display = 'none';
-                }
-            });
+</section>
 
-            buttons.forEach(btn => {
-                if (btn.id === buttonID) {
-                    btn.classList.add('active-button');
-                } else {
-                    btn.classList.remove('active-button')
-                }
-            });
-        }
-    </script>
+<section id="postAPet" class="toggle-section">
+    <h2>Post a pet</h2>
+</section>
+
+<section id="myPets" class="toggle-section">
+    <h2>My pets</h2>
+</section>
+
+<section id="searchProfiles" class="toggle-section">
+    <h2>Search profiles</h2>
+</section>
+
+
+
+
+<script>
+    function toggleObject(targetId, buttonID) {
+        const sections = document.querySelectorAll('.toggle-section');
+        const buttons = document.querySelectorAll('button');
+
+        sections.forEach(section => {
+            if (section.id === targetId) {
+                section.style.display = 'grid';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+
+        buttons.forEach(btn => {
+            if (btn.id === buttonID) {
+                btn.classList.add('active-button');
+            } else {
+                btn.classList.remove('active-button')
+            }
+        });
+    }
+
+    function toggleEditProfile() {
+        const firstNameInput = document.querySelector('#firstName');
+        const lastNameInput = document.querySelector('#lastName');
+        const storyTextarea = document.querySelector('#storyTextarea');
+        const submitBtn = document.querySelector('#storySubmit');
+        const editBtn = document.querySelector('#editProfileBtn');
+
+        const isEditing = storyTextarea.disabled === false;
+
+        // Toggle disabled state
+        firstNameInput.disabled = isEditing;
+        lastNameInput.disabled = isEditing;
+        storyTextarea.disabled = isEditing;
+
+        // Toggle button visibility/text
+        submitBtn.style.display = isEditing ? 'none' : 'inline-block';
+        editBtn.innerText = isEditing ? 'Edit profile' : 'Cancel';
+    }
+</script>
 </body>
 
 </html>
