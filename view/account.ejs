@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/browseStyling.css">
     <link rel="stylesheet" href="/static/css/accountstyle.css">
+    <script src="/static/js/dropdown.js"></script>
     <title>PetThing | Account</title>
 </head>
 
@@ -30,11 +31,17 @@
         <h1>PetMatch</h1>
     </div>
     <nav>
-        <% if (loggedIn) { %>
+        <% if (currentUser) { %>
             <a href="/browse">Browse</a>
-            <a href="/favourites">Favourites</a>
-            <a href="/account" class="active">Account</a>
-            <a href="/logout">Logout</a>
+            <a href="/favourites">Notifications</a>
+            <div class="dropdown">
+                <button class="dropbtn"><img src="<%= currentUser?.profileImage%>" alt="Profile Image"></button>
+                <div id="myDropdown" class="dropdown-content">
+                    <p>Hi <%= firstName %>!</p>
+                    <a href="/account" class="active">Account</a>
+                    <a href="/logout">Logout</a>
+                </div>
+            </div>
             <% } else { %>
                 <a href="/browse">Browse Pets</a>
                 <a href="/login">Favourites</a>
@@ -59,7 +66,7 @@
 </nav>
 
 <section id="myInfo" class="toggle-section">
-    <img src="<%= profileImage %>" alt="Profile Image">
+    <img id="profileImg" src="<%= profileImage %>" alt="Profile Image">
     <fieldset>
         <form action="/account" method="POST">
             <div>
@@ -69,14 +76,13 @@
                 </label>
 
                 <div>
-                    <input type="text" id="firstName" name="firstName" value="<%= firstName %>"
-                        onkeypress="this.style.width = ((this.value.length + 1) * 8) + 'px';" disabled>
-                    <input type="text" id="lastName" name="lastName" value="<%= lastName %>"
-                        onkeypress="this.style.width = ((this.value.length + 1) * 8) + 'px';" disabled>
+                    <input type="text" id="firstName" value="<%= firstName %>" disabled>
+                    <input type="text" id="lastName" value="<%= lastName %>" disabled>
                 </div>
+
             </div>
 
-            <div style="margin-top: 2rem;">
+            <div style="margin-top: 1rem;">
                 <label for="storyTextarea">My story:</label>
                 <div>
                     <textarea id="storyTextarea" name="story" placeholder="<%= userStory %>"
@@ -87,9 +93,31 @@
                 <input id="storySubmit" type="submit" style="display: none;" value="Save">
             </div>
 
-            <div style="margin-top: 2rem;">
-                <label>Search profile finds</label>
-
+            <div style="margin-top: 1rem;">
+                <label>Favourites</label>
+                <div class="favorites-section">
+                    <% if (favorites.length===0) { %>
+                        <p>No favorite pets yet.</p>
+                        <% } else { %>
+                            <% favorites.forEach(pet=> { %>
+                                <a href="/detail/<%= pet.id %>">
+                                    <div class="favorite">
+                                        <% if (pet.photo) { %>
+                                            <img src="<%= pet.photo %>" alt="<%= pet.name %>">
+                                            <% } else { %>
+                                                <div class="no-photo">No photo</div>
+                                                <% } %>
+                                                    <h3>
+                                                        <%= pet.name %>
+                                                    </h3>
+                                                    <p>
+                                                        <%= pet.gender %> - <%= pet.breed %>
+                                                    </p>
+                                    </div>
+                                </a>
+                                <% }); %>
+                                    <% } %>
+                </div>
             </div>
 
 
@@ -100,25 +128,29 @@
 
 <section id="recentlyViewed" class="toggle-section">
     <h2>Recently Viewed Pets</h2>
-<div class="recently-viewed">
-  <% if (recentlyViewed.length === 0) { %>
-    <p>No pets viewed yet.</p>
-  <% } else { %>
-    <% recentlyViewed.forEach(pet => { %>
-    <a href="/detail/<%= pet.id %>">
-        <div class="pet-card">
-            <% if (pet.photo) { %>
-            <img src="<%= pet.photo %>" alt="<%= pet.name %>">
+    <div class="recently-viewed">
+        <% if (recentlyViewed.length===0) { %>
+            <p>No pets viewed yet.</p>
             <% } else { %>
-            <div class="no-photo">No photo</div>
-            <% } %>
-            <h3><%= pet.name %></h3>
-            <p><%= pet.gender %> - <%= pet.breed %></p>
-        </div>
-    </a>
-    <% }); %>
-  <% } %>
-</div>
+                <% recentlyViewed.forEach(pet=> { %>
+                    <a href="/detail/<%= pet.id %>">
+                        <div class="pet-card">
+                            <% if (pet.photo) { %>
+                                <img src="<%= pet.photo %>" alt="<%= pet.name %>">
+                                <% } else { %>
+                                    <div class="no-photo">No photo</div>
+                                    <% } %>
+                                        <h3>
+                                            <%= pet.name %>
+                                        </h3>
+                                        <p>
+                                            <%= pet.gender %> - <%= pet.breed %>
+                                        </p>
+                        </div>
+                    </a>
+                    <% }); %>
+                        <% } %>
+    </div>
 
 </section>
 
@@ -138,6 +170,18 @@
 
 
 <script>
+    document.querySelectorAll('input[disabled]').forEach(input => {
+        const span = document.createElement('span');
+        span.style.visibility = 'hidden';
+        span.style.whiteSpace = 'pre';
+        span.style.font = getComputedStyle(input).font;
+        span.textContent = input.value + '1px';
+
+        document.body.appendChild(span);
+        input.style.width = span.offsetWidth + 'px';
+        document.body.removeChild(span);
+    });
+
     function toggleObject(targetId, buttonID) {
         const sections = document.querySelectorAll('.toggle-section');
         const buttons = document.querySelectorAll('button');

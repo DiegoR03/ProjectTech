@@ -8,9 +8,9 @@
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/browseStyling.css">
   <script src="/static/js/browse.js"></script>
+  <script src="/static/js/dropdown.js"></script>
   <title>PetMatch | Browse</title>
 </head>
-
 
 <body>
   <header>
@@ -32,19 +32,25 @@
       </svg>
       <h1>PetMatch</h1>
     </div>
- <nav>
-        <% if (loggedIn) { %>
-            <a href="/browse" class="active">Browse</a>
-            <a href="/favourites">Favourites</a>
-            <a href="/account">Account</a>
+    <nav>
+      <% if (currentUser) { %>
+        <a href="/browse" class="active">Browse</a>
+        <a href="/favourites">Favourites</a>
+        <div class="dropdown">
+          <button class="dropbtn"><img src="<%= currentUser?.profileImage%>" alt="Profile Image"></button>
+          <div id="myDropdown" class="dropdown-content">
+            <a href="/account" class="active">Account</a>
             <a href="/logout">Logout</a>
-            <% } else { %>
-                <a href="/browse" class="active">Browse Pets</a>
-                <a href="/login">Favourites</a>
-                <a href="/login">Login</a>
-                <% } %>
+          </div>
+        </div>
+        <% } else { %>
+          <a href="/browse" class="active">Browse Pets</a>
+          <a href="/login">Favourites</a>
+          <a href="/login">Login</a>
+          <% } %>
+
     </nav>
- 
+
   </header>
 
   <main>
@@ -234,7 +240,7 @@
                             </div>
                               
                             <div class="card-links">
-                              <a href="/fave?id=<%= pet.id %>" class="favorite">&#x2661;</a>
+                              <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
                               <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                             </div>
 
