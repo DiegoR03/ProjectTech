@@ -3,7 +3,7 @@
 // XSS (detects and blocks scripts in forms)
 var xss = require("xss");
 var html = xss('<script>alert("xss");</script>');
-console.log('look here' + html);
+
 
 //Validator restricts and unifies user input
 const validator = require('validator');
@@ -315,7 +315,7 @@ function loadPasswordChange(req, res) {
     res.render("passwordchange.ejs", { userID });
 }
 
-//Detail pgina///////////////////////////////////////////////////////////////////////
+//Detail page///////////////////////////////////////////////////////////////////////
 async function loadDetail(req, res) {
     const petId = req.params.id;
     const userID = req.session.userID || 95234;
@@ -440,7 +440,7 @@ function loadResultsSearchForm(req, res) {
     const { question, questionLabels } = require('./static/js/search-form');
 
     const groupedAnswers = {
-        "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
+        "General Info": ['type', 'size', 'gender', 'age', 'isCastrated', 'coat'],
         "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
         "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
     };
@@ -487,35 +487,6 @@ async function processLogin(req, res) {
     }
 }
 
-// Registration route with image upload
-
-function processForm(req, res) {
-    const { option, stepIndex, } = req.body;
-    const step = parseInt(stepIndex);
-
-    if (!req.session.answers) {
-        req.session.answers = {};
-    }
-
-    // Load questions
-    const { questions, questionLabels } = require('./static/js/search-form');
-    const currentQuestion = questions[step];
-
-    if (currentQuestion && currentQuestion.name) {
-        // Save the answer using the field name as key
-        req.session.answers[currentQuestion.name] = option;
-    }
-
-    const nextStep = step + 1;
-    if (nextStep >= questions.length) {
-        // All steps completed, redirect to browse (or results page)
-        return res.redirect("/results-search-form");
-    }
-
-    app.post("/register", uploads.single('profileImage'), processRegistration);
-}
-
-// Registration route with image upload
 
 function processForm(req, res) {
     const { option, stepIndex, } = req.body;
@@ -1011,6 +982,10 @@ app.get('/match', async (req, res) => {
                 score += 2;
                 reason.push("✅ Preferred gender");
             }
+            if (pet.age?.toLowerCase() === userAnswers.age?.toLowerCase()) {
+                score += 1;
+                reason.push("✅ Preferred age");
+            }
 
             if (pet.size?.toLowerCase() === userAnswers.size?.toLowerCase()) {
                 score += 2;
@@ -1022,7 +997,6 @@ app.get('/match', async (req, res) => {
                 reason.push("✅ Preferred coat type");
             }
 
-            // --- 5. TRAITS ---
             if (userAnswers.isHousetrained === 'true' && pet.attributes?.house_trained) {
                 score += 3;
                 reason.push("✅ Already housetrained");
@@ -1068,13 +1042,16 @@ app.get('/match', async (req, res) => {
             }
 
             // --- 6. CONFLICTS ---
-            if (pet.size === 'Large' && floor === 'upperfloor-without-elevator') {
+            if (pet.type === 'Dog' && pet.size === 'Small' && floor === 'upperfloor-without-elevator') {
                 score -= 3;
-                reason.push("⚠️ Large pet and no elevator — tough match");
+                reason.push("⚠️ Small pet and no elevator — tough match");
             }
 
             return { ...pet, matchScore: score, matchReasons: reason };
         });
+
+        
+        console.log("User selected age:", userAnswers.age);
 
 
         const bestMatches = scored

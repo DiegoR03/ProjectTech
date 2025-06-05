@@ -3,7 +3,7 @@
 
 :root {
     --primary-color: #90A5EC;
-    --primary-color-hover: #90A5EC;
+    --primary-color-hover: #6b7bac;
     --primary-color-2: #F47429;
     --primary-color-hover-2: #c05c23;
     --text-color: #333;
@@ -82,7 +82,7 @@ body>main>section>a:nth-of-type(1) {
 body>main>section>a:nth-of-type(1):hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  background-color: var(--primary-color-hover);
+  background-color: var(--primary-color-hover-2);
 
 }
 /* Filters ////////////////////////////////////////////////////////////////*/
@@ -396,4 +396,46 @@ body>main>section>a:nth-of-type(1):hover {
   font-size: 0.9rem;
   color: #555;
   margin: 0 0.5rem;
+}
+/* Hover animation for .card on browse page */
+.card {
+  position: relative;
+  border: 1px solid #ddd;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+  z-index: 0; /* Ensure stacking context */
+}
+
+.card::after,
+.card::before {
+  content: "";
+  position: absolute;
+  background-color: var(--primary-color-2);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.card::after {
+  height: 4px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.card::before {
+  width: 4px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+.card:hover::after {
+  transform: scaleX(1);
+}
+
+.card:hover::before {
+  transform: scaleY(1);
 }

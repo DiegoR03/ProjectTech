@@ -274,6 +274,70 @@ h3 {
 
 }
 
+/* Delete draft */
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.confirm-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 320px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-box h3 {
+  margin-top: 0;
+  color: var(--primary-color-2);
+}
+
+.confirm-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cancel-btn,
+.confirm-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #ccc;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background: #bbb;
+}
+
+.confirm-btn {
+  background: var(--primary-color-2);
+  color: white;
+}
+
+.confirm-btn:hover {
+  background: var(--primary-color-hover-2);
+}
+
+
 footer{
   bottom: 0;
 }
