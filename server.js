@@ -263,9 +263,6 @@ app
 
             req.session.favorites.unshift(petData);
 
-            // Limit to 5 
-            req.session.favorites = req.session.favorites.slice(0, 5);
-
             // Update MongoDB
             if (req.session.email) {
                 await users.updateOne(
