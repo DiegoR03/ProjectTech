@@ -12,7 +12,7 @@
 
 <body>
   <header>
-    <h1>PetLink</h1>
+    <h1>PetMatch</h1>
     <nav>
       <a href="/">Home</a>
       <a href="/browse" class="active">Browse</a>
@@ -88,6 +88,7 @@
       type: 'dog',
       size: 'medium',
       gender: 'male',
+      age: 'Young',
       isCastrated: 'false',
       coat: 'long',
       hasKids: 'true',
@@ -107,6 +108,7 @@
       type: 'Animal type',
       size: 'Size',
       gender: 'Gender',
+      age: 'Age',
       isCastrated: 'Castrated',
       coat: 'Coat type',
       hasKids: 'Has children',
@@ -123,7 +125,7 @@
     };
 
     const groupedAnswers = {
-      "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
+      "General Info": ['type', 'size', 'gender', 'age', 'isCastrated', 'coat'],
       "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
       "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
     };
@@ -135,6 +137,7 @@
       type: ['Dog', 'Cat', 'Rabbit'],
       size: ['Small', 'Medium', 'Large', 'No preference'],
       gender: ['Male', 'Female', 'No preference'],
+      age: ['Baby', 'Young', 'Adult', 'Senior', 'No preference'],
       isCastrated: ['true', 'false', 'No preference'],
       coat: ['Short', 'Medium', 'Long', 'No preference'],
       hasKids: ['true', 'false'],
@@ -262,43 +265,50 @@
 
 
 
-card.innerHTML = `
+          card.innerHTML = `
   <div class="card-image-section">
     <img src="${imgUrl}" alt="${pet.name}" />
   </div>
 
   <div class="card-content">
     <div class="card-info">
-  <h2>${pet.name} ${i === 0 ? '<span class="badge-top">⭐ Top Match</span>' : ''}</h2>
+      <h2>${pet.name} ${i === 0 ? '<span class="badge-top">⭐ Top Match</span>' : ''}</h2>
 
-  <div class="info-columns">
-    <div class="info-col">
-      <p><strong>Breed:</strong> ${pet.breeds.primary}${pet.breeds.secondary ? ' & ' + pet.breeds.secondary : ''}</p>
-      <p><strong>Age:</strong> ${pet.age}</p>
-      <p><strong>Gender:</strong> ${pet.gender}</p>
-      <p><strong>Size:</strong> ${pet.size}</p>
-      <p><strong>Coat:</strong> ${pet.coat || 'Unknown'}</p>
+      <div class="info-columns">
+        <div class="info-col">
+          <p><strong>Breed:</strong> ${pet.breeds.primary}${pet.breeds.secondary ? ' & ' + pet.breeds.secondary : ''}</p>
+          <p><strong>Age:</strong> ${pet.age}</p>
+          <p><strong>Gender:</strong> ${pet.gender}</p>
+          <p><strong>Size:</strong> ${pet.size}</p>
+          <p><strong>Coat:</strong> ${pet.coat || 'Unknown'}</p>
+        </div>
+        <div class="info-col">
+          <p><strong>Spayed/Neutered:</strong> ${pet.attributes?.spayed_neutered ? 'Yes' : 'No'}</p>
+          <p><strong>House Trained:</strong> ${pet.attributes?.house_trained ? 'Yes' : 'No'}</p>
+          <p><strong>Special Needs:</strong> ${pet.attributes?.special_needs ? 'Yes' : 'No'}</p>
+          <p><strong>Shots Current:</strong> ${pet.attributes?.shots_current ? 'Yes' : 'No'}</p>
+          <p><strong>Good with:</strong> 
+            ${pet.environment?.children ? 'Kids ' : ''}
+            ${pet.environment?.dogs ? 'Dogs ' : ''}
+            ${pet.environment?.cats ? 'Cats ' : ''}
+            ${!pet.environment?.children && !pet.environment?.dogs && !pet.environment?.cats ? 'None listed' : ''}
+          </p>
+        </div>
+      </div>
+
+      <!-- ✅ Tags moved here -->
+      ${pet.tags?.length
+              ? `<div class="tags">
+             <h4>Tags</h4>
+             <div class="tag-list">
+               ${pet.tags.map(tag => `<span class="tag-pill">${tag}</span>`).join('')}
+             </div>
+           </div>`
+              : `<div class="tags">
+             <h4>Tags</h4>
+             <p class="no-tags">No tags listed</p>
+           </div>`}
     </div>
-    <div class="info-col">
-      <p><strong>Spayed/Neutered:</strong> ${pet.attributes?.spayed_neutered ? 'Yes' : 'No'}</p>
-      <p><strong>House Trained:</strong> ${pet.attributes?.house_trained ? 'Yes' : 'No'}</p>
-      <p><strong>Special Needs:</strong> ${pet.attributes?.special_needs ? 'Yes' : 'No'}</p>
-      <p><strong>Shots Current:</strong> ${pet.attributes?.shots_current ? 'Yes' : 'No'}</p>
-      <p><strong>Good with:</strong> 
-        ${pet.environment?.children ? 'Kids ' : ''}
-        ${pet.environment?.dogs ? 'Dogs ' : ''}
-        ${pet.environment?.cats ? 'Cats ' : ''}
-        ${!pet.environment?.children && !pet.environment?.dogs && !pet.environment?.cats ? 'None listed' : ''}
-      </p>
-    </div>
-  </div>
-
-  <div class="card-buttons horizontal-buttons">
-    <a href="/detail/${pet.id}" class="viewDetail full-btn">View ➜</a>
-    <button class="favorite-button full-btn" onclick="saveFavorite('${pet.id}')">Save</button>
-  </div>
-</div>
-
 
     <div class="match-reasons">
       <h4>Match Analysis</h4>
@@ -311,33 +321,62 @@ card.innerHTML = `
         <p>${pet.description ? pet.description.slice(0, 500) : 'No description listed'}</p>
       </div>
 
-      ${pet.tags?.length
-  ? `<div class="tags">
-       <h4>Tags</h4>
-       <div class="tag-list">
-         ${pet.tags.map(tag => `<span class="tag-pill">${tag}</span>`).join('')}
-       </div>
-     </div>`
-  : `<div class="tags">
-       <h4>Tags</h4>
-       <p class="no-tags">No tags listed</p>
-     </div>`}
+      <!-- ✅ Buttons moved here -->
+      <div class="card-buttons horizontal-buttons">
+        <a href="/detail/${pet.id}" class="viewDetail full-btn">View ➜</a>
+        <button class="favorite-button full-btn" onclick="saveFavorite('${pet.id}')">Save</button>
+      </div>
+    </div>
+  </div>
 `;
+
+
 
           grid.appendChild(card);
         });
 
-        container.innerHTML = '';
+        container.innerHTML = '<h1>Your personal Top 10</h1>';
         container.appendChild(grid);
+        document.getElementById('results-and-buttons-container').style.display = 'block';
       } catch (err) {
         console.error(err);
         container.innerHTML = '<p>Something went wrong while finding matches.</p>';
       }
     }
 
-    function deleteAnswers(req, res) {
-      res.render("/browse")
+    function deleteAnswers() {
+      const confirmOverlay = document.createElement('div');
+      confirmOverlay.className = 'confirm-overlay';
+
+      confirmOverlay.innerHTML = `
+    <div class="confirm-box">
+      <h3>Are you sure?</h3>
+      <p>Your answers will be permanently deleted.</p>
+      <div class="confirm-actions">
+        <button class="cancel-btn">Cancel</button>
+        <button class="confirm-btn">Delete</button>
+      </div>
+    </div>
+  `;
+
+      document.body.appendChild(confirmOverlay);
+
+      // Event listeners
+      confirmOverlay.querySelector('.cancel-btn').addEventListener('click', () => {
+        confirmOverlay.remove();
+      });
+
+      confirmOverlay.querySelector('.confirm-btn').addEventListener('click', () => {
+        fetch('/wizard/reset', { method: 'POST' })
+          .then(() => window.location.href = '/browse')
+          .catch(err => {
+            console.error(err);
+            confirmOverlay.remove();
+            alert("Something went wrong while deleting your answers.");
+          });
+      });
     }
+
   </script>
 
 
