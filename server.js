@@ -23,6 +23,7 @@ const app = express();
 const session = require("express-session");
 const port = 3000;
 const multer = require("multer");
+
 const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
@@ -32,6 +33,36 @@ const uri = process.env.URI;
 const client = new MongoClient(uri);
 const db = client.db(process.env.DB_NAME);
 const userCollection = db.collection(process.env.USER_COLLECTION)
+const users = db.collection('users');
+
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+// Multer configuration
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "./uploads"); // Make sure this is a relative path
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+        cb(null, file.fieldname + '-' + uniqueSuffix);
+    }
+});
+
+// Initialize Multer
+const uploads = multer({
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype.startsWith("image/")) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only image files are allowed!"), false);
+        }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 let loggedIn = false;
 
@@ -71,6 +102,15 @@ app
         next();
     })
 
+    .use(session({
+        secret: 'your_secret_key',
+        resave: false,
+        saveUninitialized: true,
+        cookie: {
+            maxAge: 1000 * 60 * 60 * 24 // 1 day
+        }
+    }))
+
     .disable('x-powered-by')
 
     .set("view engine", "ejs")
@@ -78,7 +118,6 @@ app
 
     .get("/", loadHome)
     .get("/login", loadLogin)
-    .get("/register", loadRegistry)
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
 
@@ -87,6 +126,88 @@ app
         req.session.destroy();
         res.redirect("/login");
     })
+    .get('/account', async (req, res) => {
+        const userId = req.session.userID;
+        let recentlyViewed = [];
+
+        if (userId) {
+            const user = await userCollection.findOne({ _id: userId });
+
+            const now = Date.now();
+            // Filter out expired pets (older than 120 hours or with no tiem)
+            recentlyViewed = (user?.recentlyViewed || []).filter(p => now - p.timestamp < 120 * 60 * 60 * 1000);
+
+            // Update MongoDB 
+            await userCollection.updateOne(
+                { _id: userId },
+                { $set: { recentlyViewed } }
+            );
+
+            req.session.recentlyViewed = recentlyViewed;
+        }
+
+        res.render('account', {
+            recentlyViewed,
+            firstName: user?.firstName || '',
+            lastName: user?.lastName || '',
+            userStory: user?.userStory || '',
+            profileImage: user?.profileImage || '',
+            loggedIn: !!req.session.userID
+        });
+    })
+
+    .get('/detail/:id', async (req, res) => {
+        const petId = req.params.id;
+
+        try {
+            const token = await getPetfinderToken();
+            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            const pet = data.animal;
+            const now = Date.now();
+            if (!pet) throw new Error("Pet not found");
+
+            if (!req.session.recentlyViewed) req.session.recentlyViewed = [];
+
+            // Remove expired (older than 120hours or no time), or duplicates (if one animal is viewed multiple times)
+            req.session.recentlyViewed = req.session.recentlyViewed.filter(p => now - p.timestamp < 120 * 60 * 60 * 1000);
+            req.session.recentlyViewed = req.session.recentlyViewed.filter(p => p.id !== pet.id);
+
+            // Add new pet 
+            const petData = {
+                id: pet.id,
+                name: pet.name,
+                photo: pet.photos?.[0]?.medium || null,
+                gender: pet.gender,
+                breed: pet.breeds.primary,
+                timestamp: now
+            };
+
+            req.session.recentlyViewed.unshift(petData);
+
+            // Limit to 5 
+            req.session.recentlyViewed = req.session.recentlyViewed.slice(0, 5);
+
+            // Update MongoDB
+            if (req.session.email) {
+                await users.updateOne(
+                    { email: req.session.email },
+                    { $set: { recentlyViewed: req.session.recentlyViewed } }
+                );
+            }
+
+            res.render('detail', { pet });
+        } catch (err) {
+            console.error("Error in /detail route:", err);
+            res.status(500).send('Error fetching pet details.');
+        }
+    })
+
     .get("/detail/:id", loadDetail)
     .get("/fave", loadFave)
 
@@ -98,15 +219,11 @@ app
     .post("/account", changeStory)
     .post("/passwordchange", changePassword)
     .post("/searchForm", processForm)
+    .post("/register", uploads.single("fileInput"), processRegistration)
 
     .listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
     });
-
-
-
-
-
 
 // RENDERING VIEWS ///////////////////////////////////////////////////////////
 
@@ -122,12 +239,6 @@ function loadLogin(req, res) {
     res.render("login.ejs", { userID });
 }
 
-
-function loadRegistry(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
-    res.render("register.ejs", { userID });
-}
 
 function loadPasswordChange(req, res) {
     req.session.userID = 95234;
@@ -237,6 +348,7 @@ function loadSearchForm(req, res) {
         isLastStep,
         fieldName: step.name
     });
+
 }
 
 
@@ -249,6 +361,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 app.get("/account", ensureAuthenticated, loadAccount);
+
 
 function loadResultsSearchForm(req, res) {
     req.session.userID = 95234;
@@ -280,50 +393,25 @@ function loadRegistry(req, res) {
 async function processLogin(req, res) {
     const email = req.body.email;
     const password = req.body.password;
+
     try {
         const user = await userCollection.findOne({ email });
+
         if (user && await bcrypt.compare(password, user.password)) {
             req.session.userID = user._id;
-            loggedIn = true;
+            req.session.email = user.email;
+            req.session.firstName = user.firstName;
+            req.session.profileImage = user.profileImage || '/static/default.png';
+            req.session.userStory = user.story || '';
+            req.session.recentlyViewed = user.recentlyViewed || [];
+
             res.redirect("/account");
         } else {
-            loggedIn = false;
             res.render("login.ejs", { data: "Invalid credentials" });
         }
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).render("login", { data: "An error occurred during login." });
-
-
-        // Ensure the uploads directory exists
-        const uploadDir = path.join(__dirname, "uploads");
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir);
-        }
-
-        // Multer configuration
-        const storage = multer.diskStorage({
-            destination: function (req, file, cb) {
-                cb(null, "./uploads"); // Make sure this is a relative path
-            },
-            filename: function (req, file, cb) {
-                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
-                cb(null, file.fieldname + '-' + uniqueSuffix);
-            }
-        });
-
-        // Initialize Multer
-        const uploads = multer({
-            storage: storage,
-            fileFilter: function (req, file, cb) {
-                if (file.mimetype.startsWith("image/")) {
-                    cb(null, true);
-                } else {
-                    cb(new Error("Only image files are allowed!"), false);
-                }
-            },
-            limits: { fileSize: 5 * 1024 * 1024 }
-        });
         
         app.post("/register", uploads.single('profileImage'), processRegistration);
     }
@@ -353,6 +441,35 @@ function processForm(req, res) {
         // All steps completed, redirect to browse (or results page)
         return res.redirect("/results-search-form");
     }
+
+    app.post("/register", uploads.single('profileImage'), processRegistration);
+}
+
+// Registration route with image upload
+
+function processForm(req, res) {
+    const { option, stepIndex, } = req.body;
+    const step = parseInt(stepIndex);
+
+    if (!req.session.answers) {
+        req.session.answers = {};
+    }
+
+    // Load questions
+    const { questions, questionLabels } = require('./static/js/search-form');
+    const currentQuestion = questions[step];
+
+    if (currentQuestion && currentQuestion.name) {
+        // Save the answer using the field name as key
+        req.session.answers[currentQuestion.name] = option;
+    }
+
+    const nextStep = step + 1;
+    if (nextStep >= questions.length) {
+        // All steps completed, redirect to browse (or results page)
+        return res.redirect("/results-search-form");
+    }
+
 
     res.redirect(`/searchForm?stepIndex=${nextStep}`);
 };
@@ -392,7 +509,8 @@ async function processRegistration(req, res) {
             let profileImagePath = null;
             if (req.file) {
                 const inputPath = req.file.path;
-                const outputPath = path.join("uploads", "square-" + req.file.filename);
+
+                const outputPath = path.join("uploads/", "square-" + req.file.filename);
 
                 await sharp(inputPath)
                     .resize(800, 800, {
@@ -422,7 +540,10 @@ async function processRegistration(req, res) {
                 email: email.trim(),
                 password: hashedPassword,
                 profileImage: profileImagePath,
-                userStory: "A short story about you"
+
+                userStory: "A short story about you",
+
+
             };
 
             await userCollection.insertOne(newUser);
@@ -452,9 +573,6 @@ async function changePassword(req, res) {
 
         if (existingemail && newpassword == confirmpassword) {
             console.log("Password is changed");
-            userCollection.updateOne({ email: email }, { $set: { password: newpassword } })
-
-
             userCollection.updateOne({ email: email }, { $set: { password: hashedNewPassword } })
             console.log(existingemail);
             res.redirect("/login");
@@ -481,40 +599,61 @@ async function loadAccount(req, res) {
         return;
     }
 
+
     try {
         const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
         if (!user) {
             return res.status(404).render("account.ejs", { error: "User not found." });
-        }
-        else {
+        } else {
+            // Get recently viewed pets from session
+            const recentlyViewed = req.session.recentlyViewed || [];
             res.render("account.ejs", {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
                 profileImage: user.profileImage,
-                userStory: user.userStory
+                userStory: user.userStory,
+                recentlyViewed: req.session.recentlyViewed || []
             });
         }
-
-
     } catch (error) {
         console.error("Error loading account:", error);
-        res.status(500).redirect("account.ejs", { error: "An error occurred while loading your account." });
+        res.status(500).render("account.ejs", { error: "An error occurred while loading your account." });
     }
 }
+
+app.get('/test-session', (req, res) => {
+    if (!req.session.counter) req.session.counter = 0;
+    req.session.counter++;
+    res.send(`Session counter: ${req.session.counter}`);
+});
+
 
 async function changeStory(req, res) {
     try {
         const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
         const email = user.email;
-        const newstory = req.body.story;
-        const existingemail = await userCollection.findOne({ email });
 
-        if (existingemail) {
+        const newfirstname = req.body.firstName;
+        const newlastname = req.body.lastName;
+        const newstory = req.body.story;
+
+        if (user) {
             console.log("Story is changed");
-            userCollection.updateOne({ email: email }, { $set: { userStory: newstory } })
+            userCollection.updateOne(
+                { email: email },
+                {
+                    $set: {
+                        firstName: newfirstname,
+                        lastName: newlastname,
+                        userStory: newstory
+                    }
+                }
+            );
+            console.log(email);
             console.log(newstory);
             res.redirect("/account");
+            return;
         }
 
     } catch (error) {
@@ -686,3 +825,196 @@ async function loadBrowse(req, res) {
         });
     }
 }
+app.get('/match', async (req, res) => {
+    const userAnswers = req.session.answers;
+    if (!userAnswers || Object.keys(userAnswers).length === 0) {
+        return res.status(400).json({ error: "No answers found in session." });
+    }
+
+    try {
+        const token = await getPetfinderToken();
+        const url = `https://api.petfinder.com/v2/animals?limit=100&type=${userAnswers.type || 'dog'}`;
+
+        const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+
+        const data = await response.json();
+        const animals = data.animals || [];
+        // Normalize 'Yes'/'No' to 'true'/'false'
+        for (let key in userAnswers) {
+            if (userAnswers[key] === 'Yes') userAnswers[key] = 'true';
+            if (userAnswers[key] === 'No') userAnswers[key] = 'false';
+        }
+
+        const scored = animals.map(pet => {
+            let score = 0;
+            let reason = [];
+            const hasGarden = userAnswers.hasGarden === 'true';
+            const isActive = userAnswers.activity === 'true';
+            const isOftenAlone = userAnswers.isAloneOften === 'true';
+            const floor = userAnswers.floor; // groundfloor / upperfloor-with-elevator / upperfloor-without-elevator
+
+            // --- 1. ENVIRONMENT DEALBREAKERS ---
+            if (userAnswers.hasKids === 'true') {
+                if (pet.environment?.children === false) {
+                    score -= 10;
+                    reason.push("⚠️ Not suitable for kids");
+                } else if (pet.environment?.children === true) {
+                    score += 2;
+                    reason.push("✅ Good with children");
+                }
+            }
+
+            if (userAnswers.hasDogs === 'true') {
+                if (pet.environment?.dogs === false) {
+                    score -= 5;
+                    reason.push("⚠️ Not dog-friendly");
+                } else if (pet.environment?.dogs === true) {
+                    score += 2;
+                    reason.push("✅ Gets along with other dogs");
+                }
+            }
+
+            if (userAnswers.hasCats === 'true') {
+                if (pet.environment?.cats === false) {
+                    score -= 5;
+                    reason.push("⚠️ Not cat-friendly");
+                } else if (pet.environment?.cats === true) {
+                    score += 2;
+                    reason.push("✅ Gets along with cats");
+                }
+            }
+
+            // --- 2. POSITIVE ENVIRONMENT SYNERGIES ---
+            if (pet.size === 'Large' && hasGarden && isActive) {
+                score += 6;
+                reason.push("✅ Perfect fit: large active dog + garden");
+            }
+
+            if (pet.size === 'Large' && floor === 'groundfloor') {
+                score += 3;
+                reason.push("✅ Large pet and ground floor — easy access");
+            }
+
+            if (pet.size === 'Medium' && floor === 'upperfloor-without-elevator') {
+                score += 3;
+                reason.push("✅ Medium sized pet — easy in stairs");
+            }
+
+            if (pet.size === 'Small' && floor === 'upperfloor-without-elevator') {
+                score -= 3;
+                reason.push("⚠️ Small pet and no elevator — tough match");
+            }
+
+
+            if (hasGarden) {
+                score += 2;
+                reason.push("✅ Garden provides outdoor space");
+            }
+
+            if (!hasGarden && pet.size === 'Small') {
+                score += 2;
+                reason.push("✅ Small dog is fine without garden");
+            }
+
+            // --- 3. LIFESTYLE MATCH ---
+            if (isOftenAlone && pet.tags?.includes('Independent')) {
+                score += 4;
+                reason.push("✅ Independent pet for alone household");
+            }
+
+            if (!isOftenAlone && pet.description?.toLowerCase().includes('attention')) {
+                score += 3;
+                reason.push("✅ Pet needs attention and you're often home");
+            }
+
+            if (isOftenAlone && pet.description?.toLowerCase().includes('attention')) {
+                score -= 3;
+                reason.push("⚠️ Needs attention but owner away often");
+            }
+
+            // --- 4. USER PREFERENCES ---
+            if (pet.gender?.toLowerCase() === userAnswers.gender?.toLowerCase()) {
+                score += 2;
+                reason.push("✅ Preferred gender");
+            }
+
+            if (pet.size?.toLowerCase() === userAnswers.size?.toLowerCase()) {
+                score += 2;
+                reason.push("✅ Preferred size");
+            }
+
+            if (pet.coat?.toLowerCase() === userAnswers.coat?.toLowerCase()) {
+                score += 1;
+                reason.push("✅ Preferred coat type");
+            }
+
+            // --- 5. TRAITS ---
+            if (userAnswers.isHousetrained === 'true' && pet.attributes?.house_trained) {
+                score += 3;
+                reason.push("✅ Already housetrained");
+            }
+
+            if (userAnswers.isCastrated === 'true' && pet.attributes?.spayed_neutered) {
+                score += 1;
+                reason.push("✅ Castrated/neutered");
+            }
+
+            const description = pet.description?.toLowerCase() || "";
+            const tags = pet.tags?.map(t => t.toLowerCase()) || [];
+
+            // Match "playful" personality
+            if (userAnswers.isPlayful === 'true') {
+                if (
+                    description.includes('play') ||
+                    tags.includes('playful') ||
+                    tags.includes('energetic') ||
+                    tags.includes('active')
+                ) {
+                    score += 2;
+                    reason.push("✅ Playful match");
+                } else {
+                    reason.push("ℹ️ Might not be very playful");
+                }
+            }
+
+            // Match "friendly with strangers"
+            if (userAnswers.isComfystrangers === 'true') {
+                if (
+                    description.includes('friendly') ||
+                    tags.includes('friendly') ||
+                    tags.includes('social') ||
+                    tags.includes('affectionate') ||
+                    tags.includes('outgoing')
+                ) {
+                    score += 2;
+                    reason.push("✅ Friendly with strangers");
+                } else {
+                    reason.push("ℹ️ May be shy with strangers");
+                }
+            }
+
+            // --- 6. CONFLICTS ---
+            if (pet.size === 'Large' && floor === 'upperfloor-without-elevator') {
+                score -= 3;
+                reason.push("⚠️ Large pet and no elevator — tough match");
+            }
+
+            return { ...pet, matchScore: score, matchReasons: reason };
+        });
+
+
+        const bestMatches = scored
+            .filter(p => p.photos && p.photos.length > 0)
+            .sort((a, b) => b.matchScore - a.matchScore)
+            .slice(0, 10);
+
+        res.json(bestMatches);
+
+    } catch (error) {
+        console.error("Matching failed:", error);
+        res.status(500).json({ error: "Matching failed." });
+    }
+});

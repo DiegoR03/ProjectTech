@@ -4,10 +4,12 @@
 :root {
     --primary-color: #90A5EC;
     --primary-color-hover: #90A5EC;
+    --primary-color-2: #F47429;
+    --primary-color-hover-2: #c05c23;
     --text-color: #333;
     --background-color: #f2f2f2;
     --footer-text: #8E8E8E;
-    --active-filters: #46c0975a;
+    --active-filters: #c6cff0;
   }
 
 
@@ -46,7 +48,7 @@ main {
   position: absolute;
   top: 12%;
   left: 6%;
-  width: 37%;
+  width: 19%;
 
   z-index: 10;
 }
@@ -59,7 +61,7 @@ section {
 
 body>main>section>p:nth-of-type(1) {
   text-align: center;
-  margin-top: 6em;
+  margin-top: 8em;
   margin-bottom: 2em;
   max-width: 55%;
 }
@@ -67,12 +69,14 @@ body>main>section>p:nth-of-type(1) {
 body>main>section>a:nth-of-type(1) {
   text-align: center;
   display: inline-block;
+  
   padding: 1rem;
   margin: 1em auto;
-  background-color: var(--primary-color);
+  background-color: var(--primary-color-2);
   color: var(--white);
   border-radius: 12px;
   text-decoration: none;
+
 }
 
 body>main>section>a:nth-of-type(1):hover {
@@ -109,20 +113,18 @@ body>main>section>a:nth-of-type(1):hover {
   border: 1px solid #ccc;
   min-width: 120px;
   margin-top: 1em;
-
-  appearance: none;           /* Remove default styling */
+  appearance: none;           
   -webkit-appearance: none;   
   -moz-appearance: none;      
   padding: 0.5rem 2rem 0.5rem 0.5rem;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background-image: url("data:image/svg+xml;utf8,<svg fill='%2346c098' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23c08aff' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
   background-repeat: no-repeat;
   background-position: right 0.5rem center;
   background-size: 1rem;
   min-width: 120px;
   cursor: pointer;
-
 }
 
 .filters button {
@@ -340,7 +342,7 @@ body>main>section>a:nth-of-type(1):hover {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: var(--primary-color);
+  color: var(--primary-color-2);
 }
 
 .pet-gender {
