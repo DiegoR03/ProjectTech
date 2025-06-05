@@ -1,7 +1,73 @@
 @import url(style.css);
 
-main{
+main {
+    margin-top: 7em;
+}
+
+section {
     display: grid;
-    grid-template-columns:repeat(4, 1fr);
-    grid-gap:1em;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto;
+    grid-gap: 1.5em;
+    background-color: white;
+    border-radius: 1.25em;
+    margin: 8em 2em 2em; /* give space for header */
+    padding: 2em;
+}
+
+section img{
+    grid-column:1/3;
+    grid-row:2/5;
+    width: 100%;
+    height: 28.125em;
+    object-fit: cover;
+    border-radius: 1.25em;
+}
+
+h2{
+    color: var(--primary-color-action);
+    font-size: 2.5em;
+}
+
+.text-content{
+    grid-column: 3/-1;
+    grid-row-start: 2;
+    gap: 0.5em;
+}
+
+.traits-list{
+    grid-column: 1/-1;
+    display: flex;
+    gap: 2em;
+    margin-top: 2em;
+}
+
+.traits-list a {
+    text-align: center;
+    color: white;
+    background-color: var(--primary-color);
+    padding: 1rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.traits-list a:hover {
+    color: var(--primary-color);
+    background-color: white;
+    border: 2px solid var(--primary-color);
+}
+
+.traits-list li{
+    list-style: none;
+}
+
+.extra-traits li{
+    list-style: none;
+}
+
+.extra-traits{
+    grid-row-start: 6;
+    grid-column: 1/-1;
 }
