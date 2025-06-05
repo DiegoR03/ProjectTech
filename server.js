@@ -118,7 +118,6 @@ app
 
     .get("/", loadHome)
     .get("/login", loadLogin)
-    .get("/register", loadRegistry)
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
 
@@ -247,7 +246,7 @@ function loadPasswordChange(req, res) {
     res.render("passwordchange.ejs", { userID });
 }
 
-//Detail pgina///////////////////////////////////////////////////////////////////////
+//Detail page///////////////////////////////////////////////////////////////////////
 async function loadDetail(req, res) {
     const petId = req.params.id;
     const userID = req.session.userID || 95234;
@@ -414,6 +413,37 @@ async function processLogin(req, res) {
         console.error("Error during login:", error);
         res.status(500).render("login", { data: "An error occurred during login." });
 
+
+        // Ensure the uploads directory exists
+        const uploadDir = path.join(__dirname, "uploads");
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir);
+        }
+
+        // Multer configuration
+        const storage = multer.diskStorage({
+            destination: function (req, file, cb) {
+                cb(null, "./uploads"); // Make sure this is a relative path
+            },
+            filename: function (req, file, cb) {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+                cb(null, file.fieldname + '-' + uniqueSuffix);
+            }
+        });
+
+        // Initialize Multer
+        const uploads = multer({
+            storage: storage,
+            fileFilter: function (req, file, cb) {
+                if (file.mimetype.startsWith("image/")) {
+                    cb(null, true);
+                } else {
+                    cb(new Error("Only image files are allowed!"), false);
+                }
+            },
+            limits: { fileSize: 5 * 1024 * 1024 }
+        });
+        
         app.post("/register", uploads.single('profileImage'), processRegistration);
     }
 }

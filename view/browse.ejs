@@ -204,8 +204,6 @@
     <% } else { %>
       <p>No results found.</p>
       <% } %>
-
-
         <% if (error) { %>
           <p class="error">
             <%= error %>
@@ -226,6 +224,7 @@
                               <div class="pet-name">
                                 <%= pet.name %>
                               </div>
+
                               <div class="pet-gender">
                                 <%= pet.gender %>
                               </div>
@@ -233,7 +232,7 @@
                                 <%= pet.breeds.primary %>
                               </div>
                             </div>
-
+                              
                             <div class="card-links">
                               <a href="/fave?id=<%= pet.id %>" class="favorite">&#x2661;</a>
                               <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
