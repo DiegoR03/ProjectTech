@@ -97,28 +97,28 @@ app
     )
 
     .use(async (req, res, next) => {
-    try {
-        if (req.session.userID) {
-            const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+        try {
+            if (req.session.userID) {
+                const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
 
-            if (user) {
-                res.locals.currentUser = {
-                    firstName: user.firstName,
-                    profileImage: user.profileImage
-                };
+                if (user) {
+                    res.locals.currentUser = {
+                        firstName: user.firstName,
+                        profileImage: user.profileImage
+                    };
+                } else {
+                    res.locals.currentUser = null;
+                }
             } else {
                 res.locals.currentUser = null;
             }
-        } else {
+        } catch (err) {
+            console.error('Error loading user info for views:', err);
             res.locals.currentUser = null;
         }
-    } catch (err) {
-        console.error('Error loading user info for views:', err);
-        res.locals.currentUser = null;
-    }
 
-    next();
-})
+        next();
+    })
 
     .use(helmet({
         contentSecurityPolicy: false,
@@ -140,6 +140,7 @@ app
     .get("/login", loadLogin)
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
+    .get("/index", loadHome)
 
     .get("/account", loadAccount)
     .get("/logout", (req, res) => {
@@ -194,6 +195,7 @@ app
             const data = await response.json();
             const pet = data.animal;
             const now = Date.now();
+
             if (!pet) throw new Error("Pet not found");
 
             if (!req.session.recentlyViewed) req.session.recentlyViewed = [];
@@ -1050,7 +1052,7 @@ app.get('/match', async (req, res) => {
             return { ...pet, matchScore: score, matchReasons: reason };
         });
 
-        
+
         console.log("User selected age:", userAnswers.age);
 
 

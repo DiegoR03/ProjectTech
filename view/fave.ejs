@@ -12,6 +12,7 @@
         <h1>PetMatch</h1>
         <nav>
         <% if (currentUser) { %>
+            <a href="/index">Home</a>
             <a href="/browse">Browse</a>
             <a href="/favourites">Notifications</a>
             <div class="dropdown">
@@ -23,6 +24,7 @@
                 </div>
             </div>
             <% } else { %>
+                <a href="/index">Home</a>
                 <a href="/browse">Browse Pets</a>
                 <a href="/login">Favourites</a>
                 <a href="/login">Login</a>

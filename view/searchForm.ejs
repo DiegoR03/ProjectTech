@@ -13,11 +13,25 @@
     <header>
         <h1>PetMatch</h1>
         <nav>
-            <a href="/">Home</a>
-            <a href="/browse" class="active">Browse</a>
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
-        </nav>
+      <% if (currentUser) { %>
+        <a href="/index">Home</a>
+        <a href="/browse" class="active">Browse</a>
+        <a href="/favourites">Notifications</a>
+        <div class="dropdown">
+          <button class="dropbtn"><img src="<%= currentUser?.profileImage%>" alt="Profile Image"></button>
+          <div id="myDropdown" class="dropdown-content">
+            <p>Hi <%= currentUser?.firstName %>!</p>
+            <a href="/account">Account</a>
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+        <% } else { %>
+          <a href="/index">Home</a>
+          <a href="/browse">Browse Pets</a>
+          <a href="/login">Favourites</a>
+          <a href="/login">Login</a>
+          <% } %>
+    </nav>
     </header>
     <main>
     <!-- Go back knop -->
