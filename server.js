@@ -135,7 +135,7 @@ function loadPasswordChange(req, res) {
     res.render("passwordchange.ejs", { userID });
 }
 
-//Detail pgina///////////////////////////////////////////////////////////////////////
+//Detail page///////////////////////////////////////////////////////////////////////
 async function loadDetail(req, res) {
     const petId = req.params.id;
     const userID = req.session.userID || 95234;
