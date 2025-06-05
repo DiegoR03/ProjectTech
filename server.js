@@ -676,33 +676,32 @@ app.get('/test-session', (req, res) => {
 async function changeStory(req, res) {
     try {
         const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+        if (!user) return res.status(404).send("User not found");
+
         const email = user.email;
 
-        const newfirstname = req.body.firstName;
-        const newlastname = req.body.lastName;
-        const newstory = req.body.story;
+        const fieldsToUpdate = ['firstName', 'lastName', 'userStory'];
+        const updates = {};
 
-        if (user) {
-            console.log("Story is changed");
-            userCollection.updateOne(
-                { email: email },
-                {
-                    $set: {
-                        firstName: newfirstname,
-                        lastName: newlastname,
-                        userStory: newstory
-                    }
-                }
-            );
-            console.log(email);
-            console.log(newstory);
-            res.redirect("/account");
-            return;
+        for (const field of fieldsToUpdate) {
+            const newValue = req.body[field];
+            if (newValue !== undefined && newValue.trim() !== "" && newValue !== user[field]) {
+                updates[field] = newValue;
+            }
         }
 
+        if (Object.keys(updates).length > 0) {
+            await userCollection.updateOne({ email: email }, { $set: updates });
+            console.log("Updated fields:", updates);
+        } else {
+            console.log("No changes detected.");
+        }
+
+        res.redirect("/account");
+
     } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).redirect("login", { data: "An error occurred during change." });
+        console.error("Error during update:", error);
+        res.status(500).redirect("/login");
     }
 }
 

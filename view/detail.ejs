@@ -57,7 +57,7 @@
           <li><a href="#">
               <%= pet.species %>
             </a></li>
-          <li><a href="#" class="like">&#x2661;</a></li>
+          <li><a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a></li>
         </ul>
         <div class="text-content">
           <h2>
@@ -74,45 +74,45 @@
         </div>
         <ul class="extra-traits">
           <!-- Good with children -->
-          <% if (pet.good_with_children===true) { %>
+          <% if (pet.environment?.children===true) { %>
             <li>Good with children</li>
-            <% } else if (pet.good_with_children===false) { %>
+            <% } else if (pet.environment?.children===false) { %>
               <li>Not good with children</li>
               <% } else { %>
                 <li>Compatibility with children unknown</li>
                 <% } %>
 
                   <!-- Good with dogs -->
-                  <% if (pet.good_with_dogs===true) { %>
+                  <% if (pet.environment?.dogs===true) { %>
                     <li>Good with dogs</li>
-                    <% } else if (pet.good_with_dogs===false) { %>
+                    <% } else if (pet.environment?.dogs===false) { %>
                       <li>Not good with dogs</li>
                       <% } else { %>
                         <li>Compatibility with dogs unknown</li>
                         <% } %>
 
                           <!-- Good with cats -->
-                          <% if (pet.good_with_cats===true) { %>
+                          <% if (pet.environment?.cats===true) { %>
                             <li>Good with cats</li>
-                            <% } else if (pet.good_with_cats===false) { %>
+                            <% } else if (pet.environment?.cats===false) { %>
                               <li>Not good with cats</li>
                               <% } else { %>
                                 <li>Compatibility with cats unknown</li>
                                 <% } %>
 
                                   <!-- House trained -->
-                                  <% if (pet.house_trained===true) { %>
+                                  <% if (pet.attributes?.house_trained===true) { %>
                                     <li>House trained</li>
-                                    <% } else if (pet.house_trained===false) { %>
+                                    <% } else if (pet.attributes?.house_trained===false) { %>
                                       <li>Not house trained</li>
                                       <% } else { %>
                                         <li>House training unknown</li>
                                         <% } %>
 
                                           <!-- Vaccinations -->
-                                          <% if (pet.shots_current===true) { %>
+                                          <% if (pet.attributes?.shots_current ===true) { %>
                                             <li>Vaccinations up to date</li>
-                                            <% } else if (pet.shots_current===false) { %>
+                                            <% } else if (pet.attributes?.shots_current ===false) { %>
                                               <li>Vaccinations not up to date</li>
                                               <% } else { %>
                                                 <li>Vaccination status unknown</li>
