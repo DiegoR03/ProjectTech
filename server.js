@@ -89,8 +89,37 @@ app
             saveUninitialized: true,
 
             secret: process.env.SESSION_SECRET,
+
+            cookie: {
+                maxAge: 1000 * 60 * 60 * 24 // 1 day
+            }
         }),
     )
+
+    .use(async (req, res, next) => {
+    try {
+        if (req.session.userID) {
+            const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+
+            if (user) {
+                res.locals.currentUser = {
+                    firstName: user.firstName,
+                    profileImage: user.profileImage
+                };
+            } else {
+                res.locals.currentUser = null;
+            }
+        } else {
+            res.locals.currentUser = null;
+        }
+    } catch (err) {
+        console.error('Error loading user info for views:', err);
+        res.locals.currentUser = null;
+    }
+
+    next();
+})
+
     .use(helmet({
         contentSecurityPolicy: false,
         xDownloadOptions: false,
@@ -101,15 +130,6 @@ app
         res.locals.loggedIn = req.session.userID ? true : false;
         next();
     })
-
-    .use(session({
-        secret: 'your_secret_key',
-        resave: false,
-        saveUninitialized: true,
-        cookie: {
-            maxAge: 1000 * 60 * 60 * 24 // 1 day
-        }
-    }))
 
     .disable('x-powered-by')
 
@@ -126,9 +146,11 @@ app
         req.session.destroy();
         res.redirect("/login");
     })
+
     .get('/account', async (req, res) => {
         const userId = req.session.userID;
         let recentlyViewed = [];
+        let favorites = [];
 
         if (userId) {
             const user = await userCollection.findOne({ _id: userId });
@@ -140,10 +162,11 @@ app
             // Update MongoDB 
             await userCollection.updateOne(
                 { _id: userId },
-                { $set: { recentlyViewed } }
+                { $set: { recentlyViewed, favorites } }
             );
 
             req.session.recentlyViewed = recentlyViewed;
+            req.session.favorites = favorites;
         }
 
         res.render('account', {
@@ -152,7 +175,8 @@ app
             lastName: user?.lastName || '',
             userStory: user?.userStory || '',
             profileImage: user?.profileImage || '',
-            loggedIn: !!req.session.userID
+            loggedIn: !!req.session.userID,
+            favorites: user?.favorites || []
         });
     })
 
@@ -209,7 +233,52 @@ app
     })
 
     .get("/detail/:id", loadDetail)
-    .get("/fave", loadFave)
+    .get('/fave/:id', async (req, res) => {
+        const petId = req.params.id;
+
+        try {
+            const token = await getPetfinderToken();
+            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            const pet = data.animal;
+            if (!pet) throw new Error("Pet not found");
+
+            if (!req.session.favorites) req.session.favorites = [];
+
+            // Add new pet 
+            const petData = {
+                id: pet.id,
+                name: pet.name,
+                photo: pet.photos?.[0]?.medium || null,
+                gender: pet.gender,
+                breed: pet.breeds.primary
+            };
+
+            req.session.favorites.unshift(petData);
+
+            // Limit to 5 
+            req.session.favorites = req.session.favorites.slice(0, 5);
+
+            // Update MongoDB
+            if (req.session.email) {
+                await users.updateOne(
+                    { email: req.session.email },
+                    { $set: { favorites: req.session.favorites } }
+                );
+            }
+
+            res.render('detail', { pet });
+        } catch (err) {
+            console.error("Error in /detail route:", err);
+            res.status(500).send('Error fetching pet details.');
+        }
+    })
+    .get("/fave/:id", loadFave)
 
     .get("/searchForm", loadSearchForm)
     .get("/results-search-form", loadResultsSearchForm)
@@ -404,6 +473,7 @@ async function processLogin(req, res) {
             req.session.profileImage = user.profileImage || '/static/default.png';
             req.session.userStory = user.story || '';
             req.session.recentlyViewed = user.recentlyViewed || [];
+            req.session.favorites = user.favorites || []
 
             res.redirect("/account");
         } else {
@@ -412,7 +482,7 @@ async function processLogin(req, res) {
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).render("login", { data: "An error occurred during login." });
-        
+
         app.post("/register", uploads.single('profileImage'), processRegistration);
     }
 }
@@ -613,7 +683,8 @@ async function loadAccount(req, res) {
                 email: user.email,
                 profileImage: user.profileImage,
                 userStory: user.userStory,
-                recentlyViewed: req.session.recentlyViewed || []
+                recentlyViewed: req.session.recentlyViewed || [],
+                favorites: user.favorites || []
             });
         }
     } catch (error) {
@@ -689,7 +760,7 @@ async function loadBrowse(req, res) {
 
         res.locals.isFetching = true; // Set flag before API call
         const token = await getPetfinderToken();
-        const petsPerPage = 8;
+        const petsPerPage = 9;
         const page = parseInt(req.query.page) || 1;
 
         const allowedFilters = [

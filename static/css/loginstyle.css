@@ -4,18 +4,6 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-#navLogin {
-    position: absolute;
-}
-
-
-#navLogin nav a.active,
-#navLogin nav a:hover {
-    background-color: #bde9fd;
-    color: black;
-    border-radius: 1rem;
-}
-
 /* LOGIN AND REGISTER PAGES */
 #loginPage,
 #registerPage,

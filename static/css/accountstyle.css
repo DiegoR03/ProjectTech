@@ -1,9 +1,10 @@
 :root {
-  --primary-color: #46c098;
-  --primary-color-hover: #3da885;
-  --button-text-color: #ffffff;
-  --button-select-color: #ffffff;
-  --active-filters: #46c0975a;
+    --primary-color: #46c098;
+    --primary-color-hover: #3da885;
+    --button-text-color: #ffffff;
+    --button-select-color: #ffffff;
+    --active-filters: #46c0975a;
+    --background-box: #ffffff;
 }
 
 #accountNav {
@@ -15,19 +16,19 @@
     padding-top: 5rem;
 }
 
-#accountNav h2{
+#accountNav h2 {
     color: var(--button-text-color);
     padding: 0 2rem;
 }
 
-#accountNav div{
+#accountNav div {
     display: flex;
     justify-content: flex-start;
     position: sticky;
     padding: 0 1rem;
 }
 
-#accountNav div button{
+#accountNav div button {
     width: auto;
     height: auto;
     padding: 0.7rem 1.5rem;
@@ -37,7 +38,7 @@
     border-style: none;
 }
 
-#accountNav div button.active-button{
+#accountNav div button.active-button {
     color: var(--text-color);
     background-color: var(--button-select-color);
     border-radius: 2rem;
@@ -48,24 +49,34 @@
     grid-template-columns: 50% 50%;
 }
 
-#myInfo img{
+#myInfo #profileImg {
     position: relative;
-    margin: auto;
-    width: 30vw;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5rem;
+    align-self: start;
+    width: 25vw;
     height: auto;
-    top: 2.5rem;
     text-align: center;
     border-radius: 50%;
     box-shadow: #b8b8b8 4px 4px 10px;
 }
 
-#myInfo fieldset{
+#myInfo fieldset {
     position: relative;
     border-style: none;
-    top: 2rem;
+    background-color: var(--background-box);
+    border-radius: 1rem;
+    padding: 1rem;
+    width: 45vw;
+
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2rem;
+    align-self: start;
 }
 
-#myInfo #onlyView form{
+#myInfo #onlyView form {
     position: relative;
     display: inline-block;
     top: 2rem;
@@ -73,7 +84,7 @@
     width: 45vw;
 }
 
-#myInfo #canEdit form{
+#myInfo #canEdit form {
     position: relative;
     display: inline-block;
     top: 4rem;
@@ -84,8 +95,6 @@
 #myInfo fieldset label {
     font-size: 1.4rem;
     font-weight: bold;
-    margin-top: 1rem;
-    width: 80%;
 }
 
 #myInfo #canEdit label {
@@ -94,31 +103,27 @@
     font-weight: bold;
 }
 
-#myInfo fieldset p {
-    font-size: 1.2rem;
-    padding-left: 1rem;
-}
-
-#myInfo form textarea{
+#myInfo form textarea {
     display: inline-block;
     border-radius: 0.5rem;
     border-style: none;
-    width: 40vw;
-    height: 10vh;
+    width: 35vw;
+    height: 8vh;
     margin-top: 1rem;
     margin-bottom: 1rem;
 }
 
-#myInfo input[disabled]{
+#myInfo input[disabled] {
     color: var(--text-color);
     border: none;
     background-color: transparent;
+    font: inherit;
 }
 
-#myInfo input{
+#myInfo input {
     position: relative;
-    width:min-content;
-    padding: 0.8em;
+    width: min-content;
+    margin-top: 0.8rem;
     border-radius: 0.6em;
     font-size: 1rem;
     border: 1px solid #ccc;
@@ -126,7 +131,7 @@
     color: #000000;
 }
 
-#myInfo input[type=submit]{
+#myInfo input[type=submit] {
     width: auto;
     height: auto;
     text-decoration: inherit;
@@ -138,7 +143,7 @@
     box-shadow: #000000 1px 1px 3px;
 }
 
-#editProfile{
+#editProfile {
     position: relative;
     top: -2rem;
     right: -22rem;
@@ -149,15 +154,18 @@
 }
 
 .toggle-section {
-  display: none; /* All hidden by default */
+    display: none;
+    /* All hidden by default */
 }
 
-.toggleEdit{
+.toggleEdit {
     display: none;
 }
 
 #editProfileBtn {
-    margin-left: 20rem;
+    position: absolute;
+    margin-right: 1rem;
+    right: 0;
     color: var(--text-color);
     background-color: white;
     border: 2px solid var(--text-color);
@@ -166,36 +174,54 @@
     cursor: pointer;
 }
 
-#recentlyViewed{
+#recentlyViewed {
     justify-content: left;
     align-items: start;
     padding-left: 2rem;
 }
- 
-  .recently-viewed {
+
+.recently-viewed,
+.favorites-section {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-  }
+    padding-top: 1rem;
+}
 
-  .pet-card {
+.pet-card, .favorite {
     border: 1px solid #ccc;
-    border-radius: 8px;
     width: 15.4rem;
-    height: 25rem;
+    border-radius: 8px;
     padding: 1rem;
     text-align: center;
     background-color: #f9f9f9;
-  }
+}
 
-  .pet-card img {
+.pet-card {
+    height: 25rem;
+}
+
+.favorite {
+    height: 20rem;
+}
+
+.pet-card img, .favorite img {
     width: 15rem;
     height: 15rem;
     border-radius: 6px;
     object-fit: cover;
-  }
+}
 
-  .no-photo {
+.pet-card p, .favorite p {
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.pet-card h3, .favorite h3 {
+    color: var(--text-color);
+}
+
+.no-photo {
     width: 100%;
     height: 150px;
     background-color: #ddd;
@@ -203,4 +229,4 @@
     align-items: center;
     justify-content: center;
     color: #666;
-  }
+}
