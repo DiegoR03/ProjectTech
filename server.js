@@ -207,7 +207,7 @@ app
             res.status(500).send('Error fetching pet details.');
         }
     })
-
+    
     .get("/detail/:id", loadDetail)
     .get("/fave", loadFave)
 
@@ -352,9 +352,6 @@ function loadSearchForm(req, res) {
 }
 
 
-}
-
-
 function ensureAuthenticated(req, res, next) {
     if (req.session.userID) {
         next();
@@ -445,7 +442,7 @@ function processForm(req, res) {
 
         app.post("/register", uploads.single('profileImage'), processRegistration);
     }
-}
+
 
 // Registration route with image upload
 
