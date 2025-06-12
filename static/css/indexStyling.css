@@ -1,10 +1,10 @@
 :root {
-  --primary-color: #90A5EC;
+  --primary-color: #8cb7ef;
   --primary-color-hover: #6979af;
   --primary-color-2: #F47429;
   --primary-color-hover-2: #c05c23;
-  --text-color: #333333;
-  --text-color-2: #fff;
+  --text-color-black: #333333;
+  --text-color-white: #fff;
   --background-color: #f2f2f2;
   --footer-text: #8E8E8E;
   --active-filters: #46c0975a;
@@ -15,18 +15,20 @@ main {
 } */
 
 h1 {
-  font-size: 2em;
+  font-size: 3.5em;
+  font-weight: 600;
 }
 
 h2 {
   font-size: 2em;
+  font-weight: 600;
 }
 
 /* Section 1 */
 
 section:nth-of-type(1) {
   background: var(--primary-color);
-  color: #fff;
+  color: var(--text-color-white);
 }
 
 section:nth-of-type(1) .container {
@@ -48,9 +50,7 @@ section:nth-of-type(1) img {
 
 
 section:nth-of-type(1) p {
-  grid-column: 2;
-  grid-row: 2;
-  margin: 0.5em 0 1em;
+  font-size: 1.2em;
   line-height: 1.4;
 }
 
@@ -60,7 +60,8 @@ section:nth-of-type(1) button {
   display: inline-block;
   padding: 0.75em 1.5em;
   font-size: 1em;
-  background: var(--primary-color-2);
+  font-weight: 600;
+  background: #ea8232;
   color: white;
   border: none;
   border-radius: 4px;
@@ -75,6 +76,10 @@ section:nth-of-type(1) button:hover {
 /* Section 2 */
 
 section:nth-of-type(2) {
+  background-color: white;
+}
+
+section:nth-of-type(2) .container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
@@ -86,7 +91,6 @@ section:nth-of-type(2) {
 section:nth-of-type(2) h2 {
   color: var(--text-color);
   grid-column: 1 /-1;
-  background-color: var(--background-color);
   text-align: center;
 }
 
@@ -94,7 +98,7 @@ section:nth-of-type(2) h2:hover{
   background-color: var(--background-color);
 }
 
-section:nth-of-type(2) > *:not(h2) {
+/* section:nth-of-type(2) > *:not(h2) {
   background-color: var(--text-color-2);
   padding: 1rem;
   text-align: center;
@@ -102,12 +106,12 @@ section:nth-of-type(2) > *:not(h2) {
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
-}
+} */
 
-section:nth-of-type(2) > *:not(h2):hover {
+/* section:nth-of-type(2) > *:not(h2):hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-}
+} */
 
 section:nth-of-type(2) > * img {
   display: block;

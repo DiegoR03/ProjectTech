@@ -4,7 +4,7 @@
 }
 
 :root {
-  --primary-color: #90A5EC;
+  --primary-color: #8cb7ef;
   --primary-color-hover: #7387CC;
   --primary-color-action: #F47429; 
   --primary-color-hover: #6979af;
@@ -21,14 +21,15 @@
 
 body {
   font-family: 'Montserrat';
-  background-color: var(--background-color);
+  background-color: var(--primary-color);
   margin: 0;
 }
 
 header {
+  margin-top: 1em;
   position: sticky;
-  padding-right: 3em;
-  padding-left: 3em;
+  max-width: 80%;
+  margin-inline: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -36,6 +37,7 @@ header {
 
 header ul:nth-of-type(1) {
   margin: 0;
+  padding: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -78,6 +80,8 @@ header nav li {
 
 .navbar {
   background-color: var(--white);
+  padding: 0.5em;
+  border-radius: 5px;
 }
 
 header nav ul:nth-of-type(1) {
@@ -88,13 +92,12 @@ header nav ul:nth-of-type(1) {
 
 header a { 
   color: var(--text-color);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
 }
 
 header a:hover {
   color: var(--primary-color-hover-2);
-  border-bottom: solid 3px var(--primary-color-hover-2);
 }
 
 header a:active {
