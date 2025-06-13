@@ -33,6 +33,7 @@ const uri = process.env.URI;
 const client = new MongoClient(uri);
 const db = client.db(process.env.DB_NAME);
 const userCollection = db.collection(process.env.USER_COLLECTION)
+const petCollection = db.collection(process.env.PETS_COLLECTION)
 const users = db.collection('users');
 
 const uploadDir = path.join(__dirname, "uploads");
@@ -103,6 +104,7 @@ app
 
                 if (user) {
                     res.locals.currentUser = {
+                        _id: user._id,
                         firstName: user.firstName,
                         profileImage: user.profileImage
                     };
@@ -140,6 +142,32 @@ app
     .get("/login", loadLogin)
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
+    .get('/browse', async (req, res) => {
+        const filters = req.query;
+
+        // Build MongoDB filter for customPets
+        const mongoFilters = {};
+        if (filters.species) mongoFilters.species = filters.species;
+        if (filters.gender) mongoFilters.gender = filters.gender;
+        if (filters.size) mongoFilters.size = filters.size;
+        if (filters.age) mongoFilters.age = filters.age;
+        if (filters.coat) mongoFilters.coat = filters.coat;
+        if (filters.good_with_children) mongoFilters.good_with_children = filters.good_with_children;
+        if (filters.good_with_dogs) mongoFilters.good_with_dogs = filters.good_with_dogs;
+        if (filters.house_trained) mongoFilters.house_trained = filters.house_trained === 'true';
+
+        const localPets = await db.collection('customPets').find(mongoFilters).toArray();
+
+        const allPets = [...localPets /*, ...apiPets */];
+
+        res.render('browse', {
+            pets: allPets,
+            pagination: { total_count: allPets.length, current_page: 1, total_pages: 1 },
+            activeFilters: Object.entries(filters).map(([key, value]) => ({ label: key, value })),
+            request: req
+        });
+    })
+
     .get("/index", loadHome)
 
     .get("/account", loadAccount)
@@ -152,9 +180,12 @@ app
         const userId = req.session.userID;
         let recentlyViewed = [];
         let favorites = [];
+        let myPets = [];
+        let user = null;
 
         if (userId) {
             const user = await userCollection.findOne({ _id: userId });
+            myPets = await petCollection.find({ addedByUserId: userId }).toArray();
 
             const now = Date.now();
             // Filter out expired pets (older than 120 hours or with no tiem)
@@ -177,7 +208,9 @@ app
             userStory: user?.userStory || '',
             profileImage: user?.profileImage || '',
             loggedIn: !!req.session.userID,
-            favorites: user?.favorites || []
+            favorites: user?.favorites || [],
+            myPets,
+            createdAt: user?.createdAt || null
         });
     })
 
@@ -185,41 +218,53 @@ app
         const petId = req.params.id;
 
         try {
-            const token = await getPetfinderToken();
-            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            const data = await response.json();
-            const pet = data.animal;
             const now = Date.now();
 
-            if (!pet) throw new Error("Pet not found");
+            // 1. Try to find pet in your own MongoDB collection
+            const mongoPet = await petCollection.findOne({ id: petId }); // if stored as string
 
+            let pet;
+
+            if (mongoPet) {
+                // Pet was found in your MongoDB collection
+                pet = mongoPet;
+            } else {
+                // 2. Not found locally, fetch from Petfinder API
+                const token = await getPetfinderToken();
+                const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                pet = data.animal;
+
+                if (!pet) throw new Error("Pet not found");
+            }
+
+            // 3. Handle recently viewed
             if (!req.session.recentlyViewed) req.session.recentlyViewed = [];
 
-            // Remove expired (older than 120hours or no time), or duplicates (if one animal is viewed multiple times)
-            req.session.recentlyViewed = req.session.recentlyViewed.filter(p => now - p.timestamp < 120 * 60 * 60 * 1000);
-            req.session.recentlyViewed = req.session.recentlyViewed.filter(p => p.id !== pet.id);
+            // Filter out expired and duplicates
+            req.session.recentlyViewed = req.session.recentlyViewed
+                .filter(p => now - p.timestamp < 120 * 60 * 60 * 1000)
+                .filter(p => p.id !== pet.id);
 
-            // Add new pet 
+            // Add current pet to recently viewed
             const petData = {
                 id: pet.id,
-                name: pet.name,
-                photo: pet.photos?.[0]?.medium || null,
+                name: pet.name || pet.petname, // for local pets
+                photo: pet.photos?.[0]?.medium || pet.photo?.[0]?.medium || null,
                 gender: pet.gender,
-                breed: pet.breeds.primary,
+                breed: pet.breed || pet.breeds?.primary,
                 timestamp: now
             };
 
             req.session.recentlyViewed.unshift(petData);
-
-            // Limit to 5 
             req.session.recentlyViewed = req.session.recentlyViewed.slice(0, 5);
 
-            // Update MongoDB
+            // Save to user document if logged in
             if (req.session.email) {
                 await users.updateOne(
                     { email: req.session.email },
@@ -282,6 +327,87 @@ app
     .get("/searchForm", loadSearchForm)
     .get("/results-search-form", loadResultsSearchForm)
 
+    // GET form
+    .get('/post-pet', (req, res) => {
+        if (!req.session.user) return res.redirect('/login');
+        res.render('addPetForm'); // Create this EJS view
+    })
+
+    // POST form submission
+    .post('/post-pet', uploads.single('photo'), async (req, res) => {
+
+        async function generateCustomId() {
+            let id;
+            let exists = true;
+            while (exists) {
+                id = String(Math.floor(Math.random() * 10000000)).padStart(7, '0');
+                exists = await db.collection('customPets').findOne({ id });
+            }
+            return id;
+        }
+
+        const {
+            petname, description, type, breed, size, gender, age, coat, children, dogs, cats, house_trained, shots_current, isCastrated, isComfystrangers, isAloneOften, isPlayful, isPaired, activity } = req.body;
+
+        let processedPhotoPath = null;
+
+        function toBoolean(value) {
+            return value === 'true' ? true : value === 'false' ? false : undefined;
+        }
+
+        try {
+            if (req.file) {
+                const outputPath = `uploads/post-a-pet/${req.file.filename}.jpg`;
+                await sharp(req.file.path)
+                    .resize(300, 300)
+                    .toFile(outputPath);
+
+                processedPhotoPath = `/${outputPath}`;
+            }
+
+            const id = await generateCustomId();
+
+            const newPet = {
+                id,
+                name: petname,
+                description,
+                species: type,
+                size,
+                gender,
+                age,
+                coat,
+                activity: toBoolean(activity),
+                breeds: { primary: breed },
+                environment: {
+                    children: toBoolean(children),
+                    dogs: toBoolean(dogs),
+                    cats: toBoolean(cats)
+                },
+                attributes: {
+                    house_trained: toBoolean(house_trained),
+                    shots_current: toBoolean(shots_current)
+                },
+                profile: {
+                    isCastrated,
+                    isComfystrangers,
+                    isAloneOften,
+                    isPlayful,
+                    isPaired
+                },
+                photos: processedPhotoPath ? [{ medium: processedPhotoPath }] : [],
+                addedByUserId: req.session.userID || null
+            };
+
+            await db.collection('customPets').insertOne(newPet);
+            res.redirect('/account');
+        } catch (err) {
+            console.error('Error uploading or processing image:', err);
+            res.status(500).send('An error occurred while posting the pet.');
+        }
+    })
+
+
+
 
     .post("/login", processLogin)
     .post("/account", changeStory)
@@ -314,32 +440,41 @@ function loadPasswordChange(req, res) {
     res.render("passwordchange.ejs", { userID });
 }
 
-//Detail page///////////////////////////////////////////////////////////////////////
 async function loadDetail(req, res) {
     const petId = req.params.id;
     const userID = req.session.userID || 95234;
     console.log("Fetching pet ID:", petId);
 
     try {
-        const token = await getPetfinderToken();
-        const url = `https://api.petfinder.com/v2/animals/${petId}`;
-        console.log("API Request:", url);
+        // Step 1: Try to find pet in your own MongoDB collection
+        const mongoPet = await petCollection.findOne({ id: Number(petId) }); // or { id: petId } if stored as a string
 
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        let pet = null;
 
-        const data = await response.json();
-        console.log("Petfinder Response:", data);
+        if (mongoPet) {
+            console.log("Found pet in MongoDB");
+            pet = mongoPet;
+        } else {
+            // Step 2: Fall back to Petfinder API
+            const token = await getPetfinderToken();
+            const url = `https://api.petfinder.com/v2/animals/${petId}`;
+            console.log("API Request:", url);
 
-        const pet = data.animal;
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
-        if (!pet) {
-            throw new Error("Pet not found");
+            const data = await response.json();
+            console.log("Petfinder Response:", data);
+
+            pet = data.animal;
+
+            if (!pet) throw new Error("Pet not found from Petfinder");
         }
 
+        // Step 3: Render page
         res.render("detail.ejs", {
             pet,
             userID
@@ -354,6 +489,7 @@ async function loadDetail(req, res) {
         });
     }
 }
+
 
 //Fave page ///////////////////////////////////////////////////////////////
 async function loadFave(req, res) {
@@ -472,7 +608,8 @@ async function processLogin(req, res) {
             req.session.profileImage = user.profileImage || '/static/default.png';
             req.session.userStory = user.story || '';
             req.session.recentlyViewed = user.recentlyViewed || [];
-            req.session.favorites = user.favorites || []
+            req.session.favorites = user.favorites || [],
+            req.session.createdAt = user.createdAt
 
             res.redirect("/account");
         } else {
@@ -580,7 +717,7 @@ async function processRegistration(req, res) {
                 email: email.trim(),
                 password: hashedPassword,
                 profileImage: profileImagePath,
-
+                createdAt: new Date(),
                 userStory: "A short story about you",
 
 
@@ -647,6 +784,8 @@ async function loadAccount(req, res) {
         } else {
             // Get recently viewed pets from session
             const recentlyViewed = req.session.recentlyViewed || [];
+            const myPets = await petCollection.find({ addedByUserId: user._id.toString() }).toArray();
+
             res.render("account.ejs", {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -654,7 +793,9 @@ async function loadAccount(req, res) {
                 profileImage: user.profileImage,
                 userStory: user.userStory,
                 recentlyViewed: req.session.recentlyViewed || [],
-                favorites: user.favorites || []
+                favorites: user.favorites || [],
+                myPets,
+                createdAt: user.createdAt 
             });
         }
     } catch (error) {
