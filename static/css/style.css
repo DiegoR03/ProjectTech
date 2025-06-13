@@ -153,7 +153,7 @@ footer ul li a{
 
 footer ul li:nth-of-type(1) a {
   color: var(--text-color);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @media (max-width: 800px) {
