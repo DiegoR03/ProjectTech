@@ -127,7 +127,7 @@
       hasKids: 'true',
       hasCats: 'true',
       hasDogs: 'false',
-      isAloneOften: 'true',
+      //isAloneOften: 'true',
       floor: 'upperfloor-w-elevator',
       hasGarden: 'false',
       activity: 'false',
@@ -142,25 +142,25 @@
       size: 'Size',
       gender: 'Gender',
       age: 'Age',
-      isCastrated: 'Castrated',
-      coat: 'Coat type',
+      //isCastrated: 'Castrated',
+      //coat: 'Coat type',
       hasKids: 'Has children',
       hasCats: 'Has cats',
       hasDogs: 'Has dogs',
-      isAloneOften: 'Home alone often',
+      //isAloneOften: 'Home alone often',
       floor: 'Living situation',
       hasGarden: 'Has a garden',
-      activity: 'Active household',
-      isHousetrained: 'Needs to be housetrained',
+      //activity: 'Active household',
+      //isHousetrained: 'Needs to be housetrained',
       isComfystrangers: 'Comfortable with strangers',
-      isPlayful: 'Looking for a playful pet',
-      isPaired: 'Wants a bonded pair',
+      //isPlayful: 'Looking for a playful pet',
+      //isPaired: 'Wants a bonded pair',
     };
 
     const groupedAnswers = {
       "General Info": ['type', 'size', 'gender', 'age', 'isCastrated', 'coat'],
       "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
-      "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
+      "Pet Personality": ['isComfystrangers']
     };
 
 
@@ -329,7 +329,7 @@
         </div>
       </div>
 
-      <!-- ✅ Tags moved here -->
+      <!-- Tags moved here -->
       ${pet.tags?.length
               ? `<div class="tags">
              <h4>Tags</h4>
@@ -351,10 +351,10 @@
 
       <div class="description">
         <h4>Description</h4>
-        <p>${pet.description ? pet.description.slice(0, 500) : 'No description listed'}</p>
+        <p>${pet.description ? pet.description: 'No description listed'}</p>
       </div>
 
-      <!-- ✅ Buttons moved here -->
+      <!-- Buttons moved here -->
       <div class="card-buttons horizontal-buttons">
         <a href="/detail/${pet.id}" class="viewDetail full-btn">View ➜</a>
         <button class="favorite-button full-btn" onclick="saveFavorite('${pet.id}')">Save</button>

@@ -26,24 +26,24 @@ const questions = [
       { value: "No preference", label: "No preference" },
     ]
   },
-  {
-    question: "Do they have to be castrated?",
-    name: "isCastrated",
-    options: [
-      { value: "Yes", label: "Yes" },
-      { value: "No", label: "No" },
-      { value: "No preference", label: "No preference" },
-    ]
-  },
-  {
-    question: "What coat do you prefer?",
-    name: "coat",
-    options: [
-      { value: "Short", label: "Short" },
-      { value: "Medium", label: "Long" },
-      { value: "No preference", label: "No preference" },
-    ]
-  },
+  // {
+  //   question: "Do they have to be castrated?",
+  //   name: "isCastrated",
+  //   options: [
+  //     { value: "Yes", label: "Yes" },
+  //     { value: "No", label: "No" },
+  //     { value: "No preference", label: "No preference" },
+  //   ]
+  // },
+  // {
+  //   question: "What coat do you prefer?",
+  //   name: "coat",
+  //   options: [
+  //     { value: "Short", label: "Short" },
+  //     { value: "Medium", label: "Long" },
+  //     { value: "No preference", label: "No preference" },
+  //   ]
+  // },
   {
     question: "Do you have kids living at home?",
     name: "hasKids",
@@ -69,14 +69,14 @@ const questions = [
       { value: "No", label: "No" },
     ]
   },
-  {
-    question: "How often would the pet be alone?",
-    name: "isAloneOften",
-    options: [
-      { value: "true", label: "Daily, a few hours a day" },
-      { value: "No", label: "Almost never" },
-    ]
-  },
+  // {
+  //   question: "How often would the pet be alone?",
+  //   name: "isAloneOften",
+  //   options: [
+  //     { value: "Yes", label: "Daily, a few hours a day" },
+  //     { value: "No", label: "Almost never" },
+  //   ]
+  // },
   {
     question: "On what floor do you live?",
     name: "floor",
@@ -94,24 +94,24 @@ const questions = [
       { value: "No", label: "No" },
     ]
   },
-  {
-    question: "How active do you want your pet to be?",
-    name: "activity",
-    options: [
-      { value: "Yes", label: "Very active" },
-      { value: "No", label: "Not very active" },
-      { value: "No preference", label: "No preference" },
-    ]
-  },
-  {
-    question: "Do you want the pet to be house trained?",
-    name: "isHousetrained",
-    options: [
-      { value: "Yes", label: "Yes" },
-      { value: "No", label: "No" },
-      { value: "No preference", label: "No preference" },
-    ]
-  },
+  // {
+  //   question: "How active do you want your pet to be?",
+  //   name: "activity",
+  //   options: [
+  //     { value: "Yes", label: "Very active" },
+  //     { value: "No", label: "Not very active" },
+  //     { value: "No preference", label: "No preference" },
+  //   ]
+  // },
+  // {
+  //   question: "Do you want the pet to be house trained?",
+  //   name: "isHousetrained",
+  //   options: [
+  //     { value: "Yes", label: "Yes" },
+  //     { value: "No", label: "No" },
+  //     { value: "No preference", label: "No preference" },
+  //   ]
+  // },
   {
     question: "How important is it that the pet is comfortable with strangers?",
     name: "isComfystrangers",
@@ -120,24 +120,24 @@ const questions = [
       { value: "No", label: "Not very important" },
     ]
   },
-  {
-    question: "Do you want a playful pet?",
-    name: "isPlayful",
-    options: [
-      { value: "Yes", label: "Very important" },
-      { value: "No", label: "Not very important" },
-    ]
-  },
-  {
-    question: "Are you looking for a pair or single pet?",
-    name: "isPaired",
-    options: [
-      { value: "Yes", label: "Pair" },
-      { value: "No", label: "Single" },
-      { value: "No preference", label: "No preference" },
+  // {
+  //   question: "Do you want a playful pet?",
+  //   name: "isPlayful",
+  //   options: [
+  //     { value: "Yes", label: "Very important" },
+  //     { value: "No", label: "Not very important" },
+  //   ]
+  // },
+  // {
+  //   question: "Are you looking for a pair or single pet?",
+  //   name: "isPaired",
+  //   options: [
+  //     { value: "Yes", label: "Pair" },
+  //     { value: "No", label: "Single" },
+  //     { value: "No preference", label: "No preference" },
 
-    ]
-  },
+  //   ]
+  // },
   {
     question: "Do you have a preference for a certain age?",
     name: "age",
@@ -150,7 +150,6 @@ const questions = [
 
     ]
   },
-  // Add more steps as needed
 ];
 
 //SEARCH FORM RESULTS //////////////////////////////////////////////////////////////////////////

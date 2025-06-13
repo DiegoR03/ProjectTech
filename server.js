@@ -439,9 +439,9 @@ function loadResultsSearchForm(req, res) {
     const { question, questionLabels } = require('./static/js/search-form');
 
     const groupedAnswers = {
-        "General Info": ['type', 'size', 'gender', 'age', 'isCastrated', 'coat'],
-        "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
-        "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
+        "General Info": ['type', 'size', 'gender', 'age'],
+        "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'floor', 'hasGarden'],
+        "Pet Personality": [ 'isComfystrangers', 'isPlayful']
     };
 
 
@@ -865,6 +865,7 @@ async function loadBrowse(req, res) {
         });
     }
 }
+// FIND MY MATCH //////////////////////////////////////////////////////////////////////////////////////////////////
 app.get('/match', async (req, res) => {
     const userAnswers = req.session.answers;
     if (!userAnswers || Object.keys(userAnswers).length === 0) {
@@ -892,8 +893,7 @@ app.get('/match', async (req, res) => {
             let score = 0;
             let reason = [];
             const hasGarden = userAnswers.hasGarden === 'true';
-            const isActive = userAnswers.activity === 'true';
-            const isOftenAlone = userAnswers.isAloneOften === 'true';
+            
             const floor = userAnswers.floor; // groundfloor / upperfloor-with-elevator / upperfloor-without-elevator
 
             // --- 1. ENVIRONMENT DEALBREAKERS ---
@@ -928,7 +928,7 @@ app.get('/match', async (req, res) => {
             }
 
             // --- 2. POSITIVE ENVIRONMENT SYNERGIES ---
-            if (pet.size === 'Large' && hasGarden && isActive) {
+            if (pet.size === 'Large' && hasGarden) {
                 score += 6;
                 reason.push("✅ Perfect fit: large active dog + garden");
             }
@@ -960,20 +960,20 @@ app.get('/match', async (req, res) => {
             }
 
             // --- 3. LIFESTYLE MATCH ---
-            if (isOftenAlone && pet.tags?.includes('Independent')) {
-                score += 4;
-                reason.push("✅ Independent pet for alone household");
-            }
+            // if (isOftenAlone && pet.tags?.includes('Independent')) {
+            //     score += 4;
+            //     reason.push("✅ Independent pet for alone household");
+            // }
 
-            if (!isOftenAlone && pet.description?.toLowerCase().includes('attention')) {
-                score += 3;
-                reason.push("✅ Pet needs attention and you're often home");
-            }
+            // if (!isOftenAlone && pet.description?.toLowerCase().includes('attention')) {
+            //     score += 3;
+            //     reason.push("✅ Pet needs attention and you're often home");
+            // }
 
-            if (isOftenAlone && pet.description?.toLowerCase().includes('attention')) {
-                score -= 3;
-                reason.push("⚠️ Needs attention but owner away often");
-            }
+            // if (isOftenAlone && pet.description?.toLowerCase().includes('attention')) {
+            //     score -= 3;
+            //     reason.push("⚠️ Needs attention but owner away often");
+            // }
 
             // --- 4. USER PREFERENCES ---
             if (pet.gender?.toLowerCase() === userAnswers.gender?.toLowerCase()) {
@@ -990,20 +990,20 @@ app.get('/match', async (req, res) => {
                 reason.push("✅ Preferred size");
             }
 
-            if (pet.coat?.toLowerCase() === userAnswers.coat?.toLowerCase()) {
-                score += 1;
-                reason.push("✅ Preferred coat type");
-            }
+            // if (pet.coat?.toLowerCase() === userAnswers.coat?.toLowerCase()) {
+            //     score += 1;
+            //     reason.push("✅ Preferred coat type");
+            // }
 
-            if (userAnswers.isHousetrained === 'true' && pet.attributes?.house_trained) {
-                score += 3;
-                reason.push("✅ Already housetrained");
-            }
+            // if (userAnswers.isHousetrained === 'true' && pet.attributes?.house_trained) {
+            //     score += 3;
+            //     reason.push("✅ Already housetrained");
+            // }
 
-            if (userAnswers.isCastrated === 'true' && pet.attributes?.spayed_neutered) {
-                score += 1;
-                reason.push("✅ Castrated/neutered");
-            }
+            // if (userAnswers.isCastrated === 'true' && pet.attributes?.spayed_neutered) {
+            //     score += 1;
+            //     reason.push("✅ Castrated/neutered");
+            // }
 
             const description = pet.description?.toLowerCase() || "";
             const tags = pet.tags?.map(t => t.toLowerCase()) || [];
