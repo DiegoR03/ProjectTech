@@ -36,10 +36,11 @@
       <% if (currentUser) { %>
         <a href="/index">Home</a>
         <a href="/browse" class="active">Browse</a>
-        <a href="/favourites">Favourites</a>
+        <a href="/favourites">Notifications</a>
         <div class="dropdown">
           <button class="dropbtn"><img src="<%= currentUser?.profileImage%>" alt="Profile Image"></button>
           <div id="myDropdown" class="dropdown-content">
+            <p>Hi <%= currentUser?.firstName %>!</p>
             <a href="/account" class="active">Account</a>
             <a href="/logout">Logout</a>
           </div>
