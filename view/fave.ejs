@@ -11,63 +11,38 @@
     <header>
         <h1>PetMatch</h1>
         <nav>
-          <a href="/">Home</a>
-          <a href="/browse">Browse</a>
-          <a href="/login">Login</a>
-          <a href="/register">Register</a>
-          <a href="/profile" class="active">Profile</a>
-        </nav>
+        <% if (currentUser) { %>
+            <a href="/index">Home</a>
+            <a href="/browse">Browse</a>
+            <a href="/favourites">Notifications</a>
+            <div class="dropdown">
+                <button class="dropbtn"><img src="<%= currentUser?.profileImage%>" alt="Profile Image"></button>
+                <div id="myDropdown" class="dropdown-content">
+                    <p>Hi <%= firstName %>!</p>
+                    <a href="/account" class="active">Account</a>
+                    <a href="/logout">Logout</a>
+                </div>
+            </div>
+            <% } else { %>
+                <a href="/index">Home</a>
+                <a href="/browse">Browse Pets</a>
+                <a href="/login">Favourites</a>
+                <a href="/login">Login</a>
+                <% } %>
+    </nav>
     </header>
 
     <main>
-        <!-- Search -->
-        <div id="petList">
-            <aside>
-                <input type="search" class="search" placeholder="What are you searching for?">
-            </aside>
-            <ul class="list">
-                <% pets.forEach(pet => { %>
-                  <li>
-                    <h2 class="name"><%= pet.name %></h2>
-                    <p class="type"><%= pet.type %></p>
-                  </li>
-                <% }) %>
-            </ul>
-                <!-- <ul class="list">
-                    <li> 
-                        <h2 class="name">Ollie</h2>
-                        <p class="type">Cat</p>
-                    </li>
-                    <li>
-                        <h2 class="name">Bobby</h2>
-                        <p class="type">Dog</p>
-                    </li>
-                    <li>
-                        <h2 class="name">Oscar</h2>
-                        <p class="type">Cat</p>
-                    </li>
-                    <li>
-                        <h2 class="name">Pip</h2>
-                        <p class="type">Rabbit</p>
-                    </li>
-                    <li>
-                        <h2 class="name">Teddy</h2>
-                        <p class="type">Dog</p>
-                    </li>
-                    <li>
-                        <h2 class="name">Billy</h2>
-                        <p class="type">Dog</p>
-                    </li>
-                    <li>
-                        <h2 class="name">Spike</h2>
-                        <p class="type">Dog</p>
-                    </li>
-                    <li>
-                        <h2 class="name">Puck</h2>
-                        <p class="type">Cat</p>
-                    </li> 
-                </ul> -->
-        </div>
+        <% if (pet) { %>
+            <h1><%= pet.name %></h1>
+            <img src="<%= pet.photos[0]?.medium || '/static/default.jpg' %>" alt="Pet photo">
+            <p>Breed: <%= pet.breeds.primary %></p>
+            <p>Age: <%= pet.age %></p>
+            <p>Gender: <%= pet.gender %></p>
+            <p>Description: <%= pet.description %></p>
+          <% } else { %>
+            <p class="error"><%= error %></p>
+          <% } %>
     </main>
     <footer>
 

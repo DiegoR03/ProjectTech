@@ -26,24 +26,24 @@ const questions = [
       { value: "No preference", label: "No preference" },
     ]
   },
-  {
-    question: "Do they have to be castrated?",
-    name: "isCastrated",
-    options: [
-      { value: "Yes", label: "Yes" },
-      { value: "No", label: "No" },
-      { value: "No preference", label: "No preference" },
-    ]
-  },
-  {
-    question: "What coat do you prefer?",
-    name: "coat",
-    options: [
-      { value: "Short", label: "Short" },
-      { value: "Medium", label: "Long" },
-      { value: "No preference", label: "No preference" },
-    ]
-  },
+  // {
+  //   question: "Do they have to be castrated?",
+  //   name: "isCastrated",
+  //   options: [
+  //     { value: "Yes", label: "Yes" },
+  //     { value: "No", label: "No" },
+  //     { value: "No preference", label: "No preference" },
+  //   ]
+  // },
+  // {
+  //   question: "What coat do you prefer?",
+  //   name: "coat",
+  //   options: [
+  //     { value: "Short", label: "Short" },
+  //     { value: "Medium", label: "Long" },
+  //     { value: "No preference", label: "No preference" },
+  //   ]
+  // },
   {
     question: "Do you have kids living at home?",
     name: "hasKids",
@@ -69,19 +69,19 @@ const questions = [
       { value: "No", label: "No" },
     ]
   },
-  {
-    question: "How often would the pet be alone?",
-    name: "isAloneOften",
-    options: [
-      { value: "true", label: "Daily, a few hours a day" },
-      { value: "No", label: "Almost never" },
-    ]
-  },
+  // {
+  //   question: "How often would the pet be alone?",
+  //   name: "isAloneOften",
+  //   options: [
+  //     { value: "Yes", label: "Daily, a few hours a day" },
+  //     { value: "No", label: "Almost never" },
+  //   ]
+  // },
   {
     question: "On what floor do you live?",
     name: "floor",
     options: [
-      { value: "ground-level", label: "Ground level" },
+      { value: "Ground-level", label: "Ground level" },
       { value: "Upperfloor with elevator", label: "Upperfloor with elevator" },
       { value: "Upperfloor without elevator", label: "Upperfloor without elevator" }
     ]
@@ -94,24 +94,24 @@ const questions = [
       { value: "No", label: "No" },
     ]
   },
-  {
-    question: "How active do you want your pet to be?",
-    name: "activity",
-    options: [
-      { value: "Yes", label: "Very active" },
-      { value: "No", label: "Not very active" },
-      { value: "No preference", label: "No preference" },
-    ]
-  },
-  {
-    question: "Do you want the pet to be house trained?",
-    name: "isHousetrained",
-    options: [
-      { value: "Yes", label: "Yes" },
-      { value: "No", label: "No" },
-      { value: "No preference", label: "No preference" },
-    ]
-  },
+  // {
+  //   question: "How active do you want your pet to be?",
+  //   name: "activity",
+  //   options: [
+  //     { value: "Yes", label: "Very active" },
+  //     { value: "No", label: "Not very active" },
+  //     { value: "No preference", label: "No preference" },
+  //   ]
+  // },
+  // {
+  //   question: "Do you want the pet to be house trained?",
+  //   name: "isHousetrained",
+  //   options: [
+  //     { value: "Yes", label: "Yes" },
+  //     { value: "No", label: "No" },
+  //     { value: "No preference", label: "No preference" },
+  //   ]
+  // },
   {
     question: "How important is it that the pet is comfortable with strangers?",
     name: "isComfystrangers",
@@ -120,37 +120,36 @@ const questions = [
       { value: "No", label: "Not very important" },
     ]
   },
-  {
-    question: "Do you want a playful pet?",
-    name: "isPlayful",
-    options: [
-      { value: "Yes", label: "Very important" },
-      { value: "No", label: "Not very important" },
-    ]
-  },
-  {
-    question: "Are you looking for a pair or single pet?",
-    name: "isPaired",
-    options: [
-      { value: "Yes", label: "Pair" },
-      { value: "No", label: "Single" },
-      { value: "No preference", label: "No preference" },
+  // {
+  //   question: "Do you want a playful pet?",
+  //   name: "isPlayful",
+  //   options: [
+  //     { value: "Yes", label: "Very important" },
+  //     { value: "No", label: "Not very important" },
+  //   ]
+  // },
+  // {
+  //   question: "Are you looking for a pair or single pet?",
+  //   name: "isPaired",
+  //   options: [
+  //     { value: "Yes", label: "Pair" },
+  //     { value: "No", label: "Single" },
+  //     { value: "No preference", label: "No preference" },
 
-    ]
-  },
+  //   ]
+  // },
   {
     question: "Do you have a preference for a certain age?",
     name: "age",
     options: [
-      { value: "baby", label: "Baby (0 - 1 year)" },
-      { value: "young", label: "Young (1 - 3 years)" },
-      { value: "adult", label: "Adult (3 - 7 years)" },
-      { value: "senior", label: "Senior (7+ years)" },
-      { value: "unknown", label: "No preference" },
+      { value: "Baby", label: "Baby (0 - 1 year)" },
+      { value: "Young", label: "Young (1 - 3 years)" },
+      { value: "Adult", label: "Adult (3 - 7 years)" },
+      { value: "Senior", label: "Senior (7+ years)" },
+      { value: "No preference", label: "No preference" },
 
     ]
   },
-  // Add more steps as needed
 ];
 
 //SEARCH FORM RESULTS //////////////////////////////////////////////////////////////////////////
@@ -159,6 +158,7 @@ const questionLabels = {
   type: 'Animal type',
   size: 'Size',
   gender: 'Gender',
+  age: 'Age',
   isCastrated: 'Castrated',
   coat: 'Coat length',
 
@@ -177,106 +177,3 @@ const questionLabels = {
 };
 
 module.exports = { questions, questionLabels }
-
-
-
-const userAnswers = {
-  type: 'dog',
-  size: 'medium',
-  gender: 'male',
-  isCastrated: 'false',
-  coat: 'long',
-  hasKids: 'true',
-  hasCats: 'true',
-  hasDogs: 'false',
-  isAloneOften: 'true',
-  floor: 'upperfloor-w-elevator',
-  hasGarden: 'false',
-  activity: 'false',
-  isHousetrained: 'false',
-  isComfystrangers: 'false',
-  isPlayful: 'false',
-  isPaired: 'false'
-};
-
-const groupedAnswers = {
-  "General Info": ['type', 'size', 'gender', 'isCastrated', 'coat'],
-  "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
-  "Pet Personality": ['activity', 'isHousetrained', 'isComfystrangers', 'isPlayful', 'isPaired']
-};
-
-
-
-
-const answerOptions = {
-  type: ['Dog', 'Cat', 'Rabbit'],
-  size: ['Small', 'Medium', 'Large', 'No preference'],
-  gender: ['Male', 'Female', 'No preference'],
-  isCastrated: ['true', 'false', 'No preference'],
-  coat: ['Short', 'Medium', 'Long', 'No preference'],
-  hasKids: ['true', 'false'],
-  hasCats: ['true', 'false'],
-  hasDogs: ['true', 'false'],
-  isAloneOften: ['true', 'false'],
-  floor: ['Groundfloor', 'Upperfloor with elevator', 'Upperfloor without elevator'],
-  hasGarden: ['true', 'false'],
-  activity: ['true', 'false'],
-  isHousetrained: ['true', 'false'],
-  isComfystrangers: ['true', 'false'],
-  isPlayful: ['true', 'false'],
-  isPaired: ['true', 'false']
-};
-
-function formatOptionLabel(value) {
-  if (value === 'true') return 'Yes';
-  if (value === 'false') return 'No';
-  if (value === 'no preference') return 'No preference';
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function startEditing(groupName) {
-  const section = document.querySelector(`[data-group="${groupName}"]`);
-  section.querySelectorAll('.static-view').forEach(el => el.style.display = 'none');
-  section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'block');
-
-  section.querySelectorAll('li').forEach(li => {
-    const key = li.getAttribute('data-key');
-    const currentValue = li.getAttribute('data-value');
-    const container = li.querySelector(`.radio-options[data-key="${key}"]`);
-
-    container.innerHTML = ''; // Clear existing buttons
-
-    const options = answerOptions[key] || [];
-    options.forEach(opt => {
-      const input = document.createElement('input');
-      input.type = 'radio';
-      input.name = key;
-      input.value = opt;
-      if (opt === currentValue) input.checked = true;
-
-      const label = document.createElement('label');
-      label.textContent = formatOptionLabel(opt);
-      label.prepend(input);
-
-      container.appendChild(label);
-    });
-  });
-}
-
-function cancelEditing(groupName) {
-  const section = document.querySelector(`[data-group="${groupName}"]`);
-  section.querySelectorAll('.static-view').forEach(el => {
-    if (el.classList.contains('group-actions')) {
-      el.style.display = 'block'
-    } else {
-      el.style.display = 'flex'
-    }
-  });
-  section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'none');
-}
-
-function deleteAnswers() {
-  fetch('/wizard/reset', { method: 'POST' })
-    .then(() => window.location.href = '/wizard')
-    .catch(err => console.error(err));
-}
