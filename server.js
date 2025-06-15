@@ -278,7 +278,7 @@ app
             res.status(500).send('Error fetching pet details.');
         }
     })
-
+    
     .get("/detail/:id", loadDetail)
     .get('/fave/:id', async (req, res) => {
         const petId = req.params.id;
@@ -621,7 +621,7 @@ async function processLogin(req, res) {
 
         app.post("/register", uploads.single('profileImage'), processRegistration);
     }
-}
+
 
 
 function processForm(req, res) {
