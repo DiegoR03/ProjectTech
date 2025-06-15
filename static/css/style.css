@@ -4,23 +4,22 @@
 }
 
 :root {
-  --primary-color: #8cb7ef;
-  --primary-color-hover: #7387CC;
-  --primary-color-action: #F47429; 
-  --primary-color-hover: #6979af;
-  --primary-color-2: #F47429;
+  --primary-color: #4177BE;
+  --primary-color-hover: rgb(46, 73, 169);
+  --primary-color-2: #C74F0A;
   --primary-color-hover-2: #c05c23;
-  --text-color: #333;
-  --text-color-2: #fff;
   --background-color: #f2f2f2;
-  --white: #fff;
-  --footer-text: #8E8E8E;
-  --footer-background: #fff;
+  --footer-header-background: #fff;
   --active-filters: #46c0975a;
+
+  --font-color: #0d3149;
+  --font-color-white: #ffffff;
+  --footer-text: #8E8E8E;
 }
 
 body {
   font-family: 'Montserrat';
+  color: var(--font-color);
   background-color: var(--primary-color);
   margin: 0;
 }
@@ -64,7 +63,7 @@ header button {
   display: none;
   position: relative;
   z-index: 2;
-  background-color: var(--color-bg);
+  background-color: var(--background-color);
   border: none;
 }
 
@@ -79,7 +78,7 @@ header nav li {
 }
 
 .navbar {
-  background-color: var(--white);
+  background-color: var(--footer-header-background);
   padding: 0.5em;
   border-radius: 5px;
 }
@@ -129,10 +128,16 @@ header a:active {
 /* Footer Styling */
 
 footer {
+  padding-top: 2em;
+  padding-bottom: 2em;
+  background-color: var(--footer-header-background);
+}
+
+footer .container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
-  padding: 3rem 5rem;
-  background-color: var(--footer-background);
+  max-width: 80%;
+  margin-inline: auto;
 }
 
 footer ul {
@@ -166,7 +171,7 @@ footer ul li:nth-of-type(1) a {
   header nav {
     position: fixed;
     inset: 0;
-    background-color: #ffffff;
+    background-color: var(--footer-header-background);
     z-index: 1;
     translate: -100%;
     transition: 0.5s;
@@ -183,13 +188,16 @@ footer ul li:nth-of-type(1) a {
   }
 
   footer {
-    grid-template-columns: 1fr;
     padding: 2rem;
     text-align: center;
   }
 
+  footer .container{
+    grid-template-columns: 1fr;
+  }
+
   footer ul {
-    margin-bottom: 2rem;
+    margin-bottom: 1em;
   }
 
   .logo {
