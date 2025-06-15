@@ -10,6 +10,7 @@
   --primary-color-hover-2: #c05c23;
   --background-color: #f2f2f2;
   --footer-header-background: #fff;
+  --footer-border: #d3d3d3;
   --active-filters: #46c0975a;
 
   --font-color: #0d3149;
@@ -118,16 +119,23 @@ header a:active {
   fill: var(--primary-color-2);
 }
 
-.logo h1 {
+.logo p {
   text-align: left;
   margin: 0;
   font-size: 1.5rem;
   color: var(--text-color);
+  font-weight: 600;
+}
+
+.logo p:hover {
+  color: var(--primary-color-2);
+
 }
 
 /* Footer Styling */
 
 footer {
+  border-top: 1px solid var(--footer-border);
   padding-top: 2em;
   padding-bottom: 2em;
   background-color: var(--footer-header-background);
@@ -150,15 +158,23 @@ footer ul li {
   margin-top: 0.5em;
 }
 
-footer ul li a{
+footer ul li a {
   color: var(--footer-text);
   margin-top: 0.5em;
   text-decoration: none;
 }
 
+footer ul li a:hover {
+  color: var(--font-color);
+}
+
 footer ul li:nth-of-type(1) a {
   color: var(--text-color);
   font-weight: 600;
+}
+
+footer ul li:nth-of-type(1) a:hover {
+  color: var(--primary-color-2);
 }
 
 @media (max-width: 800px) {
