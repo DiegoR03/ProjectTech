@@ -33,7 +33,46 @@
         <% if (currentUser) { %>
             <a href="/index">Home</a>
             <a href="/browse">Browse</a>
-            <a href="/favourites">Notifications</a>
+            <div class="dropdown notifications-dropdown">
+                <button class="dropbtn notifications-btn">
+                    Notifications
+                    <% if (currentUser.notifications.length> 0) { %>
+                        <span class="badge">
+                            <%= currentUser.notifications.length %>
+                        </span>
+                        <% } %>
+                </button>
+
+
+                <div class="dropdown-content">
+                    <% if (currentUser.notifications.length> 0) { %>
+                        <% currentUser.notifications.slice().reverse().forEach(note=> { %>
+                            <a href="/detail/<%= note.petId %>"
+                                style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                                <img src="<%= note.image %>" class="noteImage" alt="Notification Image"
+                                    style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%;">
+
+                                <div style="flex: 1;">
+                                    <strong>
+                                        <%= note.message %>
+                                    </strong><br>
+                                    <small>
+                                        <%= new Date(note.timestamp).toLocaleString() %>
+                                    </small>
+                                </div>
+                            </a>
+
+                            <% }) %>
+                                <form method="POST" action="/notifications/clear"
+                                    style="padding: 0.5rem; text-align:center;">
+                                    <button type="submit">Clear All</button>
+                                </form>
+                                <% } else { %>
+                                    <p style="padding: 0.5rem; ">No notifications</p>
+                                    <% } %>
+                </div>
+            </div>
+
             <div class="dropdown">
                 <button class="dropbtn"><img src="<%= currentUser?.profileImage%>" alt="Profile Image"></button>
                 <div id="myDropdown" class="dropdown-content">
@@ -57,7 +96,8 @@
     <nav id="accountNav">
         <h2>Welcome back <%= firstName %>
         </h2>
-        <div>
+        <button id="navToggle" onclick="toggleNavMenu()">&#9776;</button>
+        <div class="nav-buttons">
             <button id="myInfoButton" class="active-button"
                 onclick="toggleObject('myInfo', 'myInfoButton')">MyInfo</button>
             <button id="ViewedButton" onclick="toggleObject('recentlyViewed', 'ViewedButton')">Recently Viewed</button>
@@ -67,21 +107,38 @@
         </div>
     </nav>
 
+
     <section id="myInfo" class="toggle-section">
         <div>
             <fieldset>
-                <form action="/account" method="POST">
+                <form action="/account" method="POST" enctype="multipart/form-data">
                     <div id="myInfoCollection">
-                        <img id="profileImg" src="<%= profileImage %>" alt="Profile Image">
+                        <div id="profileImgWrapper"
+                            style="position: relative; display: inline-block; cursor: pointer; width: 13rem; height: 13rem; border-radius: 50%; overflow: hidden;">
+                            <input type="file" id="profileImageInput" name="profileImage"
+                                style="display:none; cursor:default" accept="image/*" disabled />
+                            <img id="profileImg" src="<%= profileImage %>" alt="Profile Image"
+                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            <div id="overlay">
+                                <!-- Pencil icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="white"
+                                    viewBox="0 0 24 24">
+                                    <path
+                                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0L15 5.59l3.75 3.75 2.66-2.66z" />
+                                </svg>
+                            </div>
+                        </div>
+
                         <div>
                             <div>
                                 <label>
                                     Full name:
                                 </label>
 
-                                <div style="width: fit-content;">
-                                    <input type="text" id="firstName" value="<%= firstName %>" disabled>
-                                    <input type="text" id="lastName" value="<%= lastName %>" disabled>
+                                <div>
+                                    <input type="text" id="firstName" name="firstName" value="<%= firstName %>"
+                                        disabled>
+                                    <input type="text" id="lastName" name="lastName" value="<%= lastName %>" disabled>
                                 </div>
                             </div>
                             <div style="margin-top: 1rem;">
@@ -104,130 +161,132 @@
                         </div>
                     </div>
 
-                    <div style="margin-top: 1rem;">
+                    <div style="margin-top: 1rem; justify-items: center;">
                         <label for="storyTextarea">My story:</label>
                         <div>
-                            <textarea id="storyTextarea" name="story" placeholder="<%= userStory %>"
+                            <textarea id="storyTextarea" name="userStory" placeholder="<%= userStory %>"
                                 disabled><%= userStory %></textarea>
                         </div>
                     </div>
                 </form>
         </div>
         <div>
-                <div class="grid" id="result-grid">
-                    <% if (myPets.length===0) { %>
-                        <p>You haven't posted any pets yet.</p>
-                        <% } else { %>
-                            <% myPets.forEach(pet=> { %>
-                                <div href="#" class="card">
-                                        <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
-                                                <div class="card-content">
-                                                    <div class="pet-info">
-                                                        <div class="pet-name">
-                                                            <%= pet.name %>
-                                                        </div>
+            <h2>My Pets</h2>
+            <div class="grid" id="result-grid">
+                <% if (myPets.length===0) { %>
+                    <p>You haven't posted any pets yet.</p>
+                    <% } else { %>
+                        <% myPets.forEach(pet=> { %>
+                            <div href="#" class="card">
+                                <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
+                                <div class="card-content">
+                                    <div class="pet-info">
+                                        <div class="pet-name">
+                                            <%= pet.name %>
+                                        </div>
 
-                                                        <div class="pet-gender">
-                                                            <%= pet.gender %>
-                                                        </div>
-                                                        <div class="pet-breed">
-                                                            <%= pet.breeds.primary %>
-                                                        </div>
-                                                    </div>
+                                        <div class="pet-gender">
+                                            <%= pet.gender %>
+                                        </div>
+                                        <div class="pet-breed">
+                                            <%= pet.breeds.primary %>
+                                        </div>
+                                    </div>
 
-                                                    <div class="card-links">
-                                                        <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
-                                                        <a href="/detail/<%= pet.id %>" class="viewDetail">View
-                                                            &#8594;</a>
-                                                    </div>
-
-                                                </div>
+                                    <div class="card-links">
+                                        <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
+                                        <a href="/detail/<%= pet.id %>" class="viewDetail">View
+                                            &#8594;</a>
+                                    </div>
 
                                 </div>
-                                <% }) %>
+
+                            </div>
+                            <% }) %>
                                 <% } %>
-                </div>
-        </fieldset>
+            </div>
+            </fieldset>
     </section>
 
     <section id="recentlyViewed" class="toggle-section">
         <h2>Recently Viewed Pets</h2>
         <div class="grid" id="result-grid">
-                    <% if (recentlyViewed.length===0) { %>
-                        <p>You haven't posted any pets yet.</p>
-                        <% } else { %>
-                            <% recentlyViewed.forEach(pet=> { %>
-                                <div href="#" class="card">
-                                        <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
-                                                <div class="card-content">
-                                                    <div class="pet-info">
-                                                        <div class="pet-name">
-                                                            <%= pet.name %>
-                                                        </div>
+            <% if (recentlyViewed.length===0) { %>
+                <p>You haven't posted any pets yet.</p>
+                <% } else { %>
+                    <% recentlyViewed.forEach(pet=> { %>
+                        <div href="#" class="card">
+                            <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
+                            <div class="card-content">
+                                <div class="pet-info">
+                                    <div class="pet-name">
+                                        <%= pet.name %>
+                                    </div>
 
-                                                        <div class="pet-gender">
-                                                            <%= pet.gender %>
-                                                        </div>
-                                                        <div class="pet-breed">
-                                                            <%= pet.breed %>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="card-links">
-                                                        <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
-                                                        <a href="/detail/<%= pet.id %>" class="viewDetail">View
-                                                            &#8594;</a>
-                                                    </div>
-
-                                                </div>
-
+                                    <div class="pet-gender">
+                                        <%= pet.gender %>
+                                    </div>
+                                    <div class="pet-breed">
+                                        <%= pet.breed %>
+                                    </div>
                                 </div>
-                                <% }) %>
-                                <% } %>
-                </div>
+
+                                <div class="card-links">
+                                    <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
+                                    <a href="/detail/<%= pet.id %>" class="viewDetail">View
+                                        &#8594;</a>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <% }) %>
+                            <% } %>
+        </div>
     </section>
 
     <section id="Favorites" class="toggle-section">
+        <h2>Favorite Pets</h2>
         <div class="grid" id="result-grid">
-                    <% if (favorites.length===0) { %>
-                        <p>You haven't posted any pets yet.</p>
-                        <% } else { %>
-                            <% favorites.forEach(pet=> { %>
-                                <div href="#" class="card">
-                                        <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
-                                                <div class="card-content">
-                                                    <div class="pet-info">
-                                                        <div class="pet-name">
-                                                            <%= pet.name %>
-                                                        </div>
+            <% if (favorites.length===0) { %>
+                <p>You haven't posted any pets yet.</p>
+                <% } else { %>
+                    <% favorites.forEach(pet=> { %>
+                        <div href="#" class="card">
+                            <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
+                            <div class="card-content">
+                                <div class="pet-info">
+                                    <div class="pet-name">
+                                        <%= pet.name %>
+                                    </div>
 
-                                                        <div class="pet-gender">
-                                                            <%= pet.gender %>
-                                                        </div>
-                                                        <div class="pet-breed">
-                                                            <%= pet.breed %>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="card-links">
-                                                        <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
-                                                        <a href="/detail/<%= pet.id %>" class="viewDetail">View
-                                                            &#8594;</a>
-                                                    </div>
-
-                                                </div>
-
+                                    <div class="pet-gender">
+                                        <%= pet.gender %>
+                                    </div>
+                                    <div class="pet-breed">
+                                        <%= pet.breed %>
+                                    </div>
                                 </div>
-                                <% }) %>
-                                <% } %>
-                </div>
+
+                                <div class="card-links">
+                                    <a href="/removefavorite/<%= pet.id %>" class="remove">&#9932;</a>
+                                    <a href="/detail/<%= pet.id %>" class="viewDetail">View
+                                        &#8594;</a>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <% }) %>
+                            <% } %>
+        </div>
     </section>
 
     <section id="postAPet" class="toggle-section">
         <form action="/post-pet" method="POST" enctype="multipart/form-data" class="post-pet-form" id="postAPetContent">
             <div>
                 <div>
-                    <div>
+                    <div class="PetPhoto">
                         <label for="petPhoto">Photo:</label>
                         <img id="photoPreview" src="/uploads/standard/Paw.png" alt="Image Preview"
                             style="max-width: 200px; margin-top: 10px;">
@@ -448,6 +507,9 @@
     function toggleObject(targetId, buttonID) {
         const sections = document.querySelectorAll('.toggle-section');
         const buttons = document.querySelectorAll('button');
+        const nav = document.getElementById("accountNav");
+
+        nav.classList.remove("show-menu");
 
         sections.forEach(section => {
             if (section.id === targetId) {
@@ -470,8 +532,11 @@
         const firstNameInput = document.querySelector('#firstName');
         const lastNameInput = document.querySelector('#lastName');
         const storyTextarea = document.querySelector('#storyTextarea');
+        const profileImg = document.querySelector('#profileImageInput')
         const submitBtn = document.querySelector('#storySubmit');
         const editBtn = document.querySelector('#editProfileBtn');
+        const profileImgWrapper = document.getElementById('profileImgWrapper');
+
 
         const isEditing = storyTextarea.disabled === false;
 
@@ -479,11 +544,35 @@
         firstNameInput.disabled = isEditing;
         lastNameInput.disabled = isEditing;
         storyTextarea.disabled = isEditing;
+        profileImg.disabled = isEditing;
+
 
         // Toggle button visibility/text
         submitBtn.style.display = isEditing ? 'none' : 'inline-block';
         editBtn.innerText = isEditing ? 'Edit profile' : 'Cancel';
+
+        if (isEditing) {
+            // We are currently editing, so disable editing
+            profileImgWrapper.classList.remove('editable');
+        } else {
+            // We are currently not editing, so enable editing
+            profileImgWrapper.classList.add('editable');
+        }
     }
+
+    function previewImage(event) {
+        const input = event.target;
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('profileImg').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Add the event listener to the file input
+    document.getElementById('profileImageInput').addEventListener('change', previewImage);
 
     document.getElementById('petPhoto').addEventListener('change', function (event) {
         const file = event.target.files[0];
@@ -498,6 +587,21 @@
         } else {
             preview.src = '/uploads/standard/Paw.png';
         }
+    });
+
+    function toggleNavMenu() {
+        const nav = document.getElementById("accountNav");
+        nav.classList.toggle("show-menu");
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const profileImgWrapper = document.getElementById('profileImgWrapper');
+        const profileImageInput = document.getElementById('profileImageInput');
+        profileImgWrapper.addEventListener('click', () => {
+            if (profileImageInput) {
+                profileImageInput.click();
+            }
+        });
     });
 </script>
 </body>

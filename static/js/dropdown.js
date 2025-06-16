@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Close dropdowns when clicking outside
   window.addEventListener('click', function (event) {
   document.querySelectorAll('.dropdown-content').forEach(drop => {
-      drop.classList.remove('open');
+      drop.style.display = 'none';
     });
 });
 
