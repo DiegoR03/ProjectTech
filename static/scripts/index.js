@@ -1,4 +1,4 @@
-const menuButton = document.querySelector("header button")
+const menuButton = document.getElementById("menuButton")
 const deNav = document.querySelector("header nav")
 
 menuButton.onclick = toggleMenu 
