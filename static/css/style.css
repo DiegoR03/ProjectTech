@@ -64,7 +64,7 @@ header button {
   display: none;
   position: relative;
   z-index: 2;
-  background-color: var(--background-color);
+  background-color: var(--footer-header-background);
   border: none;
 }
 
