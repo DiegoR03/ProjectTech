@@ -2,7 +2,7 @@
   --primary-color: #4177BE;
   --primary-color-hover: rgb(46, 73, 169);
   --primary-color-2: #C74F0A;
-  --primary-color-hover-2: #c05c23;
+  --primary-color-hover-2: #E66F3A;
   --background-color: #f2f2f2;
   --footer-header-background: #fff;
   --active-filters: #46c0975a;
@@ -66,16 +66,85 @@ section:nth-of-type(1) a {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-section:nth-of-type(1) button:hover {
-  background: var(--primary-color-hover-2);
+section:nth-of-type(1) a:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  background-color: var(--primary-color-hover-2);
 }
 
 
 /* Section 2 */
 
 section:nth-of-type(2) {
+  background-color: var(--footer-header-background);
+  padding-top: 3em;
+  padding-bottom: 3em;
+}
+section:nth-of-type(2) .container {
+  max-width: 80%;
+  margin-inline: auto;
+  text-align: center;
+}
+section:nth-of-type(2) h2 {
+  margin-top: 0;
+  color: var(--font-color);
+}
+section:nth-of-type(2) .cards {
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+section:nth-of-type(2) .card {
+  position: relative;          /* ← make it a positioning context */
+  border-radius: 12px;
+  box-shadow: rgba(0,0,0,0.1) 0px 4px 12px;
+  overflow: hidden;
+  cursor: pointer;
+  flex: 1 1 260px;
+  transition: transform .2s, box-shadow .2s;
+}
+section:nth-of-type(2) .card:hover {
+  transform: translateY(-8px);
+  box-shadow: rgba(0,0,0,0.15) 0px 8px 16px;
+}
+
+/* --- New CSS to stack two images and fade between them --- */
+.image-container {
+  position: relative;
+  width: 100%;
+  background: white; /* optional */
+}
+.image-container img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  transition: opacity .2s ease-in-out;
+}
+.image-container .hover-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+.card:hover .hover-img {
+  opacity: 1;
+}
+.card:hover .default-img {
+  opacity: 0;
+}
+
+section:nth-of-type(2) .card-title {
+  color: var(--font-color);
+  padding: 1rem 0;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+/* section:nth-of-type(2) {
   background-color: var(--footer-header-background);
   padding-top: 3em;
   padding-bottom: 3em;
@@ -130,7 +199,7 @@ section:nth-of-type(2) .card-title {
   padding: 1rem 0;
   font-size: 1.5em;
   font-weight: 600;
-}
+} */
 
 /* section 3 */
 
@@ -171,10 +240,13 @@ section:nth-of-type(3) a {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-section:nth-of-type(3) button:hover {
-  background: var(--primary-color-hover-2);
+section:nth-of-type(3) a:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  background-color: var(--primary-color-hover-2);
 }
 
 
