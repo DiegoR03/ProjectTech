@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/static/css/style.css">
 
   <link rel="stylesheet" href="/static/css/indexStyling.css">
-    <title>FetchFinder</title>
+  <title>FetchFinder</title>
 
 </head>
+
 <body>
 
   <header class="navbar">
     <ul>
-    <li>      <div class="logo">
-          <svg height="100px" width="100px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-     viewBox="0 0 48.839 48.839" xml:space="preserve">
-  <g>
-    <path fill="var(--primary-color-2)" d="M39.041,36.843c2.054,3.234,3.022,4.951,3.022,6.742c0,3.537-2.627,5.252-6.166,5.252
+      <li>
+        <div class="logo">
+          <svg height="100px" width="100px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48.839 48.839" xml:space="preserve">
+            <g>
+              <path fill="var(--primary-color-2)" d="M39.041,36.843c2.054,3.234,3.022,4.951,3.022,6.742c0,3.537-2.627,5.252-6.166,5.252
       c-1.56,0-2.567-0.002-5.112-1.326c0,0-1.649-1.509-5.508-1.354c-3.895-0.154-5.545,1.373-5.545,1.373
       c-2.545,1.323-3.516,1.309-5.074,1.309c-3.539,0-6.168-1.713-6.168-5.252c0-1.791,0.971-3.506,3.024-6.742
       c0,0,3.881-6.445,7.244-9.477c2.43-2.188,5.973-2.18,5.973-2.18h1.093v-0.001c0,0,3.698-0.009,5.976,2.181
@@ -26,99 +29,140 @@
       s-5.761-6.672-8.488-5.414s-3.348,5.723-1.388,9.971C3.684,29.822,7.484,32.245,10.211,30.988z M32.206,20.878
       c3.7,0,6.7-4.674,6.7-10.439S35.906,0,32.206,0s-6.699,4.674-6.699,10.439C25.507,16.204,28.506,20.878,32.206,20.878z
        M45.727,15.602c-2.728-1.259-6.527,1.165-8.488,5.414s-1.339,8.713,1.389,9.972c2.728,1.258,6.527-1.166,8.488-5.414
-      S48.455,16.861,45.727,15.602z"/>
-  </g>
-  </svg>
+      S48.455,16.861,45.727,15.602z" />
+            </g>
+          </svg>
           <p>PetMatch</p>
-        </div> </li>
-  <li><button><img src="/static/images/dropdown-button.svg"></button></li>
-          </ul>
-      <!-- <nav>
-      <ul>
-        <li><a href="/" class="active">Home</a></li>
-        <li><a href="/browse">Browse</a></li>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/register">Register</a></li>
-      </ul>
-      </nav> -->
-      <nav>
-        <ul>
-        <% if (loggedIn) { %>
-            <li><a href="/browse">Browse</a></li>
-            <li><a href="/favourites">Favourites</a></li>
-            <li><a href="/account" class="active">Account</a></li>
-            <li><a href="/logout">Logout</a></li>
-            <% } else { %>
-                <li><a href="/browse">Browse Pets</a></li>
-                <li><a href="/login">Favourites</a></li>
-                <li><a href="/login">Login</a></li>
-                <% } %>
-        </ul>
+        </div>
+      </li>
+      <li><button><img src="/static/images/dropdown-button.svg"></button></li>
+    </ul>
+    <nav>
+      <% if (currentUser) { %>
+        <a href="/index">Home</a>
+        <a href="/browse">Browse</a>
+        <div class="dropdown notifications-dropdown">
+          <button class="dropbtn notifications-btn">
+            Notifications
+            <% if (currentUser.notifications.length> 0) { %>
+              <span class="badge">
+                <%= currentUser.notifications.length %>
+              </span>
+              <% } %>
+          </button>
+
+
+          <div class="dropdown-content">
+            <% if (currentUser.notifications.length> 0) { %>
+              <% currentUser.notifications.slice().reverse().forEach(note=> { %>
+                <a href="/detail/<%= note.petId %>"
+                  style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                  <img src="<%= note.image %>" class="noteImage" alt="Notification Image"
+                    style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%;">
+
+                  <div style="flex: 1;">
+                    <strong>
+                      <%= note.message %>
+                    </strong><br>
+                    <small>
+                      <%= new Date(note.timestamp).toLocaleString() %>
+                    </small>
+                  </div>
+                </a>
+
+                <% }) %>
+                  <form method="POST" action="/notifications/clear" style="padding: 0.5rem; text-align:center;">
+                    <button type="submit">Clear All</button>
+                  </form>
+                  <% } else { %>
+                    <p style="padding: 0.5rem; ">No notifications</p>
+                    <% } %>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="dropbtn"><img src="<%= currentUser?.profileImage%>" alt="Profile Image"></button>
+          <div id="myDropdown" class="dropdown-content">
+            <p>Hi <%= firstName %>!</p>
+            <a href="/account" class="active">Account</a>
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+        <% } else { %>
+          <a href="/index">Home</a>
+          <a href="/browse">Browse Pets</a>
+          <a href="/login">Login</a>
+          <% } %>
     </nav>
   </header>
-  
+
   <main>
     <section>
       <div class="container">
-      <div>
-        <h1>Looking for a pet to adopt?</h1>
-        <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hessitate to adopt one of these lovely pets.</p>
-        <a href="#">Browse pets</a>
-      </div>
-      <div>
-        <img src="/static/images/homepage-dog.png" alt="Dog">
-      </div>
-    </div>
-    </section>
-    
-      <section> 
-        <div class="container">
-          <h2>What pet are you looking for?</h2>
-          <div class="cards">
-      
-            <div class="card">
-              <div class="image-container">
-                <img src="/static/images/dog.png" alt="Dog">
-              </div>
-              <div class="card-title">Dogs</div>
-            </div>
-      
-            <div class="card">
-              <div class="image-container">
-                <img src="/static/images/cat.png" alt="Cat">
-              </div>
-              <div class="card-title">Cats</div>
-            </div>
-      
-            <div class="card">
-              <div class="image-container">
-                <img src="/static/images/rodent.png" alt="Rodent">
-              </div>
-              <div class="card-title">Rodents</div>
-            </div>
-      
-          </div>
+        <div>
+          <h1>Looking for a pet to adopt?</h1>
+          <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hessitate to
+            adopt one of these lovely pets.</p>
+          <a href="#">Browse pets</a>
         </div>
-      </section> 
+        <div>
+          <img src="/static/images/homepage-dog.png" alt="Dog">
+        </div>
+      </div>
+    </section>
 
-      <section>
-        <div class="container">
-          <div>
+    <section>
+      <div class="container">
+        <h2>What pet are you looking for?</h2>
+        <div class="cards">
+
+          <div class="card">
+            <div class="image-container">
+              <img src="/static/images/dog.png" alt="Dog">
+            </div>
+            <div class="card-title">Dogs</div>
+          </div>
+
+          <div class="card">
+            <div class="image-container">
+              <img src="/static/images/cat.png" alt="Cat">
+            </div>
+            <div class="card-title">Cats</div>
+          </div>
+
+          <div class="card">
+            <div class="image-container">
+              <img src="/static/images/rodent.png" alt="Rodent">
+            </div>
+            <div class="card-title">Rodents</div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div>
           <h2>Why adopt a pet?</h2>
-          <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of loving pets end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only gaining a loyal friend—you’re also helping reduce the number of animals in shelters and supporting a more humane world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your perfect match could be waiting for you. Adopt, and make a difference.</p>
+          <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of loving pets
+            end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only gaining a
+            loyal friend—you’re also helping reduce the number of animals in shelters and supporting a more humane
+            world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your perfect match
+            could be waiting for you. Adopt, and make a difference.</p>
           <button>Browse pets</button>
         </div>
         <div>
           <img src="/static/images/pets.jpg" alt="Dog">
         </div>
       </div>
-      </section>
+    </section>
 
-      <section>
-        <div class="container">
-          <h2>Recently uploaded pets</h2>
+    <section>
+      <div class="container">
+        <h2>Recently uploaded pets</h2>
       </div>
-      </section>
+    </section>
 
   </main>
 
@@ -126,10 +170,10 @@
     <div class="container">
       <ul>
         <div class="logo">
-          <svg height="100px" width="100px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-     viewBox="0 0 48.839 48.839" xml:space="preserve">
-  <g>
-    <path fill="var(--color-primary)" d="M39.041,36.843c2.054,3.234,3.022,4.951,3.022,6.742c0,3.537-2.627,5.252-6.166,5.252
+          <svg height="100px" width="100px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48.839 48.839" xml:space="preserve">
+            <g>
+              <path fill="var(--color-primary)" d="M39.041,36.843c2.054,3.234,3.022,4.951,3.022,6.742c0,3.537-2.627,5.252-6.166,5.252
       c-1.56,0-2.567-0.002-5.112-1.326c0,0-1.649-1.509-5.508-1.354c-3.895-0.154-5.545,1.373-5.545,1.373
       c-2.545,1.323-3.516,1.309-5.074,1.309c-3.539,0-6.168-1.713-6.168-5.252c0-1.791,0.971-3.506,3.024-6.742
       c0,0,3.881-6.445,7.244-9.477c2.43-2.188,5.973-2.18,5.973-2.18h1.093v-0.001c0,0,3.698-0.009,5.976,2.181
@@ -138,9 +182,9 @@
       s-5.761-6.672-8.488-5.414s-3.348,5.723-1.388,9.971C3.684,29.822,7.484,32.245,10.211,30.988z M32.206,20.878
       c3.7,0,6.7-4.674,6.7-10.439S35.906,0,32.206,0s-6.699,4.674-6.699,10.439C25.507,16.204,28.506,20.878,32.206,20.878z
        M45.727,15.602c-2.728-1.259-6.527,1.165-8.488,5.414s-1.339,8.713,1.389,9.972c2.728,1.258,6.527-1.166,8.488-5.414
-      S48.455,16.861,45.727,15.602z"/>
-  </g>
-  </svg>
+      S48.455,16.861,45.727,15.602z" />
+            </g>
+          </svg>
           <p>PetMatch</p>
         </div>
       </ul>
@@ -167,6 +211,7 @@
       </ul>
     </div>
   </footer>
-    <script src="/static/scripts/index.js" defer></script>
+  <script src="/static/scripts/index.js" defer></script>
 </body>
+
 </html>
