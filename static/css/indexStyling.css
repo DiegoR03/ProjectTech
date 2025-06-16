@@ -1,6 +1,12 @@
 :root {
+  /* Colors */
+ 
+  --font-color: #0d3149;
+  --font-color-white: #ffffff;
+ 
   --primary-color: #4177BE;
-  --primary-color-hover: rgb(46, 73, 169);
+  --background-color-blue: #4177BE;
+ 
   --primary-color-2: #C74F0A;
   --primary-color-hover-2: #E66F3A;
   --background-color: #f2f2f2;
@@ -11,10 +17,13 @@
   --font-color-white: #ffffff;
   --footer-text: #8E8E8E;
 }
-/* 
-main {
-  margin-inline: auto;
-} */
+
+#indexBody {
+  font-family: 'Montserrat';
+  color: var(--font-color);
+  background-color: var(--background-color-blue);
+  margin: 0;
+}
 
 h1 {
   font-size: 3.5em;
@@ -253,7 +262,7 @@ section:nth-of-type(3) a:hover {
 /* section 4 */
 
 section:nth-of-type(4) {
-  background-color: var(--footer-header-background);
+  background-color: var(--background-color-white);
   padding-top: 2em;
   padding-bottom: 2em;
 }
@@ -264,7 +273,7 @@ section:nth-of-type(4) .container {
   margin-inline: auto;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
 
   h1 {
     font-size: 1.5em;

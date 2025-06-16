@@ -1,12 +1,13 @@
 :root {
-    --primary-color: #46c098;
-    --primary-color-hover: #3da885;
     --button-text-color: #ffffff;
     --button-select-color: #ffffff;
     --active-filters: #46c0975a;
     --background-box: #ffffff;
     --removal-color: #aa0000;
     --primary-removal-color: #aa0000;
+
+    --background-color-white: #fff;
+    --background-color-blue: #4177BE;
 }
 
 /* ===== Layout ===== */
@@ -35,8 +36,8 @@ section {
 
 /* ===== Account Navigation ===== */
 #accountNav {
-    background-color: #90A5EC;
-    padding: 5rem 1rem 1rem;
+    background-color: var(--background-color-blue);
+    padding: 5rem 2rem 1rem;
     display: flex;
     position: sticky;
     flex-direction: column;
@@ -48,7 +49,7 @@ section {
 #accountNav h2 {
     color: var(--button-text-color);
     margin: 0;
-    padding-top: 1rem;
+    padding-top: 2rem;
 }
 
 #accountNav .nav-buttons {
@@ -62,7 +63,7 @@ section {
     cursor: pointer;
     padding: 0.7rem 1.5rem;
     color: var(--button-text-color);
-    background-color: #90A5EC;
+    background-color: var(--background-color-blue);
     border: none;
 }
 
@@ -503,40 +504,43 @@ textarea {
 }
 
 #profileImgWrapper {
-  position: relative;
-  display: inline-block;
-  width: 13rem;
-  height: 13rem;
-  border-radius: 50%;
-  overflow: hidden;
-  cursor: default; /* default cursor when not editable */
+    position: relative;
+    display: inline-block;
+    width: 13rem;
+    height: 13rem;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: default;
+    /* default cursor when not editable */
 }
 
 #profileImgWrapper.editable {
-  cursor: pointer; /* pointer cursor when editable */
+    cursor: pointer;
+    /* pointer cursor when editable */
 }
 
 #overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.35);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.35);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    pointer-events: none;
 }
 
 #profileImgWrapper.editable #overlay {
-  display: flex; /* show overlay only when editable */
+    display: flex;
+    /* show overlay only when editable */
 }
 
 
 /* ===== Responsive Rules ===== */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     #navToggle {
         display: block;
     }
@@ -575,6 +579,6 @@ textarea {
     }
 
     #myInfo form textarea {
-    width: 70vw;
-}
+        width: 70vw;
+    }
 }

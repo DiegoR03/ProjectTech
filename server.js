@@ -87,7 +87,7 @@ app
         session({
             resave: false,
 
-            saveUninitialized: true,
+            saveUninitialized: false,
 
             secret: process.env.SESSION_SECRET,
 
@@ -105,9 +105,10 @@ app
                 if (user) {
                     res.locals.currentUser = {
                         _id: user._id,
-                        firstName: user.firstName,
+                        firstName: user.firstName || '',
+                        lastName: user.lastName || '',
                         profileImage: user.profileImage,
-                        notifications: user.notifications || []
+                        notifications: user.notifications || [],
                     };
                 } else {
                     res.locals.currentUser = null;
@@ -133,6 +134,8 @@ app
         res.locals.loggedIn = req.session.userID ? true : false;
         next();
     })
+
+    .use(express.static('public'))
 
     .disable('x-powered-by')
 
@@ -171,7 +174,6 @@ app
 
     .get("/index", loadHome)
 
-    .get("/account", loadAccount)
     .get("/logout", (req, res) => {
         req.session.destroy();
         res.redirect("/login");
@@ -185,7 +187,7 @@ app
         let user = null;
 
         if (userId) {
-            const user = await userCollection.findOne({ _id: userId });
+            user = await userCollection.findOne({ _id: new ObjectId(userId) });
             myPets = await petCollection.find({ addedByUserId: userId }).toArray();
 
             const now = Date.now();
@@ -279,7 +281,7 @@ app
             res.status(500).send('Error fetching pet details.');
         }
     })
-    
+
     .get("/detail/:id", loadDetail)
     .get('/fave/:id', async (req, res) => {
         const petId = req.params.id;
@@ -525,27 +527,23 @@ app
 // RENDERING VIEWS ///////////////////////////////////////////////////////////
 
 function loadHome(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
     res.render("index.ejs", { userID });
 }
 
 function loadLogin(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
     res.render("login.ejs", { userID });
 }
 
 
 function loadPasswordChange(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
     res.render("passwordchange.ejs", { userID });
 }
 
 async function loadDetail(req, res) {
-    const petId = req.params.id;
-    const userID = req.session.userID || 95234;
+    const userID = req.session.userID || null;
     console.log("Fetching pet ID:", petId);
 
     try {
@@ -623,10 +621,7 @@ async function loadFave(req, res) {
 
 
 function loadSearchForm(req, res) {
-    if (!req.session.userID) {
-        req.session.userID = 95234;
-    }
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
 
 
     // Retrieves questionlist from 'search-form.js'
@@ -671,9 +666,7 @@ app.get("/account", ensureAuthenticated, loadAccount);
 
 
 function loadResultsSearchForm(req, res) {
-    req.session.userID = 95234;
-
-    let userID = req.session.userID;
+        const userID = req.session.userID || null;
     const userAnswers = req.session.answers || {};
     const { question, questionLabels } = require('./static/js/search-form');
 
@@ -688,8 +681,7 @@ function loadResultsSearchForm(req, res) {
 }
 
 function loadRegistry(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+        const userID = req.session.userID || null;
     res.render("register.ejs", { userID });
 }
 
@@ -705,14 +697,14 @@ async function processLogin(req, res) {
         const user = await userCollection.findOne({ email });
 
         if (user && await bcrypt.compare(password, user.password)) {
-            req.session.userID = user._id;
+            req.session.userID = user._id.toString();
             req.session.email = user.email;
             req.session.firstName = user.firstName;
             req.session.profileImage = user.profileImage || '/static/default.png';
             req.session.userStory = user.story || '';
             req.session.recentlyViewed = user.recentlyViewed || [];
             req.session.favorites = user.favorites || [],
-                req.session.createdAt = user.createdAt
+            req.session.createdAt = user.createdAt
 
             res.redirect("/account");
         } else {
@@ -724,7 +716,7 @@ async function processLogin(req, res) {
 
         app.post("/register", uploads.single('profileImage'), processRegistration);
     }
-
+}
 
 
 function processForm(req, res) {
@@ -877,14 +869,12 @@ async function loadAccount(req, res) {
         return;
     }
 
-
     try {
         const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
         if (!user) {
             return res.status(404).render("account.ejs", { error: "User not found." });
         } else {
             // Get recently viewed pets from session
-            const recentlyViewed = req.session.recentlyViewed || [];
             const myPets = await petCollection.find({ addedByUserId: user._id.toString() }).toArray();
 
             res.render("account.ejs", {
