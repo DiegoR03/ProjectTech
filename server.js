@@ -106,7 +106,8 @@ app
                     res.locals.currentUser = {
                         _id: user._id,
                         firstName: user.firstName,
-                        profileImage: user.profileImage
+                        profileImage: user.profileImage,
+                        notifications: user.notifications || []
                     };
                 } else {
                     res.locals.currentUser = null;
@@ -284,44 +285,133 @@ app
         const petId = req.params.id;
 
         try {
+            // First, try to find pet in customPets (local)
+            const customPet = await db.collection('customPets').findOne({ id: petId });
+
+            if (customPet) {
+                // It's a custom pet
+                const petData = {
+                    id: customPet.id,
+                    name: customPet.name,
+                    photo: customPet.photos?.[0]?.medium || null,
+                    gender: customPet.gender,
+                    breed: customPet.breeds?.primary || '',
+                    isCustom: true
+                };
+
+                if (!req.session.favorites) req.session.favorites = [];
+
+                // Check if already favorited
+                const alreadyFavorited = req.session.favorites.some(p => p.id === petId);
+                if (!alreadyFavorited) {
+                    req.session.favorites.unshift(petData);
+
+                    if (req.session.userID) {
+                        await userCollection.updateOne(
+                            { _id: new ObjectId(req.session.userID) },
+                            { $set: { favorites: req.session.favorites } }
+                        );
+                    }
+
+                    // Notify owner if liker is not the owner
+                    if (customPet.addedByUserId && req.session.userID !== customPet.addedByUserId.toString()) {
+                        const ownerId = new ObjectId(customPet.addedByUserId);
+                        const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+                        const message = `${liker.firstName} liked your pet "${customPet.name}"`;
+                        const image = liker.profileImage;
+
+                        await userCollection.updateOne(
+                            { _id: ownerId },
+                            { $push: { notifications: { image, message, petId, timestamp: Date.now() } } }
+                        );
+                    }
+                }
+
+                // Render detail with the local pet
+                return res.render('detail', { pet: customPet });
+            }
+
+            // Pet from Petfinder API
             const token = await getPetfinderToken();
             const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-
             const data = await response.json();
             const pet = data.animal;
             if (!pet) throw new Error("Pet not found");
 
-            if (!req.session.favorites) req.session.favorites = [];
-
-            // Add new pet 
             const petData = {
                 id: pet.id,
                 name: pet.name,
                 photo: pet.photos?.[0]?.medium || null,
                 gender: pet.gender,
-                breed: pet.breeds.primary
+                breed: pet.breeds.primary,
+                isCustom: false
             };
 
-            req.session.favorites.unshift(petData);
+            if (!req.session.favorites) req.session.favorites = [];
 
-            // Update MongoDB
-            if (req.session.email) {
-                await users.updateOne(
-                    { email: req.session.email },
-                    { $set: { favorites: req.session.favorites } }
-                );
+            const alreadyFavorited = req.session.favorites.some(p => p.id === petId);
+            if (!alreadyFavorited) {
+                req.session.favorites.unshift(petData);
+
+                if (req.session.userID) {
+                    await userCollection.updateOne(
+                        { _id: new ObjectId(req.session.userID) },
+                        { $set: { favorites: req.session.favorites } }
+                    );
+                }
             }
 
             res.render('detail', { pet });
         } catch (err) {
-            console.error("Error in /detail route:", err);
+            console.error("Error in /fave/:id route:", err);
             res.status(500).send('Error fetching pet details.');
         }
     })
+
+    .get('/removefavorite/:id', async (req, res) => {
+        const petId = req.params.id;
+
+        try {
+            if (!req.session.favorites) req.session.favorites = [];
+
+            req.session.favorites = req.session.favorites.filter(p => String(p.id) !== String(petId));
+
+            if (req.session.userID) {
+                await userCollection.updateOne(
+                    { _id: new ObjectId(req.session.userID) },
+                    { $set: { favorites: req.session.favorites } }
+                );
+            }
+
+            const customPet = await db.collection('customPets').findOne({ id: petId });
+
+            if (customPet) {
+                return res.redirect('/account');
+            }
+
+            const token = await getPetfinderToken();
+            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            const pet = data.animal;
+            if (!pet) throw new Error("Pet not found");
+
+            res.redirect('/account');
+
+        } catch (err) {
+            console.error("Error removing notifucation", err);
+            res.status(500).send('Error removing pet from favorites.');
+        }
+    })
+
+
     .get("/fave/:id", loadFave)
 
     .get("/searchForm", loadSearchForm)
@@ -406,11 +496,24 @@ app
         }
     })
 
+    .post('/notifications/clear', async (req, res) => {
+        if (!req.session.userID) return res.status(401).send('Unauthorized');
 
+        try {
+            await userCollection.updateOne(
+                { _id: new ObjectId(req.session.userID) },
+                { $set: { notifications: [] } }
+            );
+            res.redirect('/account');
+        } catch (err) {
+            console.error('Error clearing notifications:', err);
+            res.status(500).send('Server error');
+        }
+    })
 
 
     .post("/login", processLogin)
-    .post("/account", changeStory)
+    .post('/account', uploads.single('profileImage'), changeStory)
     .post("/passwordchange", changePassword)
     .post("/searchForm", processForm)
     .post("/register", uploads.single("fileInput"), processRegistration)
@@ -577,7 +680,7 @@ function loadResultsSearchForm(req, res) {
     const groupedAnswers = {
         "General Info": ['type', 'size', 'gender', 'age'],
         "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'floor', 'hasGarden'],
-        "Pet Personality": [ 'isComfystrangers', 'isPlayful']
+        "Pet Personality": ['isComfystrangers', 'isPlayful']
     };
 
 
@@ -609,7 +712,7 @@ async function processLogin(req, res) {
             req.session.userStory = user.story || '';
             req.session.recentlyViewed = user.recentlyViewed || [];
             req.session.favorites = user.favorites || [],
-            req.session.createdAt = user.createdAt
+                req.session.createdAt = user.createdAt
 
             res.redirect("/account");
         } else {
@@ -719,8 +822,6 @@ async function processRegistration(req, res) {
                 profileImage: profileImagePath,
                 createdAt: new Date(),
                 userStory: "A short story about you",
-
-
             };
 
             await userCollection.insertOne(newUser);
@@ -795,7 +896,7 @@ async function loadAccount(req, res) {
                 recentlyViewed: req.session.recentlyViewed || [],
                 favorites: user.favorites || [],
                 myPets,
-                createdAt: user.createdAt 
+                createdAt: user.createdAt
             });
         }
     } catch (error) {
@@ -817,15 +918,31 @@ async function changeStory(req, res) {
         if (!user) return res.status(404).send("User not found");
 
         const email = user.email;
-
         const fieldsToUpdate = ['firstName', 'lastName', 'userStory'];
         const updates = {};
 
+        // Update text fields if changed
         for (const field of fieldsToUpdate) {
             const newValue = req.body[field];
             if (newValue !== undefined && newValue.trim() !== "" && newValue !== user[field]) {
                 updates[field] = newValue;
             }
+        }
+
+        // Handle profile image upload if present
+        if (req.file) {
+            const inputPath = req.file.path;
+
+            const outputPath = path.join("uploads/", "square-" + req.file.filename);
+
+            await sharp(inputPath)
+                .resize(800, 800, {
+                    fit: sharp.fit.cover,
+                    position: sharp.strategy.entropy
+                })
+                .toFile(outputPath);
+
+            updates.profileImage = "/" + outputPath.replace(/\\/g, "/"); // Normalize path for all OS
         }
 
         if (Object.keys(updates).length > 0) {
@@ -842,6 +959,8 @@ async function changeStory(req, res) {
         res.status(500).redirect("/login");
     }
 }
+
+
 
 
 // GETTING API TOKEN /////////////////////////////////////////////////////////////////////
@@ -1034,7 +1153,7 @@ app.get('/match', async (req, res) => {
             let score = 0;
             let reason = [];
             const hasGarden = userAnswers.hasGarden === 'true';
-            
+
             const floor = userAnswers.floor; // groundfloor / upperfloor-with-elevator / upperfloor-without-elevator
 
             // --- 1. ENVIRONMENT DEALBREAKERS ---
