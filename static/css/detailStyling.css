@@ -156,7 +156,7 @@ h2{
     margin-bottom: 0.5em;
 }
 
-.extra-traits li:nth-child(even){
+.extra-traits li:nth-child(odd){
     font-weight: bold;
 }
 
