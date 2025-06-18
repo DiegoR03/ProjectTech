@@ -348,11 +348,13 @@ body>main>section>a:nth-of-type(1):hover {
 .pet-gender {
   color: #777;
   font-size: 1rem;
+  margin: 0;
 }
 
 .pet-breed{
   font-size: 0.8em;
   color: #777;
+  margin: 0;
 }
 
 .error,

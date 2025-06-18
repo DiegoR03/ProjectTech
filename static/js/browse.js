@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const resultGrid = document.getElementById("result-grid");
 
   form.addEventListener("submit", async (e) => {
-    e.preventDefault(); // voorkomen dat pagina herlaadt
     loaderDiv.classList.add("loading");
     if (resultGrid) resultGrid.style.display = "none";
 

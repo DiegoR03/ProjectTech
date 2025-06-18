@@ -179,82 +179,139 @@
       <!-- Loading state -->
       <div id="loaderDiv" class="">
         <img src="/static/images/Animation - 1747919735912.gif" alt="Loading..." />
-        <img class="secImg" src="/static/images/Animation - 1747919735912.gif" alt="Loading..." />
-        <!-- source: https://lottiefiles.com/free-animations/loading -->
 
       </div>
 
-      <% if (pagination && pagination.total_count) { %>
-        <p class="results">
-          <%= pagination.total_count %> results found
-        </p>
+      <style>
+        #pet-scroll-container {
+          position: relative;
+          height: 70vh;
+          width: 194%;
+          overflow-y: auto;
+          border: 1px solid #ccc;
+          padding: 1rem;
 
-        <!-- Page controls -->
-        <div class="pages">
-          <% function buildPageLink(pageNum) { const url=new URLSearchParams(request.query); url.set('page', pageNum);
-            return '/browse?' + url.toString(); } %>
+        }
 
-            <% if (pagination.current_page> 1) { %>
-              <a class="page-btn" href="<%= buildPageLink(pagination.current_page - 1) %>">&laquo;</a>
-              <% } %>
+        .pet-card {
+          margin-bottom: 1rem;
+        }
 
-                <span class="page-info">
-                  <%= pagination.current_page %> of <%= pagination.total_pages %>
-                </span>
+        #scroll-sentinel {
+          height: 16px;
+          background: transparent;
+        }
+      </style>
 
-                <% if (pagination.current_page < pagination.total_pages) { %>
-                  <a class="page-btn" href="<%= buildPageLink(pagination.current_page + 1) %>">&raquo;</a>
-                  <% } %>
-        </div>
-    </div>
-
-
-    <% } else { %>
-      <p>No results found.</p>
-      <% } %>
-        <% if (error) { %>
-          <p class="error">
-            <%= error %>
-          </p>
-          <% } else if (!pets || pets.length===0) { %>
-            <p class="empty">No pets found.</p>
-            <% } else { %>
-              <div class="grid" id="result-grid">
-                <% pets.forEach(pet=> { %>
-                  <div href="#" class="card">
-                    <% if (pet.photos && pet.photos.length> 0) { %>
-                      <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
-                      <% } else { %>
-                        <img src="https://via.placeholder.com/300x180?text=No+Image" alt="No image available" />
-                        <% } %>
-                          <div class="card-content">
-                            <div class="pet-info">
-                              <div class="pet-name">
-                                <%= pet.name %>
-                              </div>
-
-                              <div class="pet-gender">
-                                <%= pet.gender %>
-                              </div>
-                              <div class="pet-breed">
-                                <%= pet.breeds.primary %>
-                              </div>
-                            </div>
-                              
-                            <div class="card-links">
-                              <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
-                              <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
-                            </div>
-
-                          </div>
-
+      <div id="pet-scroll-container">
+        <div id="pet-list" class="grid">
+          <% pets.forEach(pet=> { %>
+            <div class="pet-card">
+              <div class="card">
+                <img src="<%= pet.photos?.[0]?.medium || 'No image available' %>" alt="<%= pet.name %>"
+                  class="" />
+                <div class="card-content">
+                  <div class="pet-info">
+                    <h3 class="pet-name">
+                      <%= pet.name %>
+                    </h3>
+                    <p class="pet-gender">
+                      <%= pet.age %>, <%= pet.gender %>
+                    </p>
+                    <p class="pet-breed">
+                      <%= pet.breeds?.primary || 'Unknown breed' %>
+                    </p>
+                    <div class="card-links">
+                      <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
+                      <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                    </div>
                   </div>
-                  <% }) %>
+                </div>
               </div>
+            </div>
+
+            <% }) %>
+        </div>
+        <div id="scroll-sentinel" class="h-4"></div>
+
+      </div>
+    </div>
+    <script>
+  let currentPage = 2; // eerste 9 zijn al geserveerd
+  let isLoading = false;
+  let totalPages = Infinity;
+
+  const petContainer = document.getElementById('pet-list');
+  const scrollContainer = document.getElementById('pet-scroll-container');
+  const sentinel = document.getElementById('scroll-sentinel'); 
 
 
+  function createPetCard(pet) {
+    const cardDiv = document.createElement('div');
+    cardDiv.classList.add('pet-card');
+    cardDiv.innerHTML = `
+      <div class="card">
+        <img src="${pet.photos?.[0]?.medium || '/placeholder.jpg'}" alt="${pet.name}" />
+        <div class="card-content">
+          <div class="pet-info">
+            <h3 class="pet-name">${pet.name}</h3>
+            <p class="pet-gender">${pet.age}, ${pet.gender}</p>
+            <p class="pet-breed">${pet.breeds?.primary || 'Unknown breed'}</p>
+            <div class="card-links">
+              <a href="/fave/${pet.id}" class="favorite">&#x2661;</a>
+              <a href="/detail/${pet.id}" class="viewDetail">View &#8594;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    return cardDiv;
+  }
 
-              <% } %>
+  function loadPets(page) {
+    if (isLoading) return;
+    isLoading = true;
+    document.getElementById('loaderDiv').classList.remove('hidden');
+
+    const currentFilters = new URLSearchParams(window.location.search);
+    currentFilters.set('page', currentPage + 1);
+
+    fetch(`/browse/api?${currentFilters.toString()}`)
+      .then(res => res.json())
+      .then(data => {
+        data.pets.forEach(animal => {
+          const petCard = createPetCard(animal);
+          petContainer.appendChild(petCard);
+        });
+
+        totalPages = data.pagination?.totalPages ?? totalPages;
+        isLoading = false;
+        document.getElementById('loaderDiv').classList.add('hidden');
+      })
+      .catch(err => {
+        console.error('Error loading pets:', err);
+        isLoading = false;
+        document.getElementById('loaderDiv').classList.add('hidden');
+      });
+  }
+
+  // Intersection Observer setup
+const observer = new IntersectionObserver(
+  (entries) => {
+    if (entries[0].isIntersecting && !isLoading && currentPage <= totalPages) {
+      loadPets(currentPage);
+    }
+  },
+  {
+    root: scrollContainer,
+    rootMargin: '0px 0px 700px 0px' 
+  }
+);
+
+observer.observe(sentinel);
+  // Eerste load is al gebeurd op server
+</script>
+
 
   </main>
   <footer>
