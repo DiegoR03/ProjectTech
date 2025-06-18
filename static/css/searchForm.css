@@ -12,6 +12,8 @@
 main{
   margin-top: 6%;
   margin-left: 12%;
+  width: 70%;
+  padding: 4rem;
 }
 .step-container {
   max-width: 600px;
@@ -112,10 +114,6 @@ h1 {
   color: var(--primary-color-2);
   position: sticky;
   top: 10%;
-}
-
-main{
-  width: 70%;
 }
 
 h3 {

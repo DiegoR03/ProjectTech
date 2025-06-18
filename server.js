@@ -33,6 +33,7 @@ const uri = process.env.URI;
 const client = new MongoClient(uri);
 const db = client.db(process.env.DB_NAME);
 const userCollection = db.collection(process.env.USER_COLLECTION)
+const petCollection = db.collection(process.env.PETS_COLLECTION)
 const users = db.collection('users');
 
 const uploadDir = path.join(__dirname, "uploads");
@@ -86,7 +87,7 @@ app
         session({
             resave: false,
 
-            saveUninitialized: true,
+            saveUninitialized: false,
 
             secret: process.env.SESSION_SECRET,
 
@@ -103,8 +104,11 @@ app
 
                 if (user) {
                     res.locals.currentUser = {
-                        firstName: user.firstName,
-                        profileImage: user.profileImage
+                        _id: user._id,
+                        firstName: user.firstName || '',
+                        lastName: user.lastName || '',
+                        profileImage: user.profileImage,
+                        notifications: user.notifications || [],
                     };
                 } else {
                     res.locals.currentUser = null;
@@ -131,6 +135,8 @@ app
         next();
     })
 
+    .use(express.static('public'))
+
     .disable('x-powered-by')
 
     .set("view engine", "ejs")
@@ -140,9 +146,34 @@ app
     .get("/login", loadLogin)
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
+    .get('/browse', async (req, res) => {
+        const filters = req.query;
+
+        // Build MongoDB filter for customPets
+        const mongoFilters = {};
+        if (filters.species) mongoFilters.species = filters.species;
+        if (filters.gender) mongoFilters.gender = filters.gender;
+        if (filters.size) mongoFilters.size = filters.size;
+        if (filters.age) mongoFilters.age = filters.age;
+        if (filters.coat) mongoFilters.coat = filters.coat;
+        if (filters.good_with_children) mongoFilters.good_with_children = filters.good_with_children;
+        if (filters.good_with_dogs) mongoFilters.good_with_dogs = filters.good_with_dogs;
+        if (filters.house_trained) mongoFilters.house_trained = filters.house_trained === 'true';
+
+        const localPets = await db.collection('customPets').find(mongoFilters).toArray();
+
+        const allPets = [...localPets /*, ...apiPets */];
+
+        res.render('browse', {
+            pets: allPets,
+            pagination: { total_count: allPets.length, current_page: 1, total_pages: 1 },
+            activeFilters: Object.entries(filters).map(([key, value]) => ({ label: key, value })),
+            request: req
+        });
+    })
+
     .get("/index", loadHome)
 
-    .get("/account", loadAccount)
     .get("/logout", (req, res) => {
         req.session.destroy();
         res.redirect("/login");
@@ -152,9 +183,12 @@ app
         const userId = req.session.userID;
         let recentlyViewed = [];
         let favorites = [];
+        let myPets = [];
+        let user = null;
 
         if (userId) {
-            const user = await userCollection.findOne({ _id: userId });
+            user = await userCollection.findOne({ _id: new ObjectId(userId) });
+            myPets = await petCollection.find({ addedByUserId: userId }).toArray();
 
             const now = Date.now();
             // Filter out expired pets (older than 120 hours or with no tiem)
@@ -177,7 +211,9 @@ app
             userStory: user?.userStory || '',
             profileImage: user?.profileImage || '',
             loggedIn: !!req.session.userID,
-            favorites: user?.favorites || []
+            favorites: user?.favorites || [],
+            myPets,
+            createdAt: user?.createdAt || null
         });
     })
 
@@ -185,41 +221,53 @@ app
         const petId = req.params.id;
 
         try {
-            const token = await getPetfinderToken();
-            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            const data = await response.json();
-            const pet = data.animal;
             const now = Date.now();
 
-            if (!pet) throw new Error("Pet not found");
+            // 1. Try to find pet in your own MongoDB collection
+            const mongoPet = await petCollection.findOne({ id: petId }); // if stored as string
 
+            let pet;
+
+            if (mongoPet) {
+                // Pet was found in your MongoDB collection
+                pet = mongoPet;
+            } else {
+                // 2. Not found locally, fetch from Petfinder API
+                const token = await getPetfinderToken();
+                const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                pet = data.animal;
+
+                if (!pet) throw new Error("Pet not found");
+            }
+
+            // 3. Handle recently viewed
             if (!req.session.recentlyViewed) req.session.recentlyViewed = [];
 
-            // Remove expired (older than 120hours or no time), or duplicates (if one animal is viewed multiple times)
-            req.session.recentlyViewed = req.session.recentlyViewed.filter(p => now - p.timestamp < 120 * 60 * 60 * 1000);
-            req.session.recentlyViewed = req.session.recentlyViewed.filter(p => p.id !== pet.id);
+            // Filter out expired and duplicates
+            req.session.recentlyViewed = req.session.recentlyViewed
+                .filter(p => now - p.timestamp < 120 * 60 * 60 * 1000)
+                .filter(p => p.id !== pet.id);
 
-            // Add new pet 
+            // Add current pet to recently viewed
             const petData = {
                 id: pet.id,
-                name: pet.name,
-                photo: pet.photos?.[0]?.medium || null,
+                name: pet.name || pet.petname, // for local pets
+                photo: pet.photos?.[0]?.medium || pet.photo?.[0]?.medium || null,
                 gender: pet.gender,
-                breed: pet.breeds.primary,
+                breed: pet.breed || pet.breeds?.primary,
                 timestamp: now
             };
 
             req.session.recentlyViewed.unshift(petData);
-
-            // Limit to 5 
             req.session.recentlyViewed = req.session.recentlyViewed.slice(0, 5);
 
-            // Update MongoDB
+            // Save to user document if logged in
             if (req.session.email) {
                 await users.updateOne(
                     { email: req.session.email },
@@ -239,52 +287,235 @@ app
         const petId = req.params.id;
 
         try {
+            // First, try to find pet in customPets (local)
+            const customPet = await db.collection('customPets').findOne({ id: petId });
+
+            if (customPet) {
+                // It's a custom pet
+                const petData = {
+                    id: customPet.id,
+                    name: customPet.name,
+                    photo: customPet.photos?.[0]?.medium || null,
+                    gender: customPet.gender,
+                    breed: customPet.breeds?.primary || '',
+                    isCustom: true
+                };
+
+                if (!req.session.favorites) req.session.favorites = [];
+
+                // Check if already favorited
+                const alreadyFavorited = req.session.favorites.some(p => p.id === petId);
+                if (!alreadyFavorited) {
+                    req.session.favorites.unshift(petData);
+
+                    if (req.session.userID) {
+                        await userCollection.updateOne(
+                            { _id: new ObjectId(req.session.userID) },
+                            { $set: { favorites: req.session.favorites } }
+                        );
+                    }
+
+                    // Notify owner if liker is not the owner
+                    if (customPet.addedByUserId && req.session.userID !== customPet.addedByUserId.toString()) {
+                        const ownerId = new ObjectId(customPet.addedByUserId);
+                        const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+                        const message = `${liker.firstName} liked your pet "${customPet.name}"`;
+                        const image = liker.profileImage;
+
+                        await userCollection.updateOne(
+                            { _id: ownerId },
+                            { $push: { notifications: { image, message, petId, timestamp: Date.now() } } }
+                        );
+                    }
+                }
+
+                // Render detail with the local pet
+                return res.render('detail', { pet: customPet });
+            }
+
+            // Pet from Petfinder API
             const token = await getPetfinderToken();
             const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-
             const data = await response.json();
             const pet = data.animal;
             if (!pet) throw new Error("Pet not found");
 
-            if (!req.session.favorites) req.session.favorites = [];
-
-            // Add new pet 
             const petData = {
                 id: pet.id,
                 name: pet.name,
                 photo: pet.photos?.[0]?.medium || null,
                 gender: pet.gender,
-                breed: pet.breeds.primary
+                breed: pet.breeds.primary,
+                isCustom: false
             };
 
-            req.session.favorites.unshift(petData);
+            if (!req.session.favorites) req.session.favorites = [];
 
-            // Update MongoDB
-            if (req.session.email) {
-                await users.updateOne(
-                    { email: req.session.email },
-                    { $set: { favorites: req.session.favorites } }
-                );
+            const alreadyFavorited = req.session.favorites.some(p => p.id === petId);
+            if (!alreadyFavorited) {
+                req.session.favorites.unshift(petData);
+
+                if (req.session.userID) {
+                    await userCollection.updateOne(
+                        { _id: new ObjectId(req.session.userID) },
+                        { $set: { favorites: req.session.favorites } }
+                    );
+                }
             }
 
             res.render('detail', { pet });
         } catch (err) {
-            console.error("Error in /detail route:", err);
+            console.error("Error in /fave/:id route:", err);
             res.status(500).send('Error fetching pet details.');
         }
     })
+
+    .get('/removefavorite/:id', async (req, res) => {
+        const petId = req.params.id;
+
+        try {
+            if (!req.session.favorites) req.session.favorites = [];
+
+            req.session.favorites = req.session.favorites.filter(p => String(p.id) !== String(petId));
+
+            if (req.session.userID) {
+                await userCollection.updateOne(
+                    { _id: new ObjectId(req.session.userID) },
+                    { $set: { favorites: req.session.favorites } }
+                );
+            }
+
+            const customPet = await db.collection('customPets').findOne({ id: petId });
+
+            if (customPet) {
+                return res.redirect('/account');
+            }
+
+            const token = await getPetfinderToken();
+            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            const pet = data.animal;
+            if (!pet) throw new Error("Pet not found");
+
+            res.redirect('/account');
+
+        } catch (err) {
+            console.error("Error removing notifucation", err);
+            res.status(500).send('Error removing pet from favorites.');
+        }
+    })
+
+
     .get("/fave/:id", loadFave)
 
     .get("/searchForm", loadSearchForm)
     .get("/results-search-form", loadResultsSearchForm)
 
+    // GET form
+    .get('/post-pet', (req, res) => {
+        if (!req.session.user) return res.redirect('/login');
+        res.render('addPetForm'); // Create this EJS view
+    })
+
+    // POST form submission
+    .post('/post-pet', uploads.single('photo'), async (req, res) => {
+
+        async function generateCustomId() {
+            let id;
+            let exists = true;
+            while (exists) {
+                id = String(Math.floor(Math.random() * 10000000)).padStart(7, '0');
+                exists = await db.collection('customPets').findOne({ id });
+            }
+            return id;
+        }
+
+        const {
+            petname, description, type, breed, size, gender, age, coat, children, dogs, cats, house_trained, shots_current, isCastrated, isComfystrangers, isAloneOften, isPlayful, isPaired, activity } = req.body;
+
+        let processedPhotoPath = null;
+
+        function toBoolean(value) {
+            return value === 'true' ? true : value === 'false' ? false : undefined;
+        }
+
+        try {
+            if (req.file) {
+                const outputPath = `uploads/post-a-pet/${req.file.filename}.jpg`;
+                await sharp(req.file.path)
+                    .resize(300, 300)
+                    .toFile(outputPath);
+
+                processedPhotoPath = `/${outputPath}`;
+            }
+
+            const id = await generateCustomId();
+
+            const newPet = {
+                id,
+                name: petname,
+                description,
+                species: type,
+                size,
+                gender,
+                age,
+                coat,
+                activity: toBoolean(activity),
+                breeds: { primary: breed },
+                environment: {
+                    children: toBoolean(children),
+                    dogs: toBoolean(dogs),
+                    cats: toBoolean(cats)
+                },
+                attributes: {
+                    house_trained: toBoolean(house_trained),
+                    shots_current: toBoolean(shots_current)
+                },
+                profile: {
+                    isCastrated,
+                    isComfystrangers,
+                    isAloneOften,
+                    isPlayful,
+                    isPaired
+                },
+                photos: processedPhotoPath ? [{ medium: processedPhotoPath }] : [],
+                addedByUserId: req.session.userID || null
+            };
+
+            await db.collection('customPets').insertOne(newPet);
+            res.redirect('/account');
+        } catch (err) {
+            console.error('Error uploading or processing image:', err);
+            res.status(500).send('An error occurred while posting the pet.');
+        }
+    })
+
+    .post('/notifications/clear', async (req, res) => {
+        if (!req.session.userID) return res.status(401).send('Unauthorized');
+
+        try {
+            await userCollection.updateOne(
+                { _id: new ObjectId(req.session.userID) },
+                { $set: { notifications: [] } }
+            );
+            res.redirect('/account');
+        } catch (err) {
+            console.error('Error clearing notifications:', err);
+            res.status(500).send('Server error');
+        }
+    })
+
 
     .post("/login", processLogin)
-    .post("/account", changeStory)
+    .post('/account', uploads.single('profileImage'), changeStory)
     .post("/passwordchange", changePassword)
     .post("/searchForm", processForm)
     .post("/register", uploads.single("fileInput"), processRegistration)
@@ -296,50 +527,55 @@ app
 // RENDERING VIEWS ///////////////////////////////////////////////////////////
 
 function loadHome(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
     res.render("index.ejs", { userID });
 }
 
 function loadLogin(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
     res.render("login.ejs", { userID });
 }
 
 
 function loadPasswordChange(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
     res.render("passwordchange.ejs", { userID });
 }
 
-//Detail page///////////////////////////////////////////////////////////////////////
 async function loadDetail(req, res) {
-    const petId = req.params.id;
-    const userID = req.session.userID || 95234;
+    const userID = req.session.userID || null;
     console.log("Fetching pet ID:", petId);
 
     try {
-        const token = await getPetfinderToken();
-        const url = `https://api.petfinder.com/v2/animals/${petId}`;
-        console.log("API Request:", url);
+        // Step 1: Try to find pet in your own MongoDB collection
+        const mongoPet = await petCollection.findOne({ id: Number(petId) }); // or { id: petId } if stored as a string
 
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        let pet = null;
 
-        const data = await response.json();
-        console.log("Petfinder Response:", data);
+        if (mongoPet) {
+            console.log("Found pet in MongoDB");
+            pet = mongoPet;
+        } else {
+            // Step 2: Fall back to Petfinder API
+            const token = await getPetfinderToken();
+            const url = `https://api.petfinder.com/v2/animals/${petId}`;
+            console.log("API Request:", url);
 
-        const pet = data.animal;
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
 
-        if (!pet) {
-            throw new Error("Pet not found");
+            const data = await response.json();
+            console.log("Petfinder Response:", data);
+
+            pet = data.animal;
+
+            if (!pet) throw new Error("Pet not found from Petfinder");
         }
 
+        // Step 3: Render page
         res.render("detail.ejs", {
             pet,
             userID
@@ -354,6 +590,7 @@ async function loadDetail(req, res) {
         });
     }
 }
+
 
 //Fave page ///////////////////////////////////////////////////////////////
 async function loadFave(req, res) {
@@ -384,10 +621,7 @@ async function loadFave(req, res) {
 
 
 function loadSearchForm(req, res) {
-    if (!req.session.userID) {
-        req.session.userID = 95234;
-    }
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
 
 
     // Retrieves questionlist from 'search-form.js'
@@ -432,9 +666,7 @@ app.get("/account", ensureAuthenticated, loadAccount);
 
 
 function loadResultsSearchForm(req, res) {
-    req.session.userID = 95234;
-
-    let userID = req.session.userID;
+        const userID = req.session.userID || null;
     const userAnswers = req.session.answers || {};
     const { question, questionLabels } = require('./static/js/search-form');
 
@@ -449,8 +681,7 @@ function loadResultsSearchForm(req, res) {
 }
 
 function loadRegistry(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+        const userID = req.session.userID || null;
     res.render("register.ejs", { userID });
 }
 
@@ -466,13 +697,14 @@ async function processLogin(req, res) {
         const user = await userCollection.findOne({ email });
 
         if (user && await bcrypt.compare(password, user.password)) {
-            req.session.userID = user._id;
+            req.session.userID = user._id.toString();
             req.session.email = user.email;
             req.session.firstName = user.firstName;
             req.session.profileImage = user.profileImage || '/static/default.png';
             req.session.userStory = user.story || '';
             req.session.recentlyViewed = user.recentlyViewed || [];
-            req.session.favorites = user.favorites || []
+            req.session.favorites = user.favorites || [],
+            req.session.createdAt = user.createdAt
 
             res.redirect("/account");
         } else {
@@ -580,10 +812,8 @@ async function processRegistration(req, res) {
                 email: email.trim(),
                 password: hashedPassword,
                 profileImage: profileImagePath,
-
+                createdAt: new Date(),
                 userStory: "A short story about you",
-
-
             };
 
             await userCollection.insertOne(newUser);
@@ -639,14 +869,14 @@ async function loadAccount(req, res) {
         return;
     }
 
-
     try {
         const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
         if (!user) {
             return res.status(404).render("account.ejs", { error: "User not found." });
         } else {
             // Get recently viewed pets from session
-            const recentlyViewed = req.session.recentlyViewed || [];
+            const myPets = await petCollection.find({ addedByUserId: user._id.toString() }).toArray();
+
             res.render("account.ejs", {
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -654,7 +884,9 @@ async function loadAccount(req, res) {
                 profileImage: user.profileImage,
                 userStory: user.userStory,
                 recentlyViewed: req.session.recentlyViewed || [],
-                favorites: user.favorites || []
+                favorites: user.favorites || [],
+                myPets,
+                createdAt: user.createdAt
             });
         }
     } catch (error) {
@@ -676,15 +908,31 @@ async function changeStory(req, res) {
         if (!user) return res.status(404).send("User not found");
 
         const email = user.email;
-
         const fieldsToUpdate = ['firstName', 'lastName', 'userStory'];
         const updates = {};
 
+        // Update text fields if changed
         for (const field of fieldsToUpdate) {
             const newValue = req.body[field];
             if (newValue !== undefined && newValue.trim() !== "" && newValue !== user[field]) {
                 updates[field] = newValue;
             }
+        }
+
+        // Handle profile image upload if present
+        if (req.file) {
+            const inputPath = req.file.path;
+
+            const outputPath = path.join("uploads/", "square-" + req.file.filename);
+
+            await sharp(inputPath)
+                .resize(800, 800, {
+                    fit: sharp.fit.cover,
+                    position: sharp.strategy.entropy
+                })
+                .toFile(outputPath);
+
+            updates.profileImage = "/" + outputPath.replace(/\\/g, "/"); // Normalize path for all OS
         }
 
         if (Object.keys(updates).length > 0) {
@@ -701,6 +949,8 @@ async function changeStory(req, res) {
         res.status(500).redirect("/login");
     }
 }
+
+
 
 
 // GETTING API TOKEN /////////////////////////////////////////////////////////////////////
