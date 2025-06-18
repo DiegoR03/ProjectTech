@@ -7,9 +7,10 @@
   <title>PetMatch | Pet</title>
 
   <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="stylesheet" href="/static/css/browseStyling.css">
+  <!--<link rel="stylesheet" href="/static/css/browseStyling.css">-->
   <link rel="stylesheet" href="/static/css/accountstyle.css">
   <link rel="stylesheet" href="/static/css/detailStyling.css">
+  <link rel="stylesheet" href="/static/css/likebuttonstyling.css">
   <script src="/static/js/dropdown.js"></script>
 </head>
 
@@ -40,84 +41,131 @@
   <main>
     <section>
       <% if (pet) { %>
-        <img src="<%= pet.photos[0]?.medium || '/static/default.jpg' %>" alt="Pet photo">
-        <ul class="traits-list">
-          <li><a href="#">
-              <%= pet.breeds.primary %>
-            </a></li>
-          <li><a href="#">
-              <%= pet.age %>
-            </a></li>
-          <li><a href="#">
-              <%= pet.gender %>
-            </a></li>
-          <li><a href="#">
-              <%= pet.size %>
-            </a></li>
-          <li><a href="#">
-              <%= pet.species %>
-            </a></li>
-          <li><a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a></li>
-        </ul>
-        <div class="text-content">
-          <h2>
-            <%= pet.name %>
-          </h2>
-          <h3>Description</h3>
-          <p style="white-space: pre-wrap;"><%- pet.description || "No description available." %></p>
-          <!-- A - insted of = excludes code like lang in the description -->
-          <% } else { %>
-            <p class="error">
-              <%= error %>
-            </p>
-            <% } %>
+        <div class="slider">
+          <div class="list">
+            <div class="item">
+              <img src="<%= pet.photos[0]?.medium || '/static/default.jpg' %>" alt="Pet photo">
+            </div>
+            <div class="item">
+              <img src="<%= pet.photos[1]?.medium || '/static/default.jpg' %>" alt="Pet photo">
+            </div>
+            <div class="item">
+              <img src="<%= pet.photos[2]?.medium || '/static/default.jpg' %>" alt="Pet photo">
+            </div>
+            <div class="item">
+              <img src="<%= pet.photos[3]?.medium || '/static/default.jpg' %>" alt="Pet photo">
+            </div>
+          </div>
+          <!-- Button prev and next -->
+          <div class="buttons">
+            <button id="prev"><</button>
+            <button id="next">></button>
+          </div>
+          <!-- Dots -->
+          <ul class="dots">
+            <li class="active"></li>
+            <li></li>
+            <li></li>
+            <li></li>
+          </ul>
         </div>
-        <ul class="extra-traits">
-          <!-- Good with children -->
-          <% if (pet.environment?.children===true) { %>
-            <li>Good with children</li>
-            <% } else if (pet.environment?.children===false) { %>
-              <li>Not good with children</li>
-              <% } else { %>
-                <li>Compatibility with children unknown</li>
-                <% } %>
+        <ul class="traits-list">
+          <li>
+              <%= pet.breeds.primary %>
+          </li>
+          <li>
+              <%= pet.species %>
+          </li>
+            <% const isPlayful = pet.description?.toLowerCase().includes('play') ||
+                              pet.tags?.includes('playful') ||
+                              pet.tags?.includes('energetic') ||
+                              pet.tags?.includes('active');
+             %>
 
-                  <!-- Good with dogs -->
-                  <% if (pet.environment?.dogs===true) { %>
-                    <li>Good with dogs</li>
-                    <% } else if (pet.environment?.dogs===false) { %>
-                      <li>Not good with dogs</li>
-                      <% } else { %>
-                        <li>Compatibility with dogs unknown</li>
-                        <% } %>
-
-                          <!-- Good with cats -->
-                          <% if (pet.environment?.cats===true) { %>
-                            <li>Good with cats</li>
-                            <% } else if (pet.environment?.cats===false) { %>
-                              <li>Not good with cats</li>
-                              <% } else { %>
-                                <li>Compatibility with cats unknown</li>
-                                <% } %>
-
-                                  <!-- House trained -->
-                                  <% if (pet.attributes?.house_trained===true) { %>
-                                    <li>House trained</li>
-                                    <% } else if (pet.attributes?.house_trained===false) { %>
-                                      <li>Not house trained</li>
-                                      <% } else { %>
-                                        <li>House training unknown</li>
-                                        <% } %>
-
-                                          <!-- Vaccinations -->
-                                          <% if (pet.attributes?.shots_current ===true) { %>
-                                            <li>Vaccinations up to date</li>
-                                            <% } else if (pet.attributes?.shots_current ===false) { %>
-                                              <li>Vaccinations not up to date</li>
-                                              <% } else { %>
-                                                <li>Vaccination status unknown</li>
-                                                <% } %>
+            <% if (isPlayful) { %>
+              <li>Active</li>
+            <% } else { %>
+              <li>Calm</li> <!-- Optional fallback -->
+            <% } %>
         </ul>
+        <div class="like-container">
+          <a href="/fave/<%= pet.id %>" class="like-button">
+            <span class="heart-bg">
+              <span class="heart-icon"></span>
+            </span>
+          </a>
+        </div>
+        <div class="text-section">
+          <div class="text-content">
+            <h2>
+              <%= pet.name %>
+            </h2>
+            <div class="pet-basics">
+              <p><%= pet.gender %></p>
+              <p><%= pet.age %></p>
+            </div>
+            <h3>Description</h3>
+            <p style="white-space: pre-wrap;"><%- pet.description || "No description available." %></p>
+            <!-- A - insted of = excludes code like lang in the description -->
+            <% } else { %>
+              <p class="error">
+                <%= error %>
+              </p>
+              <% } %>
+          </div>
+          <ul class="extra-traits">
+            <!-- Good with children -->
+            <li>Compatability with children</li>
+            <% if (pet.environment?.children===true) { %>
+              <li>Good</li>
+              <% } else if (pet.environment?.children===false) { %>
+                <li>Not good</li>
+                <% } else { %>
+                  <li>Unknown</li>
+                  <% } %>
+
+                    <!-- Good with dogs -->
+                    <li>Compatability with dogs</li>
+                      <% if (pet.environment?.dogs===true) { %>
+                        <li>Good</li>
+                        <% } else if (pet.environment?.dogs===false) { %>
+                          <li>Not good</li>
+                          <% } else { %>
+                            <li>Unknown</li>
+                            <% } %>
+
+                            <!-- Good with cats -->
+                            <li>Compatability with cats</li>
+                              <% if (pet.environment?.cats===true) { %>
+                                <li>Good</li>
+                                <% } else if (pet.environment?.cats===false) { %>
+                                  <li>Not</li>
+                                  <% } else { %>
+                                    <li>Unknown</li>
+                                    <% } %>
+
+                                    <!-- House trained -->
+                                    <li>House trained</li>
+                                      <% if (pet.attributes?.house_trained===true) { %>
+                                        <li>Yes</li>
+                                        <% } else if (pet.attributes?.house_trained===false) { %>
+                                          <li>No</li>
+                                          <% } else { %>
+                                            <li>Unknown</li>
+                                            <% } %>
+
+                                            <!-- Vaccinations -->
+                                            <li>Vaccinations</li>
+                                              <% if (pet.attributes?.shots_current ===true) { %>
+                                                <li>Up to date</li>
+                                                <% } else if (pet.attributes?.shots_current ===false) { %>
+                                                  <li>Not up to date</li>
+                                                  <% } else { %>
+                                                    <li>Unknown</li>
+                                                    <% } %>
+
+          </ul>
+        </div>
     </section>
   </main>
   <footer>
@@ -163,6 +211,7 @@
       <li><a href="#">Amsterdam</a></li>
     </ul>
   </footer>
+  <script src="/static/scripts/likebutton.js"></script>
   <script src="/static/scripts/detail.js"></script>
 </body>
 
