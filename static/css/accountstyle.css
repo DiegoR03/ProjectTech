@@ -75,12 +75,9 @@ section {
 
 #accountNav .nav-buttons button.active-button {
     color: var(--text-color);
-
 }
 
 #accountNav .nav-buttons button:hover {
-    background-color: var(--primary-color);
-    border-radius: 2rem;
     transition: color 0.2s ease, background 0.2s ease;
 }
 
