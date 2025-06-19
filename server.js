@@ -1000,13 +1000,11 @@ async function getPetfinderToken() {
 
 
 // REQUEST API QUERY & FILTERING ////////////////////////////////////////////////////////
-async function loadBrowse(req, res) {
+async function loadBrowse(req, res, options = { json: false }) {
     try {
 
         res.locals.isFetching = true; // Set flag before API call
         const token = await getPetfinderToken();
-        const petsPerPage = 9;
-        const page = parseInt(req.query.page) || 1;
 
         const allowedFilters = [
             "type", "gender", "size", "age", "coat",
@@ -1084,12 +1082,8 @@ async function loadBrowse(req, res) {
             req.session.petsCache[filterKey] = petsWithImages;
         }
 
-        // Step 5: In-memory pagination
-        const totalPets = petsWithImages.length;
-        const totalPages = Math.ceil(totalPets / petsPerPage);
-        const startIndex = (page - 1) * petsPerPage;
-        const endIndex = startIndex + petsPerPage;
-        const displayedPets = petsWithImages.slice(startIndex, endIndex);
+
+        const displayedPets = petsWithImages
 
         // Step 6: Build activeFilters for UI
         const filterLabels = {
@@ -1115,32 +1109,118 @@ async function loadBrowse(req, res) {
             }
         }
 
-        res.render("browse.ejs", {
-            pets: displayedPets,
-            pagination: {
-                current_page: page,
-                total_pages: totalPages,
-                total_count: totalPets
-            },
-            error: null,
-            request: req,
-            activeFilters,
-            isFetching: false
-        });
+        console.log("Filters from query:", req.query);
+        console.log("Applied filters for API:", appliedFilters);
+        console.log("Total pets fetched from API:", petsWithImages.length);
 
+
+        const offset = parseInt(req.query.offset) || 0;
+        const limit = parseInt(req.query.limit) || 12;
+        console.log("Pagination - offset:", offset, "limit:", limit);
+
+        const paginatedPets = petsWithImages.slice(offset, offset + limit);
+        console.log("Pets sent to client:", paginatedPets.length);
+
+
+        if (options.json) {
+            // Lazy load call: alleen JSON
+            return res.json({
+                pets: paginatedPets,
+                hasMore: offset + limit < petsWithImages.length
+            });
+        } else {
+            // Eerste paginalaad: render HTML
+            return res.render("browse.ejs", {
+                pets: paginatedPets,
+                hasMore: offset + limit < petsWithImages.length,
+                pagination: {
+                    offset,
+                    limit,
+                    total: petsWithImages.length,
+                    totalPages: 30
+                },
+                error: null,
+                request: req,
+                activeFilters,
+                isFetching: false
+            });
+        }
     } catch (error) {
         console.error("Browse error:", error);
-        res.status(500).render("browse.ejs", {
+        return res.status(500).render("browse.ejs", {
             pets: [],
             pagination: null,
             error: "Could not fetch pet data.",
             request: req,
             activeFilters: [],
             isFetching: false
-
         });
     }
+
 }
+
+app.get('/browse/api', async (req, res) => {
+    try {
+        const token = await getPetfinderToken();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+
+        const allowedFilters = [
+            "type", "gender", "size", "age", "coat",
+            "good_with_children", "good_with_dogs",
+            "good_with_cats", "house_trained"
+        ];
+
+        const filterMap = {
+            species: "type",
+            gender: "gender",
+            size: "size",
+            age: "age",
+            coat: "coat",
+            good_with_children: "good_with_children",
+            good_with_dogs: "good_with_dogs",
+            good_with_cats: "good_with_cats",
+            house_trained: "house_trained"
+        };
+
+        const url = new URL("https://api.petfinder.com/v2/animals");
+        url.searchParams.append("page", page);
+        url.searchParams.append("limit", limit);
+
+        // Voeg filters toe
+        for (let key in req.query) {
+            const apiKey = filterMap[key] || key;
+            if (allowedFilters.includes(apiKey) && req.query[key]) {
+                url.searchParams.append(apiKey, req.query[key]);
+            }
+        }
+
+        const response = await fetch(url.toString(), {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const petsWithPhotos = data.animals.filter(pet => pet.photos && pet.photos.length > 0);
+
+        res.json({
+            pets: petsWithPhotos,
+            currentPage: page,
+            hasMore: data.pagination && data.pagination.current_page < data.pagination.total_pages,
+            totalPages: data.pagination ? data.pagination.total_pages : 1
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Kan geen data ophalen" });
+    }
+});
+
+
 // FIND MY MATCH //////////////////////////////////////////////////////////////////////////////////////////////////
 app.get('/match', async (req, res) => {
     const userAnswers = req.session.answers;

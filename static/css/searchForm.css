@@ -111,6 +111,9 @@ h1 {
   text-align: left;
   margin-bottom: -1em;
   font-size: 1.4em;
+  color: var(--primary-color-2);
+  position: sticky;
+  top: 10%;
 }
 
 h3 {
@@ -133,6 +136,13 @@ h3 {
   padding: 2rem;
 }
 
+.group-title{
+  display: flex;
+}
+.group-title > svg{
+  margin-top: 1em ;
+  padding-left: 1em;
+}
 .answer-group {
   background-color: #FFF;
   border: 1px solid #ddd;
