@@ -156,6 +156,7 @@ h2 {
 }
 
 #myInfo form textarea {
+    width: 35vw;
     height: 8vh;
     margin: 1rem 0;
     border: none;
