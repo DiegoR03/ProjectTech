@@ -11,7 +11,9 @@
 <body>
     <%- include('partials/header') %>
         <main>
+            <div class="container">
             <nav id="accountNav">
+                <div>
                 <h2>Welcome back <%= firstName %>
                 </h2>
                 <button id="navToggle" onclick="toggleNavMenu()">&#9776;</button>
@@ -26,6 +28,7 @@
                     <button id="SearchButton" onclick="toggleObject('searchProfiles', 'SearchButton')">Search
                         Profiles</button>
                 </div>
+            </div>
             </nav>
 
 
