@@ -61,53 +61,24 @@ header h1 {
   color: var(--text-color);
 }
 
-header nav {
-  
-  position: relative;
-  background-color: none;
-  translate: 0;
-  transition: 0.5s;
-}
-
-
-#menuButton {
-  display: none;
-  position: relative;
-  z-index: 2;
-  background-color: var(--background-color-white);
-  border: none;
-}
-
 header nav ul {
   padding: 0;
 }
 
-header nav li {
-  list-style: none;
-  margin-left: 1em;
-  padding: 1em;
-}
-
 .navbar {
-  background-color: var(--footer-header-background);
+  background-color: var(--background-color-white);
   padding: 0.5em;
   border-radius: 5px;
-}
-
-header nav ul:nth-of-type(1) {
-  flex-direction: unset;
-  align-items: center;
-  justify-content: space-between;
 }
 
 header a {
   position: relative;
   display: inline-block;
-  padding-bottom: 0.4em;            
+  padding-bottom: 0.4em;
   color: var(--text-color);
   font-weight: 600;
   text-decoration: none;
-  overflow: hidden;        
+  overflow: hidden;
 }
 
 header a:hover {
@@ -124,7 +95,7 @@ header a:active {
 header a::after {
   content: "";
   position: absolute;
-  bottom: 0.125em;                  
+  bottom: 0.125em;
   left: 0;
   height: 3px;
   width: 0;
@@ -132,8 +103,13 @@ header a::after {
 }
 
 @keyframes underline-grow {
-  from { width: 0; }
-  to   { width: 100%; }
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
 }
 
 header a:hover::after {
@@ -159,30 +135,25 @@ header a:hover::after {
   font-size: 1.5rem;
   color: var(--text-color);
 }
+
 .logo p:hover {
   color: var(--primary-color-2);
   animation: nudge 0.4s ease-in-out both;
 }
 
 @keyframes nudge {
-  0%,100% { transform: translateX(0); }
-  50%     { transform: translateX(2px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(2px);
+  }
 }
 
 /* Dropdown button */
-.dropbtn {
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  background: var(--text-color-2);
-  font: inherit;
-}
-
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
 .dropdown img {
   width: 2.4rem;
   height: auto;
@@ -216,48 +187,54 @@ header a:hover::after {
   padding-left: 1vw;
 }
 
-.dropdown-content a:hover {background-color: #ddd;}
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
 
 /* Change color of dropdown links on hover */
 .dropdown-content a:hover {
   background-color: #ddd;
 }
 
-
 /* Notifications dropdown button */
-.notifications-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
 .notifications-btn {
-  font-size: 16px;
   border: none;
   cursor: pointer;
   background: var(--text-color-2);
   font: inherit;
+  font-weight: 600;
   position: relative;
-  padding: 0.5rem 1rem;
-  display: flex;
+  display: inline-block;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.notifications-dropdown:hover {
-  border-bottom: solid 3px var(--primary-color-hover-2);
+  padding-bottom: 0.6em;
+  color: var(--text-color);
+  text-decoration: none;
 }
 
 .notifications-btn:hover {
   color: var(--primary-color-hover-2);
 }
 
+.notifications-btn:hover:after {
+  animation: underline-grow 0.3s ease-in-out forwards;
+}
+
+/* Button hover animation */
+.notifications-btn:after {
+  content: "";
+  position: absolute;
+  bottom: 0.4em;
+  left: 0;
+  height: 3.5px;
+  width: 0;
+  background-color: var(--primary-color-hover-2);
+  z-index: 1;
+}
+
 /* Notifications badge */
 .notifications-btn .badge {
   position: absolute;
   top: 1.2rem;
-  /* adjust vertical position */
-  right: -0.3rem;
-  /* adjust horizontal position */
   background-color: red;
   color: white;
   font: inherit;
@@ -266,6 +243,7 @@ header a:hover::after {
   border-radius: 50%;
   line-height: 1.5rem;
   pointer-events: none;
+  z-index: 2;
 }
 
 /* Dropdown content specific to notifications */
@@ -344,12 +322,7 @@ footer ul li:nth-of-type(1) a:hover {
 
 @media (max-width: 900px) {
   .body {
-  background-image: url("/static/img/Background_PetchMatch_Mobile.png");
-}
-
-  header {
-    grid-template-columns: 1fr;
-
+    background-image: url("/static/img/Background_PetchMatch_Mobile.png");
   }
 
   .dropdown img {
@@ -357,11 +330,6 @@ footer ul li:nth-of-type(1) a:hover {
     height: auto;
     border-radius: 50%;
     background-color: transparent;
-  }
-
-
-  #menuButton {
-    display: block;
   }
 
   footer {

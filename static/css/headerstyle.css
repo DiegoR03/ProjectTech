@@ -40,6 +40,10 @@ header {
 header nav {
   display: flex;
   gap: 1.5rem;
+  position: relative;
+  background-color: none;
+  translate: 0;
+  transition: 0.5s;
 }
 
 header ul:nth-of-type(1) {
@@ -49,13 +53,6 @@ header ul:nth-of-type(1) {
   justify-content: space-between;
   align-items: center;
   list-style: none;
-}
-
-header nav {
-  position: relative;
-  background-color: none;
-  translate: 0;
-  transition: 0.5s;
 }
 
 header nav.open {
@@ -74,7 +71,6 @@ header nav ul {
 
 header nav li {
   list-style: none;
-  margin-left: 1em;
   padding: 1em;
 }
 
@@ -89,7 +85,7 @@ header nav ul:nth-of-type(1) {
   justify-content: space-between;
 }
 
-header a { 
+header a {
   color: var(--text-color);
   font-weight: 600;
   text-decoration: none;
@@ -111,10 +107,10 @@ header a:active {
   padding: 0.5em;
 }
 
-.logo svg { 
-  width: 35px; 
-  height: 35px; 
-  margin-right: 0.5rem; 
+.logo svg {
+  width: 35px;
+  height: 35px;
+  margin-right: 0.5rem;
   fill: var(--primary-color-2);
 }
 
@@ -130,9 +126,18 @@ header a:active {
   color: var(--primary-color-2);
 
 }
+
+#menuButton {
+  display: none;
+  position: relative;
+  z-index: 2;
+  background-color: var(--background-color-white);
+  border: none;
+}
+
 /* Dropdown Button */
 .dropbtn {
-  font-size: 16px;
+  font: inherit;
   border: none;
   cursor: pointer;
   background: var(--text-color-2);
@@ -164,7 +169,10 @@ header a:active {
 }
 
 /* Change color of dropdown links on hover */
-.dropdown-content a:hover {background-color: #ddd;}
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
 /* Footer Styling */
 
 @media (max-width: 900px) {
@@ -190,14 +198,20 @@ header a:active {
     /* or center if you prefer */
     justify-content: flex-start;
     width: 100%;
-    padding-left: 1rem;
-    padding-top: 3rem;
+    padding-left: 3rem;
+    padding-top: 5rem;
   }
 
   header nav ul li,
   header nav ul a {
-    width: 100%;
+    width: 40%;
     text-align: left;
+    padding: 1em;
+    box-sizing: border-box;
+  }
+
+  .notifications-btn {
+    padding: 1em;
     padding: 1em;
     box-sizing: border-box;
   }
@@ -205,6 +219,7 @@ header a:active {
 
   #menuButton {
     display: block;
+    font-size: 2rem;
   }
 
   .logo {

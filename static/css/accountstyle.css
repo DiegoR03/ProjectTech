@@ -48,6 +48,7 @@ h2 {
 #accountNav {
     background-color: var(--background-color-blue);
     padding-top: 5em;
+    padding-bottom: 1em;
     display: flex;
     position: sticky;
     flex-direction: column;
@@ -105,7 +106,7 @@ h2 {
     font-size: 2rem;
     color: var(--button-text-color);
     cursor: pointer;
-    margin-left: 1rem;
+    margin-left: 4.5rem;
 }
 
 /* ===== Account Info Section ===== */
@@ -660,8 +661,8 @@ textarea {
     #accountNav .nav-buttons {
         flex-direction: column;
         display: none;
-        background-color: #90A5EC;
         padding-top: 1rem;
+        gap: 0.3rem;
     }
 
     #accountNav.show-menu .nav-buttons {
@@ -671,6 +672,7 @@ textarea {
     #accountNav .nav-buttons button {
         width: 100%;
         text-align: left;
+        border-radius: 5px;
     }
 
     #myInfoCollection,
