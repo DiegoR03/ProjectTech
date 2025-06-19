@@ -8,7 +8,7 @@
     <title>PetThing | Account</title>
 </head>
 
-<body>
+<body class="body">
     <%- include('partials/header') %>
         <main>
             <nav id="accountNav">
@@ -365,7 +365,50 @@
 
 
             <section id="searchProfiles" class="toggle-section">
-                <h2>Search profiles</h2>
+                <% if (savedAnswers && savedAnswers.length> 0) { %>
+                    <h2>Saved Search Preferences</h2>
+                    <div class="container">
+                        <% savedAnswers.forEach(function(answers, idx) { %>
+                            <div class="answer-group" style="margin-bottom:2em;">
+                                <strong>Search #<%= idx + 1 %>:</strong>
+                                <div class="answer-groups-row">
+                                    <% for (let group in groupedAnswers) { %>
+                                        <section id="groupTitle" data-group="<%= group %>">
+                                            <h3>
+                                                <%= group %>
+                                            </h3>
+                                            <ul class="group-list">
+                                                <% groupedAnswers[group].forEach(function(key) { %>
+                                                    <% if (answers[key] !==undefined) { %>
+                                                        <li data-key="<%= key %>" data-value="<%= answers[key] %>">
+                                                            <div class="answer-row static-view">
+                                                                <span><strong>
+                                                                        <%= questionLabels[key] || key %>
+                                                                    </strong></span>
+                                                                <span>
+                                                                    <%= answers[key]==='true' ? 'Yes' :
+                                                                        answers[key]==='false' ? 'No' : answers[key] %>
+                                                                </span>
+                                                            </div>
+                                                        </li>
+                                                        <% } %>
+                                                            <% }); %>
+                                            </ul>
+                                        </section>
+                                        <% } %>
+                                </div>
+                                <form action="/load-saved-search/<%= idx %>" method="get" style="display:inline;">
+                                    <button id="loadSearch" type="submit">Load this search</button>
+                                </form>
+                                <form action="/delete-saved-search/<%= idx %>" method="post" style="display:inline;">
+                                    <button id="deleteSearch" type="submit" class="delete-saved-search-btn">Delete</button>
+                                </form>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } else { %>
+                        <p>No saved search preferences yet.</p>
+                        <% } %>
             </section>
 
         </main>

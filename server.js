@@ -202,7 +202,17 @@ app
 
             req.session.recentlyViewed = recentlyViewed;
             req.session.favorites = favorites;
+        } else {
+            return res.redirect("/login");
         }
+
+        // Add these lines to provide grouping and labels for saved answers
+        const { questionLabels } = require('./static/js/search-form');
+        const groupedAnswers = {
+            "General Info": ['type', 'size', 'gender', 'age'],
+            "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'floor', 'hasGarden'],
+            "Pet Personality": ['isComfystrangers', 'isPlayful']
+        };
 
         res.render('account', {
             recentlyViewed,
@@ -213,7 +223,10 @@ app
             loggedIn: !!req.session.userID,
             favorites: user?.favorites || [],
             myPets,
-            createdAt: user?.createdAt || null
+            createdAt: user?.createdAt || null,
+            savedAnswers: user?.savedAnswers || [],
+            groupedAnswers,
+            questionLabels
         });
     })
 
@@ -311,7 +324,7 @@ app
                     if (req.session.userID) {
                         await userCollection.updateOne(
                             { _id: new ObjectId(req.session.userID) },
-                            { $set: { favorites: req.session.favorites } }
+                            { $addToSet: { favorites: petData } }
                         );
                     }
 
@@ -362,7 +375,7 @@ app
                 if (req.session.userID) {
                     await userCollection.updateOne(
                         { _id: new ObjectId(req.session.userID) },
-                        { $set: { favorites: req.session.favorites } }
+                        { $addToSet: { favorites: petData } }
                     );
                 }
             }
@@ -385,7 +398,7 @@ app
             if (req.session.userID) {
                 await userCollection.updateOne(
                     { _id: new ObjectId(req.session.userID) },
-                    { $set: { favorites: req.session.favorites } }
+                    { $pull: { favorites: { id: petId } } }
                 );
             }
 
@@ -418,6 +431,17 @@ app
 
     .get("/searchForm", loadSearchForm)
     .get("/results-search-form", loadResultsSearchForm)
+    .get('/load-saved-search/:index', async (req, res) => {
+        if (!req.session.userID) return res.redirect('/login');
+        const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+        const idx = parseInt(req.params.index, 10);
+        if (!user || !user.savedAnswers || !user.savedAnswers[idx]) {
+            return res.redirect('/account');
+        }
+        // Set the session answers to the chosen saved search
+        req.session.answers = user.savedAnswers[idx];
+        res.redirect('/results-search-form');
+    })
 
     // GET form
     .get('/post-pet', (req, res) => {
@@ -513,12 +537,59 @@ app
         }
     })
 
-
     .post("/login", processLogin)
     .post('/account', uploads.single('profileImage'), changeStory)
     .post("/passwordchange", changePassword)
-    .post("/searchForm", processForm)
     .post("/register", uploads.single("fileInput"), processRegistration)
+
+    .post("/searchForm", processForm)
+    .post('/save-answers', async (req, res) => {
+        try {
+            const answers = req.body;
+
+            if (!req.session.userID) {
+                return res.status(401).json({ error: "Unauthorized" });
+            }
+
+            // Fetch current savedAnswers
+            const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+            const savedAnswers = user?.savedAnswers || [];
+
+            // Deep equality check
+            const isDuplicate = savedAnswers.some(saved => {
+                return JSON.stringify(saved) === JSON.stringify(answers);
+            });
+
+            if (isDuplicate) {
+                // No error, just indicate duplicate
+                return res.json({ success: true, duplicate: true });
+            }
+
+            await userCollection.updateOne(
+                { _id: new ObjectId(req.session.userID) },
+                { $push: { savedAnswers: answers } }
+            );
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error("Error saving answers:", err);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    })
+
+    .post('/delete-saved-search/:idx', async (req, res) => {
+        if (!req.session.userID) return res.redirect('/login');
+        const idx = parseInt(req.params.idx, 10);
+        const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+        if (!user || !user.savedAnswers || !user.savedAnswers[idx]) return res.redirect('/account');
+
+        user.savedAnswers.splice(idx, 1);
+        await userCollection.updateOne(
+            { _id: new ObjectId(req.session.userID) },
+            { $set: { savedAnswers: user.savedAnswers } }
+        );
+        res.redirect('/account');
+    })
 
     .listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
@@ -532,6 +603,9 @@ function loadHome(req, res) {
 }
 
 function loadLogin(req, res) {
+    if (res.locals.currentUser) {
+        req.session.destroy();
+    }
     const userID = req.session.userID || null;
     res.render("login.ejs", { userID });
 }
@@ -654,19 +728,8 @@ function loadSearchForm(req, res) {
 }
 
 
-function ensureAuthenticated(req, res, next) {
-    if (req.session.userID) {
-        next();
-    } else {
-        res.redirect("/login");
-    }
-}
-
-app.get("/account", ensureAuthenticated, loadAccount);
-
-
-function loadResultsSearchForm(req, res) {
-        const userID = req.session.userID || null;
+async function loadResultsSearchForm(req, res) {
+    const userID = req.session.userID || null;
     const userAnswers = req.session.answers || {};
     const { question, questionLabels } = require('./static/js/search-form');
 
@@ -679,12 +742,6 @@ function loadResultsSearchForm(req, res) {
 
     res.render("results-search-form.ejs", { userID, userAnswers, groupedAnswers, questionLabels });
 }
-
-function loadRegistry(req, res) {
-        const userID = req.session.userID || null;
-    res.render("register.ejs", { userID });
-}
-
 
 // PROCESS FUNCTIONS ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -704,7 +761,7 @@ async function processLogin(req, res) {
             req.session.userStory = user.story || '';
             req.session.recentlyViewed = user.recentlyViewed || [];
             req.session.favorites = user.favorites || [],
-            req.session.createdAt = user.createdAt
+                req.session.createdAt = user.createdAt
 
             res.redirect("/account");
         } else {
@@ -863,37 +920,6 @@ async function changePassword(req, res) {
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // PROFILE ///////////////////////////////////////////////////////
-async function loadAccount(req, res) {
-    if (!req.session.userID) {
-        res.redirect("/login");
-        return;
-    }
-
-    try {
-        const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
-        if (!user) {
-            return res.status(404).render("account.ejs", { error: "User not found." });
-        } else {
-            // Get recently viewed pets from session
-            const myPets = await petCollection.find({ addedByUserId: user._id.toString() }).toArray();
-
-            res.render("account.ejs", {
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                profileImage: user.profileImage,
-                userStory: user.userStory,
-                recentlyViewed: req.session.recentlyViewed || [],
-                favorites: user.favorites || [],
-                myPets,
-                createdAt: user.createdAt
-            });
-        }
-    } catch (error) {
-        console.error("Error loading account:", error);
-        res.status(500).render("account.ejs", { error: "An error occurred while loading your account." });
-    }
-}
 
 app.get('/test-session', (req, res) => {
     if (!req.session.counter) req.session.counter = 0;
