@@ -31,22 +31,15 @@
   </svg>
           <p>PetMatch</p>
         </div> </li>
-  <li><button><img src="/static/images/dropdown-button.svg"></button></li>
+        <li><button><img src="/static/images/dropdown-menu-home.svg"></button></li>
           </ul>
-      <!-- <nav>
-      <ul>
-        <li><a href="/" class="active">Home</a></li>
-        <li><a href="/browse">Browse</a></li>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/register">Register</a></li>
-      </ul>
-      </nav> -->
+
       <nav>
         <ul>
         <% if (loggedIn) { %>
             <li><a href="/browse">Browse</a></li>
             <li><a href="/favourites">Favourites</a></li>
-            <li><a href="/account" class="active">Account</a></li>
+            <li><a href="/account">Account</a></li>
             <li><a href="/logout">Logout</a></li>
             <% } else { %>
                 <li><a href="/browse">Browse Pets</a></li>
