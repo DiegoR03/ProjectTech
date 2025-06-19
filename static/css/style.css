@@ -27,12 +27,14 @@
   --footer-text: #8E8E8E;
 }
 
-body {
+.body {
   font-family: 'Montserrat';
-  background-color: var(--background-color);
+  background-image: url("/static/img/Background_PetchMatch.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
   margin: 0;
   margin-inline: auto;
-
 }
 
 /* Header styling ////////////////////////////////////////////////////////// */
@@ -284,18 +286,21 @@ footer ul li:nth-of-type(1) a:hover {
 }
 
 @media (max-width: 900px) {
+  .body {
+  background-image: url("/static/img/Background_PetchMatch_Mobile.png");
+}
 
   header {
-  grid-template-columns: 1fr;
+    grid-template-columns: 1fr;
 
-}
+  }
 
   .dropdown img {
     width: 5rem;
     height: auto;
     border-radius: 50%;
     background-color: transparent;
-}
+  }
 
 
   #menuButton {

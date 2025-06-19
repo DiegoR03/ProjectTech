@@ -5,6 +5,7 @@
     --background-box: #ffffff;
     --removal-color: #aa0000;
     --primary-removal-color: #aa0000;
+    --primary-title-color: #F47429;
 
     --background-color-white: #fff;
     --background-color-blue: #4177BE;
@@ -215,8 +216,7 @@ h2 {
 }
 
 /* ===== Favorites / Recently Viewed ===== */
-#Favorites,
-#recentlyViewed, #searchProfiles {
+#Favorites,#recentlyViewed, #searchProfiles {
     max-width: 80%;
     margin: auto;
 }
@@ -242,16 +242,18 @@ h2 {
 
 /* ===== Pet Card Grid ===== */
 .grid,
-.my-pets-grid,
-#myInfoCollection {
+.my-pets-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1.5rem;
 }
 
 #myInfoCollection {
+    display: grid;
     grid-template-columns: 1fr 1fr;
     justify-items: center;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
 }
 
 /* ===== Card Styles ===== */
@@ -450,8 +452,13 @@ h2 {
     justify-content: center;
 }
 
+.PetName {
+    width: 100%;
+    margin: auto;
+}
+
 textarea {
-    width: 40vw;
+    width: 75%;
     height: 100px;
     border-radius: 16px;
     background-color: #ddd;
@@ -467,6 +474,60 @@ textarea {
     justify-content: flex-start;
 }
 
+/* ===== Search Profile Section styles ===== */
+
+#searchProfiles .container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.answer-group {
+    width: 20rem;
+    min-width: 220px;
+    background: var(--white);
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    z-index: 0;
+    border-style: none;
+    padding: 1rem;
+}
+
+.answer-groups-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+#groupTitle h3 {
+    color: var(--primary-title-color);
+    font-weight: 800;
+}
+
+#loadSearch,
+#deleteSearch {
+    background-color: #000;
+    color: var(--white);
+    padding: 6px 10px;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border-style: none;
+}
+
+#loadSearch {
+    background-color: #000;
+}
+
+#deleteSearch {
+    background-color: var(--removal-color);
+}
+
 /* ===== Dropdown styles ===== */
 .dropdownPet {
     display: block;
@@ -475,12 +536,11 @@ textarea {
 }
 
 .dropPetbtn {
-    width: 100%;
+    width: 80%;
     padding: 0.75rem 1rem;
     border: 1px solid #ccc;
     border-radius: 12px;
     background: #fff;
-    font-weight: 600;
     font: inherit;
     text-align: left;
     cursor: pointer;
@@ -621,12 +681,20 @@ textarea {
         width: 80vw;
     }
 
+    .dropPetbtn {
+        width: 100%;
+    }
+
     #postAPetContent {
         justify-items: center;
         align-items: center;
         grid-template-columns: 1fr;
         padding: 2rem;
         gap: 2rem;
+    }
+
+    .answer-group {
+        width: 100%;
     }
 
     #myInfo form textarea {
