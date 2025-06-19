@@ -1,9 +1,3 @@
-//const heartIcon = document.querySelector(".like-button .heart-icon");
-
-//heartIcon.addEventListener("click", () => {
-  //heartIcon.classList.toggle("liked");
-//});
-
 document.querySelectorAll('.like-button .heart-icon').forEach(icon => {
     icon.addEventListener('click', e => {
       e.preventDefault(); // Stop immediate link navigation
