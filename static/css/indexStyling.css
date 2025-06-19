@@ -4,6 +4,7 @@
   --primary-color-2: #C74F0A;
   --primary-color-hover-2: #E66F3A;
   --background-color: #f2f2f2;
+  --background-color-cards: #fff;
   --footer-header-background: #fff;
   --active-filters: #46c0975a;
 
@@ -99,6 +100,7 @@ section:nth-of-type(2) .cards {
   justify-content: center;
 }
 section:nth-of-type(2) .card {
+  background-color: var(--background-color-cards);
   position: relative;          /* ← make it a positioning context */
   border-radius: 12px;
   box-shadow: rgba(0,0,0,0.1) 0px 4px 12px;
