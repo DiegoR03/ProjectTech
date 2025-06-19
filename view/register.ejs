@@ -6,7 +6,7 @@
 
     <link rel="stylesheet" href="/static/css/style.css">
 
-    <title>PetThing | Login</title>
+    <title>PetThing | Sign Up</title>
 </head>
 <body>
     <header>
@@ -14,18 +14,20 @@
     <nav>
       <a href="/">Home</a>
       <a href="/browse">Browse</a>
-      <a href="/login" class="active">Login</a>
-      <a href="/register">Register</a>
+      <a href="/login">Login</a>
+      <a href="/register" class="active">Register</a>
     </nav>
   </header>
    
 <form action="/login" method="POST">
+    <input type="text" name="firstName" placeholder="First name">
+    <input type="text" name="lastName" placeholder="Last name">
     <input type="email" name="email" placeholder="Email">
     <input type="password" name="password" placeholder="Password">
-    <button>Login</button>
+    <button>Sign up</button>
 </form>
 
-<a href="/register">I don't have an account yet</a>
+<a href="/login">I already have an account</a>
 
 
     
