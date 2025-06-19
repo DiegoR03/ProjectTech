@@ -1,10 +1,20 @@
 :root {
-    --primary-color: #46c098;
-    --primary-color-hover: #3da885;
     --button-text-color: #ffffff;
     --button-select-color: #ffffff;
     --active-filters: #46c0975a;
     --background-box: #ffffff;
+    --removal-color: #aa0000;
+    --primary-removal-color: #aa0000;
+    --primary-title-color: #F47429;
+
+    --background-color-white: #fff;
+    --background-color-blue: #4177BE;
+}
+
+/* ===== Layout ===== */
+
+body {
+    font-family: 'Montserrat';
 }
 
 main {
@@ -16,62 +26,101 @@ section {
     margin-top: 1rem;
 }
 
+h2 {
+    font-weight: 600;
+} 
+
+/* ===== Utility Hidden Elements ===== */
+.toggle-section,
+.toggleEdit {
+    display: none;
+}
+
+#postAPet {
+    display: none;
+}
+
+#onlyView {
+    display: block;
+}
+
+/* ===== Account Navigation ===== */
 #accountNav {
-    grid-template-rows: 7vh 6vh;
-    display: grid;
-    background-color: #90A5EC;
-    text-align: left;
-    padding: 1rem;
-    padding-top: 5rem;
+    background-color: var(--background-color-blue);
+    padding-top: 5em;
+    display: flex;
+    position: sticky;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    z-index: 10;
 }
 
 #accountNav h2 {
     color: var(--button-text-color);
-    padding: 0 2rem;
+    padding-top: 2em;
+    padding-bottom: 0.8em;
+    max-width: 80%;
+    margin: auto;
+    font-size: 2em;
+    font-weight: 600;
 }
 
-#accountNav div {
+#accountNav .nav-buttons {
     display: flex;
     justify-content: flex-start;
-    position: sticky;
     padding: 0 1rem;
+    flex-wrap: wrap;
+    max-width: 80%;
+    margin: auto;
 }
 
-#accountNav div button {
+#accountNav .nav-buttons button {
+    margin-right: 0.2em;
     cursor: pointer;
-    width: auto;
-    height: auto;
     padding: 0.7rem 1.5rem;
-    text-decoration: inherit;
-    color: var(--button-text-color);
-    background-color: #90A5EC;
-    border-style: none;
+    color: var(--font-color);
+    background-color: var(--background-color);
+    border: 1px solid #ccc;
+    border-radius: 5px 5px 0 0;
+    font-size: 1em;
+    font-weight: 600;
 }
 
 #accountNav div button.active-button {
-    color: var(--text-color);
-    background-color: var(--button-select-color);
-    border-radius: 2rem;
+    color: var(--primary-color-2);
+    font-weight: 700;
+    border-bottom: solid 3px var(--primary-color-2);
 }
-
+  
 #accountNav div button:hover {
-    background-color: var(--primary-color);
-    transition: color 0.2s ease, background 0.2s ease;
-    border-radius: 2rem;
+    color: var(--primary-color-hover-2);
+}
+  
+
+#navToggle {
+    display: none;
+    background-color: transparent;
+    border: none;
+    font-size: 2rem;
+    color: var(--button-text-color);
+    cursor: pointer;
+    margin-left: 1rem;
 }
 
+/* ===== Account Info Section ===== */
 #myInfo {
     display: grid;
-    grid-template-columns: 50% 50%;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 80%;
+    margin: auto;
 }
 
-#myInfo #profileImg {
-    position: relative;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: auto;
-    align-self: start;
-    width: 15vw;
+
+#profileImg {
+    margin: auto;
+    width: 13rem;
     height: auto;
     text-align: center;
     border-radius: 50%;
@@ -79,78 +128,62 @@ section {
 }
 
 #myInfo fieldset {
-    position: relative;
-    border-style: none;
+    border: none;
     border-radius: 1rem;
-    padding: 1rem;
+    padding-top: 1em;
     width: 45vw;
-    margin-left: auto;
-    margin-right: auto;
+    margin: auto;
     align-self: start;
 }
 
-#myInfo #onlyView form {
-    position: relative;
+#onlyView form,
+#canEdit form {
     display: inline-block;
-    top: 2rem;
-    border-style: none;
+    border: none;
+    position: relative;
     width: 45vw;
 }
 
-#myInfo #canEdit form {
-    position: relative;
-    display: inline-block;
+#canEdit form {
     top: 4rem;
-    border-style: none;
     width: 20vw;
 }
 
-#myInfo fieldset label, #myInfo #canEdit label {
-    position: relative;
+#myInfo fieldset label,
+#canEdit label {
     font-size: 1.4rem;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 #myInfo form textarea {
-    display: inline-block;
-    border-radius: 0.5rem;
-    border-style: none;
     width: 35vw;
     height: 8vh;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin: 1rem 0;
+    border: none;
+    border-radius: 0.5rem;
+}
+
+#myInfo input,
+#myInfo input[disabled] {
+    margin-top: 0.8rem;
+    border-radius: 0.4em;
+    font: inherit;
+    background-color: #e3e3e3;
+    color: #000;
 }
 
 #myInfo input[disabled] {
-    color: var(--text-color);
-    border: none;
     background-color: transparent;
-    font: inherit;
+    border: none;
 }
 
-#myInfo input {
-    width: min-content;
-    margin-top: 0.8rem;
-    border-radius: 0.6em;
-    border: 1px solid #ccc;
-    background-color: #e3e3e3;
-    color: #000000;
-        font: inherit;
-}
-
-#myInfo input[type=submit] {
-    position: relative;
+#myInfo input[type="submit"] {
+    padding: 0.5rem 1rem;
+    color: var(--primary-color);
+    background: transparent;
     border: 2px solid var(--primary-color);
     border-radius: 1rem;
-    padding: 0.5rem 1rem;
     cursor: pointer;
-    color: var(--primary-color);
-    background-color: transparent;
-}
-
-#myInfoCollection{
-    display: grid;
-    grid-template-columns: 50% 50%;
 }
 
 #editProfile {
@@ -159,186 +192,204 @@ section {
     right: -22rem;
 }
 
-#onlyView {
-    display: block;
-}
-
-.toggle-section {
-    display: none;
-    /* All hidden by default */
-}
-
-.toggleEdit {
-    display: none;
-}
-
 #editProfileBtn {
-    position: relative;
     margin-top: 0.8rem;
-    color: var(--text-color);
+    padding: 0.5rem 1rem;
     border: 2px solid var(--text-color);
     border-radius: 1rem;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
+    color: var(--text-color);
     font: inherit;
+    cursor: pointer;
 }
 
+#myPetsList .search {
+    width: 90%;                  
+    padding: 0.5em 1em;          
+    font-size: 1rem;            
+    line-height: 1.4;  
+    color: var(--font-color); 
+    background-color: var(--background-color-white); 
+    border: 1px solid var(--footer-border);  
+    border-radius: 0.375rem;  
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1rem;  
+}
+
+/* ===== Favorites / Recently Viewed ===== */
+#Favorites,#recentlyViewed, #searchProfiles {
+    max-width: 80%;
+    margin: auto;
+}
+
+#recentlyViewed .search, #Favorites .search {
+    width: 50vw;                  
+    padding: 0.5em 1em;          
+    font-size: 1rem;            
+    line-height: 1.4;  
+    color: var(--font-color); 
+    background-color: var(--background-color-white); 
+    border: 1px solid var(--footer-border);  
+    border-radius: 0.375rem;  
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1rem;  
+}
+
+
 #Favorites {
-    padding-left: 2rem;
     padding-bottom: 2rem;
 }
 
-#recentlyViewed {
-    padding-left: 2rem;
+/* ===== Pet Card Grid ===== */
+.grid,
+.my-pets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
 }
 
-.PetName{
-    position: relative;
-    left: 0;
+#myInfoCollection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: center;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2em;
-  margin-right: 1em;  
-}
-
-/* Card styling /////////////////////////////////////////////////////////*/
+/* ===== Card Styles ===== */
 .card {
-  background: var(--white);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  text-decoration: none;
-  color: inherit;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
+    background: var(--white);
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     position: relative;
-  border: 1px solid #ddd;
-  z-index: 0; /* Ensure stacking context */
+    text-decoration: none;
+    color: inherit;
+    z-index: 0;
 }
 
 .card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
 }
 
-/* Card content /////////////////////////////////////////////////////////*/
-
 .card-content {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 1rem;
-  padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 12px;
 }
 
 .pet-info {
-  display: grid;
-  gap: 4px;
+    display: grid;
+    gap: 4px;
 }
 
 .card-links {
-  display: grid;
-  gap: 8px;
-  justify-items: end;
+    display: grid;
+    gap: 8px;
+    justify-items: end;
 }
 
 .card::after,
 .card::before {
-  content: "";
-  position: absolute;
-  background-color: var(--primary-color-2);
-  transition: all 0.3s ease;
-  z-index: 1;
+    content: "";
+    position: absolute;
+    background-color: var(--primary-color-2);
+    transition: all 0.3s ease;
+    z-index: 1;
 }
 
 .card::after {
-  height: 4px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  transform: scaleX(0);
-  transform-origin: left;
+    height: 4px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: scaleX(0);
+    transform-origin: left;
 }
 
 .card::before {
-  width: 4px;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  transform: scaleY(0);
-  transform-origin: top;
+    width: 4px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    transform: scaleY(0);
+    transform-origin: top;
 }
 
 .card:hover::after {
-  transform: scaleX(1);
+    transform: scaleX(1);
 }
 
 .card:hover::before {
-  transform: scaleY(1);
+    transform: scaleY(1);
 }
-
 
 .favorite,
+.viewDetail,
+.remove {
+    background-color: #000;
+    color: var(--white);
+    padding: 6px 10px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
 .viewDetail {
-  background-color: #000;
-  color: var(--white);
-  padding: 6px 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0. ease;
+    border-radius: 999px;
 }
 
-.favorite {
-  border-radius: 50%;
-  text-decoration: none;
-}
-.viewDetail{
-  border-radius: 999px;
-  text-decoration: none;
-}
-
-.viewDetail:hover{
-  border: solid 2px #000;
-  background: transparent;
-  color: #000;
-  transition: 0.2s ease-in-out;
+.viewDetail:hover {
+    background: transparent;
+    color: #000;
+    border: 2px solid #000;
 }
 
 .favorite:hover {
     background-color: var(--primary-color);
-    border: solid 2px var(--primary-color-hover);
-
+    border: 2px solid var(--primary-color-hover);
 }
+
+.remove:hover {
+    background-color: var(--removal-color);
+    border: 2px solid var(--primary-removal-color);
+}
+
+/* ===== Card Text ===== */
 .pet-name {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: var(--primary-color-2);
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color-2);
+    margin-bottom: 0.5rem;
+}
+
+.pet-gender,
+.pet-breed {
+    color: #777;
 }
 
 .pet-gender {
-  color: #777;
-  font-size: 1rem;
+    font-size: 1rem;
 }
 
-.pet-breed{
-  font-size: 0.8em;
-  color: #777;
+.pet-breed {
+    font-size: 0.8em;
 }
-
 
 .no-photo {
     width: 100%;
@@ -350,36 +401,18 @@ section {
     color: #666;
 }
 
-#postAPet {
-    display: none;
-}
-
+/* ===== Post a Pet ===== */
 #postAPetContent {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding: 3rem;
-    font-family: 'Segoe UI', sans-serif;
-    gap: 10rem;
+    max-width: 80%;
+    margin: auto;
+    /* padding: 3rem; */
+    gap: 2em;
+    font: inherit;
 }
 
-/* Responsive layout */
-@media (max-width: 768px) {
-    #postAPetContent {
-        grid-template-columns: 1fr;
-        padding: 2rem;
-    }
-}
-
-/* Left column */
 #postAPetContent>div:first-child {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-#postAPetContent>div:first-child>div {
-    margin-bottom: 2rem;
-    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -390,7 +423,6 @@ section {
     border-radius: 50%;
     background-color: transparent;
     object-fit: cover;
-    display: block;
     padding: 2rem;
     margin: auto;
 }
@@ -398,30 +430,106 @@ section {
 #postAPetContent label {
     margin-bottom: 0.5rem;
     font-weight: 500;
-    display: block;
     font: inherit;
+    display: block;
+}
+
+#postAPetContent label input[type="text"] {
+    width: 80%;
+    padding: 0.8em;
+    margin: 0.5em 0;
+    border-radius: 0.6em;
+    border: 1px solid #ccc;
+    background-color: #e3e3e3;
+    font-size: 1rem;
+}
+
+.PetPhoto {
+    margin-bottom: 2rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.PetName {
+    width: 100%;
+    margin: auto;
 }
 
 textarea {
-    width: 220px;
+    width: 75%;
     height: 100px;
     border-radius: 16px;
     background-color: #ddd;
     border: none;
     padding: 0.75rem 1rem;
-    font-size: 1rem;
-    resize: none;
     font: inherit;
+    resize: none;
 }
 
-/* Right section (form) */
 .post-pet-form {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
 }
 
-/* Dropdown styling */
+/* ===== Search Profile Section styles ===== */
+
+#searchProfiles .container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.answer-group {
+    width: 20rem;
+    min-width: 220px;
+    background: var(--white);
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    z-index: 0;
+    border-style: none;
+    padding: 1rem;
+}
+
+.answer-groups-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+#groupTitle h3 {
+    color: var(--primary-title-color);
+    font-weight: 800;
+}
+
+#loadSearch,
+#deleteSearch {
+    background-color: #000;
+    color: var(--white);
+    padding: 6px 10px;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border-style: none;
+}
+
+#loadSearch {
+    background-color: #000;
+}
+
+#deleteSearch {
+    background-color: var(--removal-color);
+}
+
+/* ===== Dropdown styles ===== */
 .dropdownPet {
     display: block;
     margin-bottom: 1rem;
@@ -429,16 +537,15 @@ textarea {
 }
 
 .dropPetbtn {
-    width: 100%;
+    width: 80%;
     padding: 0.75rem 1rem;
     border: 1px solid #ccc;
     border-radius: 12px;
-    background: #ffffff;
-    font-weight: 600;
+    background: #fff;
     font: inherit;
     text-align: left;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
@@ -446,15 +553,14 @@ textarea {
     background-color: #f2f4f8;
 }
 
-/* Dropdown content */
 .dropdown-petcontent {
     display: none;
     position: absolute;
     background-color: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid #ccc;
-    margin-top: 0.5rem;
     border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 0.5rem;
     z-index: 10;
     padding: 0.5rem;
     max-height: 300px;
@@ -462,7 +568,6 @@ textarea {
     width: 100%;
 }
 
-/* Show when active */
 .dropdownPet.active .dropdown-petcontent {
     display: block;
 }
@@ -485,7 +590,6 @@ textarea {
     background: #555;
 }
 
-/* Form groups inside dropdowns */
 .form-group {
     margin-bottom: 0.75rem;
 }
@@ -500,7 +604,6 @@ textarea {
     accent-color: #6c8df5;
 }
 
-/* Submit button */
 .post-pet-form button[type="submit"] {
     padding: 0.6rem 1.5rem;
     background-color: #8ea3e0;
@@ -512,9 +615,90 @@ textarea {
     margin-top: 1rem;
 }
 
-.my-pets-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+#profileImgWrapper {
+    position: relative;
+    display: inline-block;
+    width: 13rem;
+    height: 13rem;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: default;
+    /* default cursor when not editable */
+}
+
+#profileImgWrapper.editable {
+    cursor: pointer;
+    /* pointer cursor when editable */
+}
+
+#overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.35);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+#profileImgWrapper.editable #overlay {
+    display: flex;
+    /* show overlay only when editable */
+}
+
+
+/* ===== Responsive Rules ===== */
+@media (max-width: 900px) {
+    #navToggle {
+        display: block;
+    }
+
+    #accountNav .nav-buttons {
+        flex-direction: column;
+        display: none;
+        background-color: #90A5EC;
+        padding-top: 1rem;
+    }
+
+    #accountNav.show-menu .nav-buttons {
+        display: flex;
+    }
+
+    #accountNav .nav-buttons button {
+        width: 100%;
+        text-align: left;
+    }
+
+    #myInfoCollection,
+    #myInfo {
+        grid-template-columns: 1fr;
+    }
+
+    #myInfo fieldset {
+        width: 80vw;
+    }
+
+    .dropPetbtn {
+        width: 100%;
+    }
+
+    #postAPetContent {
+        justify-items: center;
+        align-items: center;
+        grid-template-columns: 1fr;
+        padding: 2rem;
+        gap: 2rem;
+    }
+
+    .answer-group {
+        width: 100%;
+    }
+
+    #myInfo form textarea {
+        width: 70vw;
+    }
 }

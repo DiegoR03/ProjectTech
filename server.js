@@ -87,7 +87,7 @@ app
         session({
             resave: false,
 
-            saveUninitialized: true,
+            saveUninitialized: false,
 
             secret: process.env.SESSION_SECRET,
 
@@ -105,8 +105,10 @@ app
                 if (user) {
                     res.locals.currentUser = {
                         _id: user._id,
-                        firstName: user.firstName,
-                        profileImage: user.profileImage
+                        firstName: user.firstName || '',
+                        lastName: user.lastName || '',
+                        profileImage: user.profileImage,
+                        notifications: user.notifications || [],
                     };
                 } else {
                     res.locals.currentUser = null;
@@ -132,6 +134,8 @@ app
         res.locals.loggedIn = req.session.userID ? true : false;
         next();
     })
+
+    .use(express.static('public'))
 
     .disable('x-powered-by')
 
@@ -170,7 +174,6 @@ app
 
     .get("/index", loadHome)
 
-    .get("/account", loadAccount)
     .get("/logout", (req, res) => {
         req.session.destroy();
         res.redirect("/login");
@@ -184,7 +187,7 @@ app
         let user = null;
 
         if (userId) {
-            const user = await userCollection.findOne({ _id: userId });
+            user = await userCollection.findOne({ _id: new ObjectId(userId) });
             myPets = await petCollection.find({ addedByUserId: userId }).toArray();
 
             const now = Date.now();
@@ -199,7 +202,17 @@ app
 
             req.session.recentlyViewed = recentlyViewed;
             req.session.favorites = favorites;
+        } else {
+            return res.redirect("/login");
         }
+
+        // Add these lines to provide grouping and labels for saved answers
+        const { questionLabels } = require('./static/js/search-form');
+        const groupedAnswers = {
+            "General Info": ['type', 'size', 'gender', 'age'],
+            "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'floor', 'hasGarden'],
+            "Pet Personality": ['isComfystrangers', 'isPlayful']
+        };
 
         res.render('account', {
             recentlyViewed,
@@ -210,7 +223,10 @@ app
             loggedIn: !!req.session.userID,
             favorites: user?.favorites || [],
             myPets,
-            createdAt: user?.createdAt || null
+            createdAt: user?.createdAt || null,
+            savedAnswers: user?.savedAnswers || [],
+            groupedAnswers,
+            questionLabels
         });
     })
 
@@ -278,54 +294,154 @@ app
             res.status(500).send('Error fetching pet details.');
         }
     })
-    
+
     .get("/detail/:id", loadDetail)
     .get('/fave/:id', async (req, res) => {
         const petId = req.params.id;
 
         try {
+            // First, try to find pet in customPets (local)
+            const customPet = await db.collection('customPets').findOne({ id: petId });
+
+            if (customPet) {
+                // It's a custom pet
+                const petData = {
+                    id: customPet.id,
+                    name: customPet.name,
+                    photo: customPet.photos?.[0]?.medium || null,
+                    gender: customPet.gender,
+                    breed: customPet.breeds?.primary || '',
+                    isCustom: true
+                };
+
+                if (!req.session.favorites) req.session.favorites = [];
+
+                // Check if already favorited
+                const alreadyFavorited = req.session.favorites.some(p => p.id === petId);
+                if (!alreadyFavorited) {
+                    req.session.favorites.unshift(petData);
+
+                    if (req.session.userID) {
+                        await userCollection.updateOne(
+                            { _id: new ObjectId(req.session.userID) },
+                            { $addToSet: { favorites: petData } }
+                        );
+                    }
+
+                    // Notify owner if liker is not the owner
+                    if (customPet.addedByUserId && req.session.userID !== customPet.addedByUserId.toString()) {
+                        const ownerId = new ObjectId(customPet.addedByUserId);
+                        const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+                        const message = `${liker.firstName} liked your pet "${customPet.name}"`;
+                        const image = liker.profileImage;
+
+                        await userCollection.updateOne(
+                            { _id: ownerId },
+                            { $push: { notifications: { image, message, petId, timestamp: Date.now() } } }
+                        );
+                    }
+                }
+
+                // Render detail with the local pet
+                return res.render('detail', { pet: customPet });
+            }
+
+            // Pet from Petfinder API
             const token = await getPetfinderToken();
             const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-
             const data = await response.json();
             const pet = data.animal;
             if (!pet) throw new Error("Pet not found");
 
-            if (!req.session.favorites) req.session.favorites = [];
-
-            // Add new pet 
             const petData = {
                 id: pet.id,
                 name: pet.name,
                 photo: pet.photos?.[0]?.medium || null,
                 gender: pet.gender,
-                breed: pet.breeds.primary
+                breed: pet.breeds.primary,
+                isCustom: false
             };
 
-            req.session.favorites.unshift(petData);
+            if (!req.session.favorites) req.session.favorites = [];
 
-            // Update MongoDB
-            if (req.session.email) {
-                await users.updateOne(
-                    { email: req.session.email },
-                    { $set: { favorites: req.session.favorites } }
-                );
+            const alreadyFavorited = req.session.favorites.some(p => p.id === petId);
+            if (!alreadyFavorited) {
+                req.session.favorites.unshift(petData);
+
+                if (req.session.userID) {
+                    await userCollection.updateOne(
+                        { _id: new ObjectId(req.session.userID) },
+                        { $addToSet: { favorites: petData } }
+                    );
+                }
             }
 
             res.render('detail', { pet });
         } catch (err) {
-            console.error("Error in /detail route:", err);
+            console.error("Error in /fave/:id route:", err);
             res.status(500).send('Error fetching pet details.');
         }
     })
+
+    .get('/removefavorite/:id', async (req, res) => {
+        const petId = req.params.id;
+
+        try {
+            if (!req.session.favorites) req.session.favorites = [];
+
+            req.session.favorites = req.session.favorites.filter(p => String(p.id) !== String(petId));
+
+            if (req.session.userID) {
+                await userCollection.updateOne(
+                    { _id: new ObjectId(req.session.userID) },
+                    { $pull: { favorites: { id: petId } } }
+                );
+            }
+
+            const customPet = await db.collection('customPets').findOne({ id: petId });
+
+            if (customPet) {
+                return res.redirect('/account');
+            }
+
+            const token = await getPetfinderToken();
+            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            const pet = data.animal;
+            if (!pet) throw new Error("Pet not found");
+
+            res.redirect('/account');
+
+        } catch (err) {
+            console.error("Error removing notifucation", err);
+            res.status(500).send('Error removing pet from favorites.');
+        }
+    })
+
+
     .get("/fave/:id", loadFave)
 
     .get("/searchForm", loadSearchForm)
     .get("/results-search-form", loadResultsSearchForm)
+    .get('/load-saved-search/:index', async (req, res) => {
+        if (!req.session.userID) return res.redirect('/login');
+        const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+        const idx = parseInt(req.params.index, 10);
+        if (!user || !user.savedAnswers || !user.savedAnswers[idx]) {
+            return res.redirect('/account');
+        }
+        // Set the session answers to the chosen saved search
+        req.session.answers = user.savedAnswers[idx];
+        res.redirect('/results-search-form');
+    })
 
     // GET form
     .get('/post-pet', (req, res) => {
@@ -406,14 +522,74 @@ app
         }
     })
 
+    .post('/notifications/clear', async (req, res) => {
+        if (!req.session.userID) return res.status(401).send('Unauthorized');
 
-
+        try {
+            await userCollection.updateOne(
+                { _id: new ObjectId(req.session.userID) },
+                { $set: { notifications: [] } }
+            );
+            res.redirect('/account');
+        } catch (err) {
+            console.error('Error clearing notifications:', err);
+            res.status(500).send('Server error');
+        }
+    })
 
     .post("/login", processLogin)
-    .post("/account", changeStory)
+    .post('/account', uploads.single('profileImage'), changeStory)
     .post("/passwordchange", changePassword)
-    .post("/searchForm", processForm)
     .post("/register", uploads.single("fileInput"), processRegistration)
+
+    .post("/searchForm", processForm)
+    .post('/save-answers', async (req, res) => {
+        try {
+            const answers = req.body;
+
+            if (!req.session.userID) {
+                return res.status(401).json({ error: "Unauthorized" });
+            }
+
+            // Fetch current savedAnswers
+            const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+            const savedAnswers = user?.savedAnswers || [];
+
+            // Deep equality check
+            const isDuplicate = savedAnswers.some(saved => {
+                return JSON.stringify(saved) === JSON.stringify(answers);
+            });
+
+            if (isDuplicate) {
+                // No error, just indicate duplicate
+                return res.json({ success: true, duplicate: true });
+            }
+
+            await userCollection.updateOne(
+                { _id: new ObjectId(req.session.userID) },
+                { $push: { savedAnswers: answers } }
+            );
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error("Error saving answers:", err);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    })
+
+    .post('/delete-saved-search/:idx', async (req, res) => {
+        if (!req.session.userID) return res.redirect('/login');
+        const idx = parseInt(req.params.idx, 10);
+        const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+        if (!user || !user.savedAnswers || !user.savedAnswers[idx]) return res.redirect('/account');
+
+        user.savedAnswers.splice(idx, 1);
+        await userCollection.updateOne(
+            { _id: new ObjectId(req.session.userID) },
+            { $set: { savedAnswers: user.savedAnswers } }
+        );
+        res.redirect('/account');
+    })
 
     .listen(port, () => {
         console.log(`Server running at http://localhost:${port}`);
@@ -422,27 +598,26 @@ app
 // RENDERING VIEWS ///////////////////////////////////////////////////////////
 
 function loadHome(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
     res.render("index.ejs", { userID });
 }
 
 function loadLogin(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    if (res.locals.currentUser) {
+        req.session.destroy();
+    }
+    const userID = req.session.userID || null;
     res.render("login.ejs", { userID });
 }
 
 
 function loadPasswordChange(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
     res.render("passwordchange.ejs", { userID });
 }
 
 async function loadDetail(req, res) {
-    const petId = req.params.id;
-    const userID = req.session.userID || 95234;
+    const userID = req.session.userID || null;
     console.log("Fetching pet ID:", petId);
 
     try {
@@ -520,10 +695,7 @@ async function loadFave(req, res) {
 
 
 function loadSearchForm(req, res) {
-    if (!req.session.userID) {
-        req.session.userID = 95234;
-    }
-    let userID = req.session.userID;
+    const userID = req.session.userID || null;
 
 
     // Retrieves questionlist from 'search-form.js'
@@ -556,40 +728,20 @@ function loadSearchForm(req, res) {
 }
 
 
-function ensureAuthenticated(req, res, next) {
-    if (req.session.userID) {
-        next();
-    } else {
-        res.redirect("/login");
-    }
-}
-
-app.get("/account", ensureAuthenticated, loadAccount);
-
-
-function loadResultsSearchForm(req, res) {
-    req.session.userID = 95234;
-
-    let userID = req.session.userID;
+async function loadResultsSearchForm(req, res) {
+    const userID = req.session.userID || null;
     const userAnswers = req.session.answers || {};
     const { question, questionLabels } = require('./static/js/search-form');
 
     const groupedAnswers = {
         "General Info": ['type', 'size', 'gender', 'age'],
         "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'floor', 'hasGarden'],
-        "Pet Personality": [ 'isComfystrangers', 'isPlayful']
+        "Pet Personality": ['isComfystrangers', 'isPlayful']
     };
 
 
     res.render("results-search-form.ejs", { userID, userAnswers, groupedAnswers, questionLabels });
 }
-
-function loadRegistry(req, res) {
-    req.session.userID = 95234;
-    let userID = req.session.userID;
-    res.render("register.ejs", { userID });
-}
-
 
 // PROCESS FUNCTIONS ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -602,14 +754,14 @@ async function processLogin(req, res) {
         const user = await userCollection.findOne({ email });
 
         if (user && await bcrypt.compare(password, user.password)) {
-            req.session.userID = user._id;
+            req.session.userID = user._id.toString();
             req.session.email = user.email;
             req.session.firstName = user.firstName;
             req.session.profileImage = user.profileImage || '/static/default.png';
             req.session.userStory = user.story || '';
             req.session.recentlyViewed = user.recentlyViewed || [];
             req.session.favorites = user.favorites || [],
-            req.session.createdAt = user.createdAt
+                req.session.createdAt = user.createdAt
 
             res.redirect("/account");
         } else {
@@ -621,7 +773,7 @@ async function processLogin(req, res) {
 
         app.post("/register", uploads.single('profileImage'), processRegistration);
     }
-
+}
 
 
 function processForm(req, res) {
@@ -719,8 +871,6 @@ async function processRegistration(req, res) {
                 profileImage: profileImagePath,
                 createdAt: new Date(),
                 userStory: "A short story about you",
-
-
             };
 
             await userCollection.insertOne(newUser);
@@ -770,39 +920,6 @@ async function changePassword(req, res) {
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // PROFILE ///////////////////////////////////////////////////////
-async function loadAccount(req, res) {
-    if (!req.session.userID) {
-        res.redirect("/login");
-        return;
-    }
-
-
-    try {
-        const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
-        if (!user) {
-            return res.status(404).render("account.ejs", { error: "User not found." });
-        } else {
-            // Get recently viewed pets from session
-            const recentlyViewed = req.session.recentlyViewed || [];
-            const myPets = await petCollection.find({ addedByUserId: user._id.toString() }).toArray();
-
-            res.render("account.ejs", {
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                profileImage: user.profileImage,
-                userStory: user.userStory,
-                recentlyViewed: req.session.recentlyViewed || [],
-                favorites: user.favorites || [],
-                myPets,
-                createdAt: user.createdAt 
-            });
-        }
-    } catch (error) {
-        console.error("Error loading account:", error);
-        res.status(500).render("account.ejs", { error: "An error occurred while loading your account." });
-    }
-}
 
 app.get('/test-session', (req, res) => {
     if (!req.session.counter) req.session.counter = 0;
@@ -817,15 +934,31 @@ async function changeStory(req, res) {
         if (!user) return res.status(404).send("User not found");
 
         const email = user.email;
-
         const fieldsToUpdate = ['firstName', 'lastName', 'userStory'];
         const updates = {};
 
+        // Update text fields if changed
         for (const field of fieldsToUpdate) {
             const newValue = req.body[field];
             if (newValue !== undefined && newValue.trim() !== "" && newValue !== user[field]) {
                 updates[field] = newValue;
             }
+        }
+
+        // Handle profile image upload if present
+        if (req.file) {
+            const inputPath = req.file.path;
+
+            const outputPath = path.join("uploads/", "square-" + req.file.filename);
+
+            await sharp(inputPath)
+                .resize(800, 800, {
+                    fit: sharp.fit.cover,
+                    position: sharp.strategy.entropy
+                })
+                .toFile(outputPath);
+
+            updates.profileImage = "/" + outputPath.replace(/\\/g, "/"); // Normalize path for all OS
         }
 
         if (Object.keys(updates).length > 0) {
@@ -842,6 +975,8 @@ async function changeStory(req, res) {
         res.status(500).redirect("/login");
     }
 }
+
+
 
 
 // GETTING API TOKEN /////////////////////////////////////////////////////////////////////
@@ -865,13 +1000,11 @@ async function getPetfinderToken() {
 
 
 // REQUEST API QUERY & FILTERING ////////////////////////////////////////////////////////
-async function loadBrowse(req, res) {
+async function loadBrowse(req, res, options = { json: false }) {
     try {
 
         res.locals.isFetching = true; // Set flag before API call
         const token = await getPetfinderToken();
-        const petsPerPage = 9;
-        const page = parseInt(req.query.page) || 1;
 
         const allowedFilters = [
             "type", "gender", "size", "age", "coat",
@@ -949,12 +1082,8 @@ async function loadBrowse(req, res) {
             req.session.petsCache[filterKey] = petsWithImages;
         }
 
-        // Step 5: In-memory pagination
-        const totalPets = petsWithImages.length;
-        const totalPages = Math.ceil(totalPets / petsPerPage);
-        const startIndex = (page - 1) * petsPerPage;
-        const endIndex = startIndex + petsPerPage;
-        const displayedPets = petsWithImages.slice(startIndex, endIndex);
+
+        const displayedPets = petsWithImages
 
         // Step 6: Build activeFilters for UI
         const filterLabels = {
@@ -980,32 +1109,118 @@ async function loadBrowse(req, res) {
             }
         }
 
-        res.render("browse.ejs", {
-            pets: displayedPets,
-            pagination: {
-                current_page: page,
-                total_pages: totalPages,
-                total_count: totalPets
-            },
-            error: null,
-            request: req,
-            activeFilters,
-            isFetching: false
-        });
+        console.log("Filters from query:", req.query);
+        console.log("Applied filters for API:", appliedFilters);
+        console.log("Total pets fetched from API:", petsWithImages.length);
 
+
+        const offset = parseInt(req.query.offset) || 0;
+        const limit = parseInt(req.query.limit) || 12;
+        console.log("Pagination - offset:", offset, "limit:", limit);
+
+        const paginatedPets = petsWithImages.slice(offset, offset + limit);
+        console.log("Pets sent to client:", paginatedPets.length);
+
+
+        if (options.json) {
+            // Lazy load call: alleen JSON
+            return res.json({
+                pets: paginatedPets,
+                hasMore: offset + limit < petsWithImages.length
+            });
+        } else {
+            // Eerste paginalaad: render HTML
+            return res.render("browse.ejs", {
+                pets: paginatedPets,
+                hasMore: offset + limit < petsWithImages.length,
+                pagination: {
+                    offset,
+                    limit,
+                    total: petsWithImages.length,
+                    totalPages: 30
+                },
+                error: null,
+                request: req,
+                activeFilters,
+                isFetching: false
+            });
+        }
     } catch (error) {
         console.error("Browse error:", error);
-        res.status(500).render("browse.ejs", {
+        return res.status(500).render("browse.ejs", {
             pets: [],
             pagination: null,
             error: "Could not fetch pet data.",
             request: req,
             activeFilters: [],
             isFetching: false
-
         });
     }
+
 }
+
+app.get('/browse/api', async (req, res) => {
+    try {
+        const token = await getPetfinderToken();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+
+        const allowedFilters = [
+            "type", "gender", "size", "age", "coat",
+            "good_with_children", "good_with_dogs",
+            "good_with_cats", "house_trained"
+        ];
+
+        const filterMap = {
+            species: "type",
+            gender: "gender",
+            size: "size",
+            age: "age",
+            coat: "coat",
+            good_with_children: "good_with_children",
+            good_with_dogs: "good_with_dogs",
+            good_with_cats: "good_with_cats",
+            house_trained: "house_trained"
+        };
+
+        const url = new URL("https://api.petfinder.com/v2/animals");
+        url.searchParams.append("page", page);
+        url.searchParams.append("limit", limit);
+
+        // Voeg filters toe
+        for (let key in req.query) {
+            const apiKey = filterMap[key] || key;
+            if (allowedFilters.includes(apiKey) && req.query[key]) {
+                url.searchParams.append(apiKey, req.query[key]);
+            }
+        }
+
+        const response = await fetch(url.toString(), {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const petsWithPhotos = data.animals.filter(pet => pet.photos && pet.photos.length > 0);
+
+        res.json({
+            pets: petsWithPhotos,
+            currentPage: page,
+            hasMore: data.pagination && data.pagination.current_page < data.pagination.total_pages,
+            totalPages: data.pagination ? data.pagination.total_pages : 1
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Kan geen data ophalen" });
+    }
+});
+
+
 // FIND MY MATCH //////////////////////////////////////////////////////////////////////////////////////////////////
 app.get('/match', async (req, res) => {
     const userAnswers = req.session.answers;
@@ -1034,7 +1249,7 @@ app.get('/match', async (req, res) => {
             let score = 0;
             let reason = [];
             const hasGarden = userAnswers.hasGarden === 'true';
-            
+
             const floor = userAnswers.floor; // groundfloor / upperfloor-with-elevator / upperfloor-without-elevator
 
             // --- 1. ENVIRONMENT DEALBREAKERS ---
