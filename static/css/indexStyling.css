@@ -10,6 +10,7 @@
   --primary-color-2: #C74F0A;
   --primary-color-hover-2: #E66F3A;
   --background-color: #f2f2f2;
+  --background-color-cards: #fff;
   --footer-header-background: #fff;
   --active-filters: #46c0975a;
 
@@ -35,6 +36,10 @@ h2 {
   font-weight: 600;
 }
 
+p {
+  font-size: 1.2em;
+}
+
 /* Section 1 */
 
 section:nth-of-type(1) {
@@ -58,9 +63,7 @@ section:nth-of-type(1) img {
   border-radius: 8px;
 }
 
-
 section:nth-of-type(1) p {
-  font-size: 1.2em;
   line-height: 1.4;
 }
 
@@ -108,7 +111,8 @@ section:nth-of-type(2) .cards {
   justify-content: center;
 }
 section:nth-of-type(2) .card {
-  position: relative;          /* ← make it a positioning context */
+  background-color: var(--background-color-cards);
+  position: relative;       
   border-radius: 12px;
   box-shadow: rgba(0,0,0,0.1) 0px 4px 12px;
   overflow: hidden;
@@ -121,11 +125,10 @@ section:nth-of-type(2) .card:hover {
   box-shadow: rgba(0,0,0,0.15) 0px 8px 16px;
 }
 
-/* --- New CSS to stack two images and fade between them --- */
 .image-container {
   position: relative;
   width: 100%;
-  background: white; /* optional */
+  background: white; 
 }
 .image-container img {
   display: block;
@@ -153,64 +156,8 @@ section:nth-of-type(2) .card-title {
   font-size: 1.5em;
   font-weight: 600;
 }
-/* section:nth-of-type(2) {
-  background-color: var(--footer-header-background);
-  padding-top: 3em;
-  padding-bottom: 3em;
-}
 
-section:nth-of-type(2) .container {
-  max-width: 80%;
-  margin-inline: auto;
-   text-align: center;
-}
-
-section:nth-of-type(2) h2 {
-  margin-top: 0;
-  color: var(--font-color);
-}
-
-section:nth-of-type(2) .cards {
-  display: flex;
-  gap: 1em;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-section:nth-of-type(2) .card {
-  border-radius: 12px;
-  box-shadow: rgba(0,0,0,0.1) 0px 4px 12px;
-  overflow: hidden;
-  cursor: pointer;
-  flex: 1 1 260px;
-  transition: transform .2s, box-shadow .2s;
-}
-
-section:nth-of-type(2) .card:hover {
-  transform: translateY(-8px);
-  box-shadow: rgba(0,0,0,0.15) 0px 8px 16px;
-}
-
-section:nth-of-type(2) .image-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-section:nth-of-type(2) .image-container img {
-  max-width: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-section:nth-of-type(2) .card-title {
-  color: var(--font-color);
-  padding: 1rem 0;
-  font-size: 1.5em;
-  font-weight: 600;
-} */
-
-/* section 3 */
+/* Section 3 */
 
 section:nth-of-type(3) {
   color: var(--font-color-white);
@@ -234,7 +181,6 @@ section:nth-of-type(3) img {
 }
 
 section:nth-of-type(3) p {
-  margin: 0.5em 0 1em;
   line-height: 1.4;
 }
 
@@ -258,8 +204,7 @@ section:nth-of-type(3) a:hover {
   background-color: var(--primary-color-hover-2);
 }
 
-
-/* section 4 */
+/* Section 4 */
 
 section:nth-of-type(4) {
   background-color: var(--background-color-white);
@@ -283,6 +228,10 @@ section:nth-of-type(4) .container {
     font-size: 1.5em;
   }
 
+  p {
+    font-size: 1em;
+  }
+  
   section:nth-of-type(1) .container {
     flex-direction: column-reverse;
     text-align: center;
