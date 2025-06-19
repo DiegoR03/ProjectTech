@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/searchForm.css">
+  <title>Result page</title>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <svg height="100px" width="100px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48.839 48.839" xml:space="preserve">
+        <g>
+          <path fill="var(--color-primary)" d="M39.041,36.843c2.054,3.234,3.022,4.951,3.022,6.742c0,3.537-2.627,5.252-6.166,5.252
+  c-1.56,0-2.567-0.002-5.112-1.326c0,0-1.649-1.509-5.508-1.354c-3.895-0.154-5.545,1.373-5.545,1.373
+  c-2.545,1.323-3.516,1.309-5.074,1.309c-3.539,0-6.168-1.713-6.168-5.252c0-1.791,0.971-3.506,3.024-6.742
+  c0,0,3.881-6.445,7.244-9.477c2.43-2.188,5.973-2.18,5.973-2.18h1.093v-0.001c0,0,3.698-0.009,5.976,2.181
+  C35.059,30.51,39.041,36.844,39.041,36.843z M16.631,20.878c3.7,0,6.699-4.674,6.699-10.439S20.331,0,16.631,0
+  S9.932,4.674,9.932,10.439S12.931,20.878,16.631,20.878z M10.211,30.988c2.727-1.259,3.349-5.723,1.388-9.971
+  s-5.761-6.672-8.488-5.414s-3.348,5.723-1.388,9.971C3.684,29.822,7.484,32.245,10.211,30.988z M32.206,20.878
+  c3.7,0,6.7-4.674,6.7-10.439S35.906,0,32.206,0s-6.699,4.674-6.699,10.439C25.507,16.204,28.506,20.878,32.206,20.878z
+   M45.727,15.602c-2.728-1.259-6.527,1.165-8.488,5.414s-1.339,8.713,1.389,9.972c2.728,1.258,6.527-1.166,8.488-5.414
+  S48.455,16.861,45.727,15.602z" />
+        </g>
+      </svg>
+      <h1>PetMatch</h1>
+    </div>
+    <nav>
+      <% if (currentUser) { %>
+        <a href="/index">Home</a>
+        <a href="/browse" class="active">Browse</a>
+        <a href="/favourites">Favourites</a>
+        <div class="dropdown">
+          <button class="dropbtn"><img src="<%= currentUser?.profileImage%>" alt="Profile Image"></button>
+          <div id="myDropdown" class="dropdown-content">
+            <a href="/account" class="active">Account</a>
+            <a href="/logout">Logout</a>
+          </div>
+        </div>
+        <% } else { %>
+          <a href="/index">Home</a>
+          <a href="/browse" class="active">Browse Pets</a>
+          <a href="/login">Favourites</a>
+          <a href="/login">Login</a>
+          <% } %>
+
+    </nav>
+
+  </header>
+
+
+  <main>
+
+    <% if (Object.keys(userAnswers).length===0) { %>
+      <p>No answers submitted yet. <a href="/searchForm">Start now</a>.</p>
+      <% } else { %>
+        <div id="results-and-buttons-container">
+          <h1>One last check:</h1>
+          <div id="answers-list">
+            <% for (let group in groupedAnswers) { %>
+              <section class="answer-group" data-group="<%= group %>">
+                <h3>
+                  <%= group %>
+                </h3>
+                <ul class="group-list">
+                  <% groupedAnswers[group].forEach(key=> {
+                    const currentValue = userAnswers[key];
+                    %>
+                    <li data-key="<%= key %>" data-value="<%= currentValue %>">
+                      <div class="answer-row static-view">
+                        <span><strong>
+                            <%= questionLabels[key] || key %>
+                          </strong></span>
+                        <span>
+                          <%= currentValue==='true' ? 'Yes' : currentValue==='false' ? 'No' : currentValue %>
+                        </span>
+                      </div>
+                      <div class="edit-view" style="display: none;">
+                        <label><strong>
+                            <%= questionLabels[key] || key %>
+                          </strong></label>
+                        <div class="radio-options" data-key="<%= key %>"></div>
+                      </div>
+                    </li>
+                    <% }) %>
+                </ul>
+
+                <div class="group-actions static-view">
+                  <button class="edit-group-btn" onclick="startEditing('<%= group %>')">Edit</button>
+                </div>
+
+                <form class="group-actions edit-view" style="display: none;" data-group="<%= group %>">
+                  <button type="submit" class="save-action">Save changes</button>
+                  <button type="button" class="cancel-action" onclick="cancelEditing('<%= group %>')">Cancel</button>
+                </form>
+              </section>
+              <% } %>
+
+          </div>
+
+          <div class="sticky-buttons">
+            <button class="primary-action" onclick="findMyMatch()">Find my match</button>
+            <button class="danger-action" onclick="deleteAnswers()">Delete</button>
+          </div>
+        </div>
+        <% } %>
+
+
+
+  </main>
+
+
+  <script>
+
+    const userAnswers = {
+      type: 'dog',
+      size: 'medium',
+      gender: 'male',
+      age: 'Young',
+      isCastrated: 'false',
+      coat: 'long',
+      hasKids: 'true',
+      hasCats: 'true',
+      hasDogs: 'false',
+      //isAloneOften: 'true',
+      floor: 'upperfloor-w-elevator',
+      hasGarden: 'false',
+      activity: 'false',
+      isHousetrained: 'false',
+      isComfystrangers: 'false',
+      isPlayful: 'false',
+      isPaired: 'false'
+    };
+
+    const questionLabels = {
+      type: 'Animal type',
+      size: 'Size',
+      gender: 'Gender',
+      age: 'Age',
+      //isCastrated: 'Castrated',
+      //coat: 'Coat type',
+      hasKids: 'Has children',
+      hasCats: 'Has cats',
+      hasDogs: 'Has dogs',
+      //isAloneOften: 'Home alone often',
+      floor: 'Living situation',
+      hasGarden: 'Has a garden',
+      //activity: 'Active household',
+      //isHousetrained: 'Needs to be housetrained',
+      isComfystrangers: 'Comfortable with strangers',
+      //isPlayful: 'Looking for a playful pet',
+      //isPaired: 'Wants a bonded pair',
+    };
+
+    const groupedAnswers = {
+      "General Info": ['type', 'size', 'gender', 'age', 'isCastrated', 'coat'],
+      "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
+      "Pet Personality": ['isComfystrangers']
+    };
+
+
+
+
+    const answerOptions = {
+      type: ['Dog', 'Cat', 'Rabbit'],
+      size: ['Small', 'Medium', 'Large', 'No preference'],
+      gender: ['Male', 'Female', 'No preference'],
+      age: ['Baby', 'Young', 'Adult', 'Senior', 'No preference'],
+      isCastrated: ['true', 'false', 'No preference'],
+      coat: ['Short', 'Medium', 'Long', 'No preference'],
+      hasKids: ['true', 'false'],
+      hasCats: ['true', 'false'],
+      hasDogs: ['true', 'false'],
+      isAloneOften: ['true', 'false'],
+      floor: ['Groundfloor', 'Upperfloor with elevator', 'Upperfloor without elevator'],
+      hasGarden: ['true', 'false'],
+      activity: ['true', 'false'],
+      isHousetrained: ['true', 'false'],
+      isComfystrangers: ['true', 'false'],
+      isPlayful: ['true', 'false'],
+      isPaired: ['true', 'false']
+    };
+
+    function formatOptionLabel(value) {
+      if (value === 'true') return 'Yes';
+      if (value === 'false') return 'No';
+      if (value === 'no preference') return 'No preference';
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    function startEditing(groupName) {
+      const section = document.querySelector(`[data-group="${groupName}"]`);
+      section.querySelectorAll('.static-view').forEach(el => el.style.display = 'none');
+      section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'block');
+
+      section.querySelectorAll('li').forEach(li => {
+        const key = li.getAttribute('data-key');
+        const currentValue = li.getAttribute('data-value');
+        const container = li.querySelector(`.radio-options[data-key="${key}"]`);
+
+        container.innerHTML = ''; // Clear existing buttons
+
+        const options = answerOptions[key] || [];
+        options.forEach(opt => {
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = key;
+          input.value = opt;
+          if (opt === currentValue) input.checked = true;
+
+          const label = document.createElement('label');
+          label.textContent = formatOptionLabel(opt);
+          label.prepend(input);
+
+          container.appendChild(label);
+        });
+      });
+    }
+
+
+    // Save changes ////////////////////////////////////////////////////////////////////////////////////
+
+
+    document.querySelectorAll('.group-actions.edit-view').forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const group = form.getAttribute('data-group');
+        const section = document.querySelector(`[data-group="${group}"]`);
+        const updatedAnswers = {};
+
+        section.querySelectorAll('.radio-options').forEach(container => {
+          const key = container.getAttribute('data-key');
+          const selected = container.querySelector('input[type="radio"]:checked');
+          if (selected) {
+            updatedAnswers[key] = selected.value;
+          }
+        });
+
+        try {
+          const res = await fetch('/results-search-form', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedAnswers)
+          });
+
+          if (res.ok) {
+            window.location.reload(); // Refresh to see updated values
+          } else {
+            console.error('Update failed');
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+    });
+
+    function cancelEditing(groupName) {
+      const section = document.querySelector(`[data-group="${groupName}"]`);
+      section.querySelectorAll('.static-view').forEach(el => {
+        if (el.classList.contains('group-actions')) {
+          el.style.display = 'block'
+        } else {
+          el.style.display = 'flex'
+        }
+      });
+      section.querySelectorAll('.edit-view').forEach(el => el.style.display = 'none');
+    }
+
+    async function findMyMatch() {
+      const container = document.getElementById('results-and-buttons-container');
+      container.innerHTML = '<p>Loading your best matches...</p>';
+
+      try {
+        const res = await fetch('/match');
+        const matches = await res.json();
+
+        if (!Array.isArray(matches)) {
+          container.innerHTML = '<p>No matches found. Please try again.</p>';
+          return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+
+        matches.forEach((pet, i) => {
+          const card = document.createElement('div');
+          card.className = 'card expanded-card';
+
+          const imgUrl = pet.photos[0]?.medium || 'https://via.placeholder.com/300x180?text=No+Image';
+
+
+
+          card.innerHTML = `
+  <div class="card-image-section">
+    <img src="${imgUrl}" alt="${pet.name}" />
+  </div>
+
+  <div class="card-content">
+    <div class="card-info">
+      <h2>${pet.name} ${i === 0 ? '<span class="badge-top">⭐ Top Match</span>' : ''}</h2>
+
+      <div class="info-columns">
+        <div class="info-col">
+          <p><strong>Breed:</strong> ${pet.breeds.primary}${pet.breeds.secondary ? ' & ' + pet.breeds.secondary : ''}</p>
+          <p><strong>Age:</strong> ${pet.age}</p>
+          <p><strong>Gender:</strong> ${pet.gender}</p>
+          <p><strong>Size:</strong> ${pet.size}</p>
+          <p><strong>Coat:</strong> ${pet.coat || 'Unknown'}</p>
+        </div>
+        <div class="info-col">
+          <p><strong>Spayed/Neutered:</strong> ${pet.attributes?.spayed_neutered ? 'Yes' : 'No'}</p>
+          <p><strong>House Trained:</strong> ${pet.attributes?.house_trained ? 'Yes' : 'No'}</p>
+          <p><strong>Special Needs:</strong> ${pet.attributes?.special_needs ? 'Yes' : 'No'}</p>
+          <p><strong>Shots Current:</strong> ${pet.attributes?.shots_current ? 'Yes' : 'No'}</p>
+          <p><strong>Good with:</strong> 
+            ${pet.environment?.children ? 'Kids ' : ''}
+            ${pet.environment?.dogs ? 'Dogs ' : ''}
+            ${pet.environment?.cats ? 'Cats ' : ''}
+            ${!pet.environment?.children && !pet.environment?.dogs && !pet.environment?.cats ? 'None listed' : ''}
+          </p>
+        </div>
+      </div>
+
+      <!-- Tags moved here -->
+      ${pet.tags?.length
+              ? `<div class="tags">
+             <h4>Tags</h4>
+             <div class="tag-list">
+               ${pet.tags.map(tag => `<span class="tag-pill">${tag}</span>`).join('')}
+             </div>
+           </div>`
+              : `<div class="tags">
+             <h4>Tags</h4>
+             <p class="no-tags">No tags listed</p>
+           </div>`}
+    </div>
+
+    <div class="match-reasons">
+      <h4>Match Analysis</h4>
+      <ul>
+        ${pet.matchReasons.map(r => `<li>${r}</li>`).join('')}
+      </ul>
+
+      <div class="description">
+        <h4>Description</h4>
+        <p>${pet.description ? pet.description: 'No description listed'}</p>
+      </div>
+
+      <!-- Buttons moved here -->
+      <div class="card-buttons horizontal-buttons">
+        <a href="/detail/${pet.id}" class="viewDetail full-btn">View ➜</a>
+        <button class="favorite-button full-btn" onclick="saveFavorite('${pet.id}')">Save</button>
+      </div>
+    </div>
+  </div>
+`;
+
+
+
+          grid.appendChild(card);
+        });
+
+        container.innerHTML = '<h1>Your personal Top 10</h1>';
+        container.appendChild(grid);
+        document.getElementById('results-and-buttons-container').style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<p>Something went wrong while finding matches.</p>';
+      }
+    }
+
+    function deleteAnswers() {
+      const confirmOverlay = document.createElement('div');
+      confirmOverlay.className = 'confirm-overlay';
+
+      confirmOverlay.innerHTML = `
+    <div class="confirm-box">
+      <h3>Are you sure?</h3>
+      <p>Your answers will be permanently deleted.</p>
+      <div class="confirm-actions">
+        <button class="cancel-btn">Cancel</button>
+        <button class="confirm-btn">Delete</button>
+      </div>
+    </div>
+  `;
+
+      document.body.appendChild(confirmOverlay);
+
+      // Event listeners
+      confirmOverlay.querySelector('.cancel-btn').addEventListener('click', () => {
+        confirmOverlay.remove();
+      });
+
+      confirmOverlay.querySelector('.confirm-btn').addEventListener('click', () => {
+        fetch('/wizard/reset', { method: 'POST' })
+          .then(() => window.location.href = '/browse')
+          .catch(err => {
+            console.error(err);
+            confirmOverlay.remove();
+            alert("Something went wrong while deleting your answers.");
+          });
+      });
+    }
+
+  </script>
+
+
+</body>
+
+</html>
