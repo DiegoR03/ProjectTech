@@ -61,13 +61,13 @@
             <%= pet.age %>
           </li>
         </ul>
-        <div class="like-container">
-          <a href="/fave/<%= pet.id %>" class="like-button">
-            <span class="heart-bg">
-              <span class="heart-icon"></span>
-            </span>
-          </a>
-        </div>
+          <div class="like-container">
+            <a href="/fave/<%= pet.id %>" class="like-button">
+              <span class="heart-bg">
+                <span class="heart-icon <%= favoritePetIds && favoritePetIds.includes(pet.id) ? 'liked' : '' %>"></span>
+              </span>
+            </a>
+          </div>
         <div class="text-section">
           <div class="text-content">
             <h2>

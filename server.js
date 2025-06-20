@@ -232,63 +232,57 @@ app
 
     .get('/detail/:id', async (req, res) => {
         const petId = req.params.id;
-
+        const userId = req.user?.id; // <-- assuming you're using req.user
+    
         try {
             const now = Date.now();
-
-            // 1. Try to find pet in your own MongoDB collection
-            const mongoPet = await petCollection.findOne({ id: petId }); // if stored as string
-
+    
+            const mongoPet = await petCollection.findOne({ id: petId });
+    
             let pet;
-
+    
             if (mongoPet) {
-                // Pet was found in your MongoDB collection
                 pet = mongoPet;
             } else {
-                // 2. Not found locally, fetch from Petfinder API
                 const token = await getPetfinderToken();
                 const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    headers: { Authorization: `Bearer ${token}` }
                 });
-
                 const data = await response.json();
                 pet = data.animal;
-
                 if (!pet) throw new Error("Pet not found");
             }
-
-            // 3. Handle recently viewed
+    
+            // Handle recently viewed
             if (!req.session.recentlyViewed) req.session.recentlyViewed = [];
-
-            // Filter out expired and duplicates
+    
             req.session.recentlyViewed = req.session.recentlyViewed
                 .filter(p => now - p.timestamp < 120 * 60 * 60 * 1000)
                 .filter(p => p.id !== pet.id);
-
-            // Add current pet to recently viewed
+    
             const petData = {
                 id: pet.id,
-                name: pet.name || pet.petname, // for local pets
+                name: pet.name || pet.petname,
                 photo: pet.photos?.[0]?.medium || pet.photo?.[0]?.medium || null,
                 gender: pet.gender,
                 breed: pet.breed || pet.breeds?.primary,
                 timestamp: now
             };
-
+    
             req.session.recentlyViewed.unshift(petData);
             req.session.recentlyViewed = req.session.recentlyViewed.slice(0, 5);
-
-            // Save to user document if logged in
+    
             if (req.session.email) {
                 await users.updateOne(
                     { email: req.session.email },
                     { $set: { recentlyViewed: req.session.recentlyViewed } }
                 );
             }
-
-            res.render('detail', { pet });
+    
+            // ✅ Fetch favorite pet IDs
+            const favoritePetIds = userId ? await getFavoritesForUser(userId) : [];
+    
+            res.render('detail', { pet, favoritePetIds }); // ✅ Pass them to EJS
         } catch (err) {
             console.error("Error in /detail route:", err);
             res.status(500).send('Error fetching pet details.');
@@ -447,6 +441,32 @@ app
     .get('/post-pet', (req, res) => {
         if (!req.session.user) return res.redirect('/login');
         res.render('addPetForm'); // Create this EJS view
+    })
+
+    .get('/fave/:id', (req, res) => {
+        const petId = req.params.id;
+        const userId = req.user?.id;
+      
+        // Save to favorites
+        saveToFavorites(userId, petId)
+          .then(() => {
+            res.send('OK');
+          })
+          .catch(err => {
+            console.error(err);
+            res.status(500).send('Failed');
+          });
+    })
+    .get('/pets', async (req, res) => {
+        const userId = req.user.id;
+      
+        const allPets = await Pet.findAll(); 
+        const userFavorites = await getFavoritesForUser(userId);
+      
+        res.render('pets', {
+          pets: allPets,
+          favoritePetIds: userFavorites
+        });
     })
 
     // POST form submission
