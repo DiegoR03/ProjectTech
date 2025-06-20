@@ -4,11 +4,11 @@
 }
 
 :root {
-  --primary-color: #90A5EC;
-  --primary-color-hover: #7387CC;
+  --primary-color: #4177BE;
+  --primary-color-hover: #2e49a9;
   --primary-color-action: #F47429;
   --primary-color-hover: #6979af;
-  --primary-color-2: #F47429;
+  --primary-color-2: #C74F0A;
   --primary-color-hover-2: #c05c23;
   --text-color: #333;
   --text-color-2: #fff;
@@ -26,23 +26,24 @@
   --footer-text: #8E8E8E;
 }
 
-body {
+.body {
   font-family: 'Montserrat';
-  background-color: var(--background-color);
+  background-image: url("/static/img/Background_PetchMatch.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
   margin: 0;
   margin-inline: auto;
-
 }
 
-/* Header styling ////////////////////////////////////////////////////////// */
+/* Header styling */
 header {
-  background: var(--white);
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  background: var(--text-color-2);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  box-sizing: border-box;
-  padding: 1rem 5rem;
+  position: sticky;
+  margin-top: 1em;
+  max-width: 80%;
+  margin-inline: auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   position: fixed;
   top: -0.5rem;
@@ -59,34 +60,62 @@ header h1 {
   color: var(--text-color);
 }
 
-header nav a {
-  text-decoration: none;
+header nav ul {
+  padding: 0;
+}
+
+.navbar {
+  background-color: var(--background-color-white);
+  padding: 0.5em;
+  border-radius: 5px;
+}
+
+header a {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.4em;
   color: var(--text-color);
-  font-weight: 500;
-  padding: 0.5rem 0.75rem;
-  transition: color 0.2s ease, background 0.2s ease;
+  font-weight: 600;
+  text-decoration: none;
+  overflow: hidden;
 }
 
-header nav a:hover {
+header a:hover {
   color: var(--primary-color-hover-2);
-  border-bottom: solid 3px var(--primary-color-hover-2);
 }
 
-header .active {
+header a:active {
   color: var(--primary-color-2);
   font-weight: 700;
   border-bottom: solid 3px var(--primary-color-2);
 }
 
-
-#menuButton {
-  display: none;
-  position: relative;
-  z-index: 2;
-  background-color: var(--background-color-white);
-  border: none;
+/* Button hover animation */
+header a::after {
+  content: "";
+  position: absolute;
+  bottom: 0.125em;
+  left: 0;
+  height: 3px;
+  width: 0;
+  background-color: var(--primary-color-hover-2);
 }
 
+@keyframes underline-grow {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+header a:hover::after {
+  animation: underline-grow 0.3s ease-in-out forwards;
+}
+
+/* logo styling */
 .logo {
   display: flex;
   align-items: center;
@@ -106,21 +135,24 @@ header .active {
   color: var(--text-color);
 }
 
-/* Dropdown Button */
-.dropbtn {
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  background: var(--text-color-2);
-  font: inherit;
+.logo p:hover {
+  color: var(--primary-color-2);
+  animation: nudge 0.4s ease-in-out both;
 }
 
-/* The container <div> - needed to position the dropdown content */
-.dropdown {
-  position: relative;
-  display: inline-block;
+@keyframes nudge {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(2px);
+  }
 }
 
+/* Dropdown button */
 .dropdown img {
   width: 2.4rem;
   height: auto;
@@ -128,7 +160,6 @@ header .active {
   background-color: transparent;
 }
 
-/* Dropdown Content (Hidden by Default) */
 .dropdown-content {
   display: none;
   position: absolute;
@@ -140,7 +171,6 @@ header .active {
   border-radius: 1rem;
 }
 
-/* Links inside the dropdown */
 .dropdown-content a {
   color: black;
   padding: 12px 16px;
@@ -156,46 +186,54 @@ header .active {
   padding-left: 1vw;
 }
 
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
 /* Change color of dropdown links on hover */
 .dropdown-content a:hover {
   background-color: #ddd;
 }
 
-
 /* Notifications dropdown button */
-.notifications-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
 .notifications-btn {
-  font-size: 16px;
   border: none;
   cursor: pointer;
   background: var(--text-color-2);
   font: inherit;
+  font-weight: 600;
   position: relative;
-  padding: 0.5rem 1rem;
-  display: flex;
+  display: inline-block;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.notifications-dropdown:hover {
-  border-bottom: solid 3px var(--primary-color-hover-2);
+  padding-bottom: 0.6em;
+  color: var(--text-color);
+  text-decoration: none;
 }
 
 .notifications-btn:hover {
   color: var(--primary-color-hover-2);
 }
 
+.notifications-btn:hover:after {
+  animation: underline-grow 0.3s ease-in-out forwards;
+}
+
+/* Button hover animation */
+.notifications-btn:after {
+  content: "";
+  position: absolute;
+  bottom: 0.4em;
+  left: 0;
+  height: 3.5px;
+  width: 0;
+  background-color: var(--primary-color-hover-2);
+  z-index: 1;
+}
+
 /* Notifications badge */
 .notifications-btn .badge {
   position: absolute;
   top: 1.2rem;
-  /* adjust vertical position */
-  right: -0.3rem;
-  /* adjust horizontal position */
   background-color: red;
   color: white;
   font: inherit;
@@ -204,6 +242,7 @@ header .active {
   border-radius: 50%;
   line-height: 1.5rem;
   pointer-events: none;
+  z-index: 2;
 }
 
 /* Dropdown content specific to notifications */
@@ -236,9 +275,7 @@ header .active {
   transition: color 0.2s ease, background 0.2s ease;
 }
 
-
-/* Footer Styling */
-
+/* Footer styling */
 footer {
   border-top: 1px solid var(--footer-border);
   padding-top: 2em;
@@ -283,22 +320,15 @@ footer ul li:nth-of-type(1) a:hover {
 }
 
 @media (max-width: 900px) {
-
-  header {
-  grid-template-columns: 1fr;
-
-}
+  .body {
+    background-image: url("/static/img/Background_PetchMatch_Mobile.png");
+  }
 
   .dropdown img {
     width: 5rem;
     height: auto;
     border-radius: 50%;
     background-color: transparent;
-}
-
-
-  #menuButton {
-    display: block;
   }
 
   footer {

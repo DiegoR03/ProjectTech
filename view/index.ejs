@@ -8,53 +8,71 @@
  ">
   <title>PetMatch | Home</title>
 </head>
-
+  
 <body id="indexBody">
   <%- include('partials/header') %>
-    <main>
-      <section>
-        <div class="container">
-          <div>
-            <h1>Looking for a pet to adopt?</h1>
-            <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hesitate to
-              adopt one of these lovely pets.</p>
-            <a href="#">Browse pets</a>
-          </div>
-          <div>
-            <img src="/static/images/homepage-dog.png" alt="Dog">
-          </div>
-        </div>
-      </section>
+  <main>
+    <section>
+      <div class="container">
+      <div>
+        <h1>Looking for a pet to adopt?</h1>
+        <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hesitate to adopt one of these lovely pets.</p>
+        <a href="#">Browse pets</a>
+      </div>
+      <div>
+        <img src="/static/images/homepage-dog.png" alt="Dog">
+      </div>
+    </div>
+    </section>
 
-      <section>
+      <section> 
         <div class="container">
           <h2>What pet are you looking for?</h2>
           <div class="cards">
-
+    
             <div class="card">
               <div class="image-container">
-                <img src="/static/images/dog.png" alt="Dog" class="default-img">
-                <img src="/static/images/dog-hover.png" alt="Dog smiling" class="hover-img">
+                <img
+                  src="/static/images/dog.png"
+                  alt="Dog"
+                  class="default-img"
+                >
+                <img
+                  src="/static/images/dog-hover.png"
+                  alt="Dog smiling"
+                  class="hover-img">
               </div>
               <div class="card-title">Dogs</div>
             </div>
-
+    
             <div class="card">
               <div class="image-container">
-                <img src="/static/images/cat.png" alt="Cat" class="default-img">
-                <img src="/static/images/cat-hover.png" alt="Cat smiling" class="hover-img">
+                <img
+                  src="/static/images/cat.png"
+                  alt="Cat"
+                  class="default-img">
+                <img
+                  src="/static/images/cat-hover.png"
+                  alt="Cat smiling"
+                  class="hover-img">
               </div>
               <div class="card-title">Cats</div>
             </div>
-
+    
             <div class="card">
               <div class="image-container">
-                <img src="/static/images/rodent.png" alt="Rodent" class="default-img">
-                <img src="/static/images/rodent-hover.png" alt="Rodent smiling" class="hover-img">
+                <img
+                  src="/static/images/rabbit.png"
+                  alt="Rodent"
+                  class="default-img">
+                <img
+                  src="/static/images/rabbit-hover.png"
+                  alt="Rodent smiling"
+                  class="hover-img">
               </div>
               <div class="card-title">Rodents</div>
             </div>
-
+    
           </div>
         </div>
       </section>
@@ -62,19 +80,14 @@
       <section>
         <div class="container">
           <div>
-            <h2>Why adopt a pet?</h2>
-            <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of loving
-              pets
-              end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only gaining a
-              loyal friend—you’re also helping reduce the number of animals in shelters and supporting a more humane
-              world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your perfect match
-              could be waiting for you. Adopt, and make a difference.</p>
-            <a href="#">Browse pets</a>
-          </div>
-          <div>
-            <img src="/static/images/pets.jpg" alt="Dog">
-          </div>
+          <h2>Why adopt a pet?</h2>
+          <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of loving pets end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only gaining a loyal friend—you’re also helping reduce the number of animals in shelters and supporting a more humane world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your perfect match could be waiting for you. Adopt, and make a difference.</p>
+          <a href="#">Browse pets</a>
         </div>
+        <div>
+          <img src="/static/images/pets.jpg" alt="Dog">
+        </div>
+      </div>
       </section>
 
       <section>
@@ -115,7 +128,7 @@
         </div>
       </section>
 
-    </main>
+  </main>
 
     <%- include('partials/footer') %>
 </body>

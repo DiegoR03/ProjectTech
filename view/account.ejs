@@ -8,10 +8,11 @@
     <title>PetThing | Account</title>
 </head>
 
-<body>
+<body class="body">
     <%- include('partials/header') %>
         <main>
             <nav id="accountNav">
+                <div>
                 <h2>Welcome back <%= firstName %>
                 </h2>
                 <button id="navToggle" onclick="toggleNavMenu()">&#9776;</button>
@@ -94,115 +95,102 @@
                 </div>
                 <div>
                     <h2>My Pets</h2>
-                    <div class="grid" id="result-grid">
-                        <% if (myPets.length===0) { %>
-                            <p>You haven't posted any pets yet.</p>
-                            <% } else { %>
-                                <% myPets.forEach(pet=> { %>
-                                    <div href="#" class="card">
-                                        <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
-                                        <div class="card-content">
-                                            <div class="pet-info">
-                                                <div class="pet-name">
-                                                    <%= pet.name %>
-                                                </div>
+                        <div id="myPetsList">
+                            <input class="search" placeholder="Search pets…" />
+                            <div class="grid list" id="result-grid">
+                                <% if (myPets.length === 0) { %>
+                                <p>You haven't posted any pets yet.</p>
+                                <% } else { %>
+                                <% myPets.forEach(pet => { %>
 
-                                                <div class="pet-gender">
-                                                    <%= pet.gender %>
-                                                </div>
-                                                <div class="pet-breed">
-                                                    <%= pet.breeds.primary %>
-                                                </div>
-                                            </div>
+                                    <div class="card list-item">
 
-                                            <div class="card-links">
-                                                <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
-                                                <a href="/detail/<%= pet.id %>" class="viewDetail">View
-                                                    &#8594;</a>
-                                            </div>
-
+                                    <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
+                                    <div class="card-content">
+                                        <div class="pet-info">
+                                        <div class="pet-name name"><%= pet.name %></div>
+                                        <div class="pet-gender gender"><%= pet.gender %></div>
+                                        <div class="pet-breed breed"><%= pet.breeds.primary %></div>
                                         </div>
 
+                                        <div class="card-links">
+                                        <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
+                                        <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                                        </div>
                                     </div>
-                                    <% }) %>
-                                        <% } %>
-                    </div>
+                                    </div>
+                                <% }) %>
+                                <% } %>
+                            </div>
+                            </div>
                     </fieldset>
             </section>
 
+
             <section id="recentlyViewed" class="toggle-section">
                 <h2>Recently Viewed Pets</h2>
-                <div class="grid" id="result-grid">
-                    <% if (recentlyViewed.length===0) { %>
-                        <p>You haven't posted any pets yet.</p>
-                        <% } else { %>
-                            <% recentlyViewed.forEach(pet=> { %>
-                                <div href="#" class="card">
-                                    <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
-                                    <div class="card-content">
-                                        <div class="pet-info">
-                                            <div class="pet-name">
-                                                <%= pet.name %>
-                                            </div>
 
-                                            <div class="pet-gender">
-                                                <%= pet.gender %>
-                                            </div>
-                                            <div class="pet-breed">
-                                                <%= pet.breed %>
-                                            </div>
-                                        </div>
+                <div id="recentlyViewedList">
 
-                                        <div class="card-links">
-                                            <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
-                                            <a href="/detail/<%= pet.id %>" class="viewDetail">View
-                                                &#8594;</a>
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                                <% }) %>
-                                    <% } %>
+                  <input class="search" placeholder="Search recently viewed…" />
+              
+                  <div id="recentlyViewed-grid" class="grid list">
+                    <% if (recentlyViewed.length === 0) { %>
+                      <p>You haven't viewed any pets yet.</p>
+                    <% } else { %>
+                      <% recentlyViewed.forEach(pet => { %>
+                        <div class="card list-item">
+                          <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
+                          <div class="card-content">
+                            <div class="pet-info">
+                              <div class="pet-name name"><%= pet.name %></div>
+                              <div class="pet-gender gender"><%= pet.gender %></div>
+                              <div class="pet-breed breed"><%= pet.breed %></div>
+                            </div>
+                            <div class="card-links">
+                              <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
+                              <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                            </div>
+                          </div>
+                        </div>
+                      <% }) %>
+                    <% } %>
+                  </div>
                 </div>
-            </section>
+              </section>
+
 
             <section id="Favorites" class="toggle-section">
                 <h2>Favorite Pets</h2>
-                <div class="grid" id="result-grid">
-                    <% if (favorites.length===0) { %>
-                        <p>You haven't posted any pets yet.</p>
-                        <% } else { %>
-                            <% favorites.forEach(pet=> { %>
-                                <div href="#" class="card">
-                                    <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
-                                    <div class="card-content">
-                                        <div class="pet-info">
-                                            <div class="pet-name">
-                                                <%= pet.name %>
-                                            </div>
-
-                                            <div class="pet-gender">
-                                                <%= pet.gender %>
-                                            </div>
-                                            <div class="pet-breed">
-                                                <%= pet.breed %>
-                                            </div>
-                                        </div>
-
-                                        <div class="card-links">
-                                            <a href="/removefavorite/<%= pet.id %>" class="remove">&#9932;</a>
-                                            <a href="/detail/<%= pet.id %>" class="viewDetail">View
-                                                &#8594;</a>
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                                <% }) %>
-                                    <% } %>
+          
+                <div id="favoritesList">
+                  <input class="search" placeholder="Search favorites…" />
+          
+                  <div id="favorites-grid" class="grid list">
+                    <% if (favorites.length === 0) { %>
+                      <p>You haven't favorited any pets yet.</p>
+                    <% } else { %>
+                      <% favorites.forEach(pet => { %>
+                        <div class="card list-item">
+                          <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
+                          <div class="card-content">
+                            <div class="pet-info">
+                              <div class="pet-name name"><%= pet.name %></div>
+                              <div class="pet-gender gender"><%= pet.gender %></div>
+                              <div class="pet-breed breed"><%= pet.breed %></div>
+                            </div>
+                            <div class="card-links">
+                              <a href="/removefavorite/<%= pet.id %>" class="remove">&#9932;</a>
+                              <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                            </div>
+                          </div>
+                        </div>
+                      <% }) %>
+                    <% } %>
+                  </div>
                 </div>
-            </section>
+              </section>
+
 
             <section id="postAPet" class="toggle-section">
                 <form action="/post-pet" method="POST" enctype="multipart/form-data" class="post-pet-form"
@@ -365,13 +353,56 @@
 
 
             <section id="searchProfiles" class="toggle-section">
-                <h2>Search profiles</h2>
+                <% if (savedAnswers && savedAnswers.length> 0) { %>
+                    <h2>Saved Search Preferences</h2>
+                    <div class="container">
+                        <% savedAnswers.forEach(function(answers, idx) { %>
+                            <div class="answer-group" style="margin-bottom:2em;">
+                                <strong>Search #<%= idx + 1 %>:</strong>
+                                <div class="answer-groups-row">
+                                    <% for (let group in groupedAnswers) { %>
+                                        <section id="groupTitle" data-group="<%= group %>">
+                                            <h3>
+                                                <%= group %>
+                                            </h3>
+                                            <ul class="group-list">
+                                                <% groupedAnswers[group].forEach(function(key) { %>
+                                                    <% if (answers[key] !==undefined) { %>
+                                                        <li data-key="<%= key %>" data-value="<%= answers[key] %>">
+                                                            <div class="answer-row static-view">
+                                                                <span><strong>
+                                                                        <%= questionLabels[key] || key %>
+                                                                    </strong></span>
+                                                                <span>
+                                                                    <%= answers[key]==='true' ? 'Yes' :
+                                                                        answers[key]==='false' ? 'No' : answers[key] %>
+                                                                </span>
+                                                            </div>
+                                                        </li>
+                                                        <% } %>
+                                                            <% }); %>
+                                            </ul>
+                                        </section>
+                                        <% } %>
+                                </div>
+                                <form action="/load-saved-search/<%= idx %>" method="get" style="display:inline;">
+                                    <button id="loadSearch" type="submit">Load this search</button>
+                                </form>
+                                <form action="/delete-saved-search/<%= idx %>" method="post" style="display:inline;">
+                                    <button id="deleteSearch" type="submit" class="delete-saved-search-btn">Delete</button>
+                                </form>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } else { %>
+                        <p>No saved search preferences yet.</p>
+                        <% } %>
             </section>
 
         </main>
 
         <%- include('partials/footer') %>
-
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
             <script>
                 document.querySelectorAll('input[disabled]').forEach(input => {
                     const span = document.createElement('span');
@@ -483,6 +514,18 @@
                             profileImageInput.click();
                         }
                     });
+                });
+
+                document.addEventListener('DOMContentLoaded', function() {
+                var options = {
+                    valueNames: ['name', 'gender', 'breed']
+                    };
+
+                var myPetsList = new List('myPetsList', options);
+
+                var favoritesList = new List('favoritesList', options);
+
+                var recentlyViewedList = new List('recentlyViewedList', options);
                 });
             </script>
 </body>
