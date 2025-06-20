@@ -698,10 +698,14 @@ textarea {
     }
 
     .answer-group {
-        width: 100%;
+        width: auto;
     }
 
     #myInfo form textarea {
         width: 70vw;
     }
+
+    #searchProfiles .container {
+    flex-direction: column;
+}
 }
