@@ -43,6 +43,10 @@
     animation: like-anim 0.7s steps(28) forwards;
 }
 
+.heart-icon.animate {
+    animation: like-anim 0.7s steps(28) forwards;
+}
+
 .heart-icon:focus {
     outline: none;
     box-shadow: none;
