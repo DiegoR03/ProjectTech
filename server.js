@@ -526,9 +526,25 @@ app
 
 // RENDERING VIEWS ///////////////////////////////////////////////////////////
 
-function loadHome(req, res) {
+async function loadHome(req, res) {
     const userID = req.session.userID || null;
-    res.render("index.ejs", { userID });
+    let newestPets = [];
+
+    try {
+        const token = await getPetfinderToken();
+        
+        const url = "https://api.petfinder.com/v2/animals?limit=100&sort=recent";
+        const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        // Now filter for pets with images and take the first 5
+        newestPets = (data.animals || []).filter(pet => pet.photos && pet.photos.length > 0).slice(0, 5);
+    } catch (err) {
+        console.error("Error fetching newest pets:", err);
+    }
+    res.render("index.ejs", { userID, newestPets });
 }
 
 function loadLogin(req, res) {
@@ -666,14 +682,14 @@ app.get("/account", ensureAuthenticated, loadAccount);
 
 
 function loadResultsSearchForm(req, res) {
-        const userID = req.session.userID || null;
+    const userID = req.session.userID || null;
     const userAnswers = req.session.answers || {};
     const { question, questionLabels } = require('./static/js/search-form');
 
     const groupedAnswers = {
         "General Info": ['type', 'size', 'gender', 'age'],
         "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'floor', 'hasGarden'],
-        "Pet Personality": ['isComfystrangers', 'isPlayful']
+        "Pet Personality": ['isComfystrangers', 'isPlayful', 'isAloneOften'],
     };
 
 
@@ -681,7 +697,7 @@ function loadResultsSearchForm(req, res) {
 }
 
 function loadRegistry(req, res) {
-        const userID = req.session.userID || null;
+    const userID = req.session.userID || null;
     res.render("register.ejs", { userID });
 }
 
@@ -704,7 +720,7 @@ async function processLogin(req, res) {
             req.session.userStory = user.story || '';
             req.session.recentlyViewed = user.recentlyViewed || [];
             req.session.favorites = user.favorites || [],
-            req.session.createdAt = user.createdAt
+                req.session.createdAt = user.createdAt
 
             res.redirect("/account");
         } else {

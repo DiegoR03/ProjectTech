@@ -92,51 +92,7 @@
 
   <script>
 
-    const userAnswers = {
-      type: 'dog',
-      size: 'medium',
-      gender: 'male',
-      age: 'Young',
-      isCastrated: 'false',
-      coat: 'long',
-      hasKids: 'true',
-      hasCats: 'true',
-      hasDogs: 'false',
-      //isAloneOften: 'true',
-      floor: 'upperfloor-w-elevator',
-      hasGarden: 'false',
-      activity: 'false',
-      isHousetrained: 'false',
-      isComfystrangers: 'false',
-      isPlayful: 'false',
-      isPaired: 'false'
-    };
-
-    const questionLabels = {
-      type: 'Animal type',
-      size: 'Size',
-      gender: 'Gender',
-      age: 'Age',
-      //isCastrated: 'Castrated',
-      //coat: 'Coat type',
-      hasKids: 'Has children',
-      hasCats: 'Has cats',
-      hasDogs: 'Has dogs',
-      //isAloneOften: 'Home alone often',
-      floor: 'Living situation',
-      hasGarden: 'Has a garden',
-      //activity: 'Active household',
-      //isHousetrained: 'Needs to be housetrained',
-      isComfystrangers: 'Comfortable with strangers',
-      //isPlayful: 'Looking for a playful pet',
-      //isPaired: 'Wants a bonded pair',
-    };
-
-    const groupedAnswers = {
-      "General Info": ['type', 'size', 'gender', 'age', 'isCastrated', 'coat'],
-      "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'isAloneOften', 'floor', 'hasGarden'],
-      "Pet Personality": ['isComfystrangers']
-    };
+    
 
 
 
@@ -258,7 +214,7 @@
         const matches = await res.json();
 
         if (!Array.isArray(matches)) {
-          container.innerHTML = '<p>No matches found. Please try again.</p>';
+          container.innerHTML = '<p>No matches found. Please try again.</p> <div id="loaderDiv" class=""><img src="/static/images/Animation - 1747919735912.gif" alt="Loading..." /></div>';
           return;
         }
 

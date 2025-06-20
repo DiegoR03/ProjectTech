@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/static/css/indexStyling.css">
-  <title>FetchFinder</title>
+ ">
+  <title>PetMatch | Home</title>
 </head>
 
 <body id="indexBody">
@@ -15,7 +16,7 @@
         <div class="container">
           <div>
             <h1>Looking for a pet to adopt?</h1>
-            <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hessitate to
+            <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hesitate to
               adopt one of these lovely pets.</p>
             <a href="#">Browse pets</a>
           </div>
@@ -79,6 +80,38 @@
       <section>
         <div class="container">
           <h2>Recently uploaded pets</h2>
+          <div class="grid">
+            <% if (newestPets && newestPets.length> 0) { %>
+              <% newestPets.forEach(pet=> { %>
+                <div class="pet-card">
+              <div class="card">
+                <img src="<%= pet.photos?.[0]?.medium || 'No image available' %>" alt="<%= pet.name %>"
+                  class="" />
+                <div class="card-content">
+                  <div class="pet-info">
+                    <h3 class="pet-name">
+                      <%= pet.name %>
+                    </h3>
+                    <p class="pet-gender">
+                      <%= pet.age %>, <%= pet.gender %>
+                    </p>
+                    <p class="pet-breed">
+                      <%= pet.breeds?.primary || 'Unknown breed' %>
+                    </p>
+                    </div>
+                    <div class="card-links">
+                      <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
+                      <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                    </div>
+                  
+                </div>
+              </div>
+            </div>
+                <% }) %>
+                  <% } else { %>
+                    <p>No recent pets found.</p>
+                    <% } %>
+          </div>
         </div>
       </section>
 
