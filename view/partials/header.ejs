@@ -46,28 +46,46 @@
                         <div class="dropdown-content">
                             <% if (currentUser.notifications.length> 0) { %>
                                 <% currentUser.notifications.slice().reverse().forEach(note=> { %>
-                                    <a href="/detail/<%= note.petId %>"
-                                        style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
-                                        <img src="<%= note.image %>" class="noteImage" alt="Notification Image"
-                                            style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%;">
-
-                                        <div style="flex: 1;">
-                                            <strong>
-                                                <%= note.message %>
-                                            </strong><br>
-                                            <small>
-                                                <%= new Date(note.timestamp).toLocaleString() %>
-                                            </small>
-                                        </div>
-                                    </a>
+                                    <div
+                                        style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; border-bottom: 1px solid #ccc; padding-bottom: 1rem;">
+                                        <a href="/otheruser/<%= note.userId %>"
+                                            style="display: flex; align-items: center; text-decoration: none; flex: 1; gap: 10px;">
+                                            <img src="<%= note.image %>" class="noteImage" alt="Notification Image"
+                                                style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%;">
+                                            <div>
+                                                <strong>
+                                                    <%= note.message %>
+                                                </strong><br>
+                                                <small>
+                                                    <%= new Date(note.timestamp).toLocaleString() %>
+                                                </small>
+                                            </div>
+                                            <% if (note.type==='contact_request' && note.status==='pending' ) { %>
+                                                <form method="POST" action="/notifications/respond"
+                                                     class="responses">
+                                                    <input type="hidden" name="notificationId" value="<%= note._id %>">
+                                                    <button id="approved" name="response" value="approved"
+                                                        title="Share Contact Info">&#9745;</button>
+                                                    <button id="declined" name="response" value="declined"
+                                                        title="Decline Request">&#9746;</button>
+                                                </form>
+                                                <% } else if (note.type==='contact_request' ) { %>
+                                                    <div style="padding-left: 1rem;">
+                                                        <small>You have <%= note.status %> this request.</small>
+                                                    </div>
+                                                    <% } %>
+                                        </a>
+                                    </div>
                                     <% }) %>
+
                                         <form method="POST" action="/notifications/clear"
                                             style="padding: 0.5rem; text-align:center;">
                                             <button type="submit">Clear All</button>
                                         </form>
                                         <% } else { %>
-                                            <p style="padding: 0.5rem; ">No notifications</p>
+                                            <p style="padding: 0.5rem;">No notifications</p>
                                             <% } %>
+
                         </div>
                     </div>
                 </li>

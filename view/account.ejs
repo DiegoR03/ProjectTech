@@ -36,7 +36,7 @@
                         <form action="/account" method="POST" enctype="multipart/form-data">
                             <div id="myInfoCollection">
                                 <div id="profileImgWrapper"
-                                    style="position: relative; display: inline-block; cursor: pointer; width: 13rem; height: 13rem; border-radius: 50%; overflow: hidden;">
+                                    style="position: relative; display: inline-block; width: 13rem; height: 13rem; border-radius: 50%; overflow: hidden;">
                                     <input type="file" id="profileImageInput" name="profileImage"
                                         style="display:none; cursor:default" accept="image/*" disabled />
                                     <img id="profileImg" src="<%= profileImage %>" alt="Profile Image"
@@ -201,7 +201,7 @@
                                 <label for="petPhoto">Photo:</label>
                                 <img id="photoPreview" src="/uploads/standard/Paw.png" alt="Image Preview"
                                     style="max-width: 200px; margin-top: 10px;">
-                                <input type="file" name="photo" id="petPhoto" accept="image/*" required>
+                                <input type="file" name="photos" id="petPhoto" accept="image/*" multiple required>
                             </div>
 
                             <div class="PetName">

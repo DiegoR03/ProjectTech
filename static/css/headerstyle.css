@@ -25,6 +25,9 @@
 
   --footer-border: #d3d3d3;
   --footer-text: #8E8E8E;
+
+  --approved-color: #4CAF50; 
+  --declined-color: #F44336; 
 }
 
 header {
@@ -173,6 +176,28 @@ header a:active {
   background-color: #ddd;
 }
 
+/* Notifications */
+.responses{
+  display: flex; 
+  gap: 0.5rem;
+}
+
+.responses button {
+  background-color: transparent;
+  border-style: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.6rem;
+}
+
+.responses #approved {
+  color: var(--approved-color);
+}
+
+.responses #declined {
+  color: var(--declined-color);
+}
+
 /* Footer Styling */
 
 @media (max-width: 900px) {
@@ -204,10 +229,17 @@ header a:active {
 
   header nav ul li,
   header nav ul a {
-    width: 40%;
     text-align: left;
     padding: 1em;
     box-sizing: border-box;
+  }
+
+  header nav ul li{
+    width: 40%;
+  }
+
+  header nav ul a{
+    width: 100%;
   }
 
   .notifications-btn {
