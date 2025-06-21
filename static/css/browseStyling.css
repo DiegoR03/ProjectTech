@@ -1,16 +1,15 @@
-
 @import url(style.css);
 
 :root {
-    --primary-color: #90A5EC;
-    --primary-color-hover: #6b7bac;
-    --primary-color-2: #F47429;
-    --primary-color-hover-2: #c05c23;
-    --text-color: #333;
-    --background-color: #f2f2f2;
-    --footer-text: #8E8E8E;
-    --active-filters: #c6cff0;
-  }
+  --primary-color: #90A5EC;
+  --primary-color-hover: #6b7bac;
+  --primary-color-2: #F47429;
+  --primary-color-hover-2: #c05c23;
+  --text-color: #333;
+  --background-color: #f2f2f2;
+  --footer-text: #8E8E8E;
+  --active-filters: #c6cff0;
+}
 
 
 main {
@@ -41,10 +40,11 @@ main {
 }
 
 
-#loaderDiv.loading ~ #resultsGrid {
+#loaderDiv.loading~#resultsGrid {
   display: none;
 }
-.secImg{
+
+.secImg {
   position: absolute;
   top: 12%;
   left: 6%;
@@ -52,6 +52,7 @@ main {
 
   z-index: 10;
 }
+
 section {
   display: flex;
   flex-direction: column;
@@ -65,11 +66,12 @@ body>main>section>p:nth-of-type(1) {
   margin-bottom: 2em;
   max-width: 55%;
 }
+
 /* Create search profile ////////////////////////////////////////////////*/
 body>main>section>a:nth-of-type(1) {
   text-align: center;
   display: inline-block;
-  
+
   padding: 1rem;
   margin: 1em auto;
   background-color: var(--primary-color-2);
@@ -85,6 +87,7 @@ body>main>section>a:nth-of-type(1):hover {
   background-color: var(--primary-color-hover-2);
 
 }
+
 /* Filters ////////////////////////////////////////////////////////////////*/
 .filters {
   margin: 2rem auto;
@@ -113,9 +116,9 @@ body>main>section>a:nth-of-type(1):hover {
   border: 1px solid #ccc;
   min-width: 120px;
   margin-top: 1em;
-  appearance: none;           
-  -webkit-appearance: none;   
-  -moz-appearance: none;      
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   padding: 0.5rem 2rem 0.5rem 0.5rem;
   border-radius: 6px;
   border: 1px solid #ccc;
@@ -160,7 +163,7 @@ body>main>section>a:nth-of-type(1):hover {
   padding: 0.37rem 0.7rem;
   background-color: #000;
   color: var(--white);
-  border: 2px solid #000; 
+  border: 2px solid #000;
   border-radius: 6px;
   cursor: pointer;
   align-self: end;
@@ -181,11 +184,12 @@ body>main>section>a:nth-of-type(1):hover {
 .filters button:hover {
   background-color: var(--primary-color-hover);
 }
+
 /* Active filters//////////////////////////////////////////////////////////////////// */
 .active-filters {
   border: 1px 0px solid #cceee2;
   padding: 1rem 2rem;
-  margin-top: 2rem ;
+  margin-top: 2rem;
   width: fit-content;
   border-radius: 10px;
   text-align: center;
@@ -224,7 +228,7 @@ body>main>section>a:nth-of-type(1):hover {
 
 
 .results-wrapper {
- display: grid;
+  display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   margin-top: 2rem;
@@ -234,11 +238,11 @@ body>main>section>a:nth-of-type(1):hover {
 }
 
 .results {
- font-weight: bold;
+  font-weight: bold;
   font-size: 1.1rem;
   color: #333;
   margin: 0;
-  
+
   grid-column: 2;
   text-align: center;
 }
@@ -314,19 +318,20 @@ body>main>section>a:nth-of-type(1):hover {
   border-radius: 50%;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.
+  transition: background 0.2s;
 }
 
 .favorite {
   border-radius: 50%;
   text-decoration: none;
 }
-.viewDetail{
+
+.viewDetail {
   border-radius: 999px;
   text-decoration: none;
 }
 
-.viewDetail:hover{
+.viewDetail:hover {
   border: solid 2px #000;
   background: transparent;
   color: #000;
@@ -334,10 +339,11 @@ body>main>section>a:nth-of-type(1):hover {
 }
 
 .favorite:hover {
-    background-color: var(--primary-color);
-    border: solid 2px var(--primary-color-hover);
+  background-color: var(--primary-color);
+  border: solid 2px var(--primary-color-hover);
 
 }
+
 .pet-name {
   font-size: 1.2rem;
   font-weight: bold;
@@ -351,7 +357,7 @@ body>main>section>a:nth-of-type(1):hover {
   margin: 0;
 }
 
-.pet-breed{
+.pet-breed {
   font-size: 0.8em;
   color: #777;
   margin: 0;
@@ -364,6 +370,7 @@ body>main>section>a:nth-of-type(1):hover {
   font-weight: bold;
   margin-top: 2rem;
 }
+
 /* Pages /////////////////////////////////////////////////////////*/
 
 .pages {
@@ -399,12 +406,14 @@ body>main>section>a:nth-of-type(1):hover {
   color: #555;
   margin: 0 0.5rem;
 }
+
 /* Hover animation for .card on browse page */
 .card {
   position: relative;
   border: 1px solid #ddd;
   transition: border 0.3s ease, box-shadow 0.3s ease;
-  z-index: 0; /* Ensure stacking context */
+  z-index: 0;
+  /* Ensure stacking context */
 }
 
 .card::after,
@@ -440,4 +449,24 @@ body>main>section>a:nth-of-type(1):hover {
 
 .card:hover::before {
   transform: scaleY(1);
+}
+
+#pet-scroll-container {
+  position: relative;
+  height: 70vh;
+  width: 194%;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  background-color: var(--active-filters);
+
+}
+
+.pet-card {
+  margin-bottom: 1rem;
+}
+
+#scroll-sentinel {
+  height: 16px;
+  background: transparent;
 }

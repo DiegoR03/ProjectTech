@@ -53,8 +53,8 @@ section:nth-of-type(1) .container {
   gap: 2em;
   max-width: 80%;
   margin-inline: auto;
-  padding-top: 3em;
-  padding-bottom: 3em;
+  padding-top: 5em;
+  
 }
 
 section:nth-of-type(1) img {
@@ -262,4 +262,165 @@ section:nth-of-type(4) .container {
   section:nth-of-type(3) img {
     max-width: 250px;
   }
+}
+
+/* RECENTLY ADDED ////////////////////////////////////////////////////////////////////////////////////// */
+.grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  padding-bottom: 1em;
+  align-items: stretch;
+
+}
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+/* Card content /////////////////////////////////////////////////////////*/
+
+.card-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 12px;
+}
+
+.pet-info {
+  display: grid;
+  float: left;
+  gap: 4px;
+}
+
+.card-links {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.favorite,
+.viewDetail {
+  background-color: #000;
+  color: var(--white);
+  padding: 6px 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.favorite {
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.viewDetail {
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.viewDetail:hover {
+  border: solid 2px #000;
+  background: transparent;
+  color: #000;
+  transition: 0.2s ease-in-out;
+}
+
+.favorite:hover {
+  background-color: var(--primary-color);
+  border: solid 2px var(--primary-color-hover);
+
+}
+
+.pet-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color-2);
+}
+
+.pet-gender {
+  color: #777;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.pet-breed {
+  font-size: 0.8em;
+  color: #777;
+  margin: 0;
+}
+
+.error,
+.empty {
+  text-align: center;
+  color: #c00;
+  font-weight: bold;
+  margin-top: 2rem;
+}
+
+/* Hover animation for .card on browse page */
+.card {
+  position: relative;
+  border: 1px solid #ddd;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+  z-index: 0;
+  /* Ensure stacking context */
+}
+
+.card::after,
+.card::before {
+  content: "";
+  position: absolute;
+  background-color: var(--primary-color-2);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.card::after {
+  height: 4px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.card::before {
+  width: 4px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+.card:hover::after {
+  transform: scaleX(1);
+}
+
+.card:hover::before {
+  transform: scaleY(1);
 }

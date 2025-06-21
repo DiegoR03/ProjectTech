@@ -69,13 +69,15 @@
 
 
 
-    </main>
-    <%- include('partials/footer') %>
+  </main>
+  <%- include('partials/footer') %>
 
-      <script id="userAnswersData" type="application/json"><%- JSON.stringify(userAnswers || {}) %></script>
+  <script>
 
-      <script>
-        const userAnswers = JSON.parse(document.getElementById('userAnswersData').textContent);
+    
+
+
+
 
         const answerOptions = {
           type: ['Dog', 'Cat', 'Rabbit'],
@@ -209,10 +211,10 @@
             const res = await fetch('/match');
             const matches = await res.json();
 
-            if (!Array.isArray(matches)) {
-              container.innerHTML = '<p>No matches found. Please try again.</p>';
-              return;
-            }
+        if (!Array.isArray(matches)) {
+          container.innerHTML = '<p>No matches found. Please try again.</p> <div id="loaderDiv" class=""><img src="/static/images/Animation - 1747919735912.gif" alt="Loading..." /></div>';
+          return;
+        }
 
             const grid = document.createElement('div');
             grid.className = 'grid';

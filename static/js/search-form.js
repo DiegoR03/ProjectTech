@@ -69,14 +69,14 @@ const questions = [
       { value: "No", label: "No" },
     ]
   },
-  // {
-  //   question: "How often would the pet be alone?",
-  //   name: "isAloneOften",
-  //   options: [
-  //     { value: "Yes", label: "Daily, a few hours a day" },
-  //     { value: "No", label: "Almost never" },
-  //   ]
-  // },
+  {
+    question: "How often would the pet be alone?",
+    name: "isAloneOften",
+    options: [
+      { value: "Yes", label: "Daily, a few hours a day" },
+      { value: "No", label: "Almost never" },
+    ]
+  },
   {
     question: "On what floor do you live?",
     name: "floor",
@@ -120,14 +120,14 @@ const questions = [
       { value: "No", label: "Not very important" },
     ]
   },
-  // {
-  //   question: "Do you want a playful pet?",
-  //   name: "isPlayful",
-  //   options: [
-  //     { value: "Yes", label: "Very important" },
-  //     { value: "No", label: "Not very important" },
-  //   ]
-  // },
+  {
+    question: "Do you want a playful pet?",
+    name: "isPlayful",
+    options: [
+      { value: "Yes", label: "Very important" },
+      { value: "No", label: "Not very important" },
+    ]
+  },
   // {
   //   question: "Are you looking for a pair or single pet?",
   //   name: "isPaired",
@@ -165,7 +165,7 @@ const questionLabels = {
   hasKids: 'Has children',
   hasCats: 'Has cats',
   hasDogs: 'Has dogs',
-  isAloneOften: 'At home often',
+  isAloneOften: 'Independent',
   hasGarden: 'Has a garden',
   floor: 'Living situation',
 

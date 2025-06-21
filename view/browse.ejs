@@ -138,27 +138,7 @@
 
       </div>
 
-      <style>
-        #pet-scroll-container {
-          position: relative;
-          height: 70vh;
-          width: 194%;
-          overflow-y: auto;
-          border: 1px solid #ccc;
-          padding: 1rem;
-
-        }
-
-        .pet-card {
-          margin-bottom: 1rem;
-        }
-
-        #scroll-sentinel {
-          height: 16px;
-          background: transparent;
-        }
-      </style>
-
+      
       <div id="pet-scroll-container">
         <div id="pet-list" class="grid">
           <% pets.forEach(pet=> { %>
@@ -177,11 +157,12 @@
                     <p class="pet-breed">
                       <%= pet.breeds?.primary || 'Unknown breed' %>
                     </p>
+                    </div>
                     <div class="card-links">
                       <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
                       <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                     </div>
-                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -213,11 +194,12 @@
             <h3 class="pet-name">${pet.name}</h3>
             <p class="pet-gender">${pet.age}, ${pet.gender}</p>
             <p class="pet-breed">${pet.breeds?.primary || 'Unknown breed'}</p>
+            </div>
             <div class="card-links">
               <a href="/fave/${pet.id}" class="favorite">&#x2661;</a>
               <a href="/detail/${pet.id}" class="viewDetail">View &#8594;</a>
             </div>
-          </div>
+          
         </div>
       </div>
     `;
@@ -260,7 +242,7 @@ const observer = new IntersectionObserver(
   },
   {
     root: scrollContainer,
-    rootMargin: '0px 0px 700px 0px' 
+    rootMargin: '0px 0px 1000px 0px' 
   }
 );
 
