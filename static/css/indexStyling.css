@@ -184,7 +184,7 @@ section:nth-of-type(3) p {
   line-height: 1.4;
 }
 
-section:nth-of-type(3) a {
+section:nth-of-type(3) a, section:nth-of-type(3) button {
   text-decoration: none;
   display: inline-block;
   padding: 0.75em 1.5em;
