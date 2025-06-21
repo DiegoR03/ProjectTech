@@ -61,18 +61,24 @@
             <%= pet.age %>
           </li>
         </ul>
-          <div class="like-container">
-            <a href="/fave/<%= pet.id %>" class="like-button">
-              <span class="heart-bg">
-                <span class="heart-icon <%= favoritePetIds && favoritePetIds.includes(pet.id) ? 'liked' : '' %>"></span>
-              </span>
-            </a>
-          </div>
+        <div class="like-container">
+          <a href="/fave/<%= pet.id %>" class="like-button">
+            <span class="heart-bg">
+              <span class="heart-icon"></span>
+            </span>
+          </a>
+        </div>
+
+        <!-- Only show on mobile!!!! -->
+        <h2 class="pet-name-heading-mobile">
+          <%= pet.name %>
+        </h2>
         <div class="text-section">
+          <!-- Only show on big screens!!! -->
+          <h2 class="pet-name-heading">
+            <%= pet.name %>
+          </h2>
           <div class="text-content">
-            <h2>
-              <%= pet.name %>
-            </h2>
             <h3>Description</h3>
             <p style="white-space: pre-wrap;"><%- pet.description || "No description available." %></p>
             <!-- A - insted of = excludes code like lang in the description -->
