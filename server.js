@@ -144,6 +144,10 @@ app
 
     .get("/", loadHome)
     .get("/login", loadLogin)
+    .get("/login", (req, res) => {
+        res.render("login", { data: null });
+    })
+
     .get("/passwordchange", loadPasswordChange)
     .get("/browse", loadBrowse)
     .get('/browse', async (req, res) => {
@@ -230,6 +234,54 @@ app
         });
     })
 
+    .get('/otheruser/:id', async (req, res) => {
+        const otherId = req.params.id;
+        if (!otherId) return res.redirect('/login');
+
+        try {
+            // Fetch the user document by ID
+            const user = await userCollection.findOne({ _id: new ObjectId(otherId) });
+            if (!user) return res.status(404).send('User not found');
+
+            // Fetch pets posted by this user
+            const myPets = await petCollection.find({ addedByUserId: otherId }).toArray();
+
+            // Get ohter user's favorites from their document
+            const favorites = user.favorites || [];
+
+            // Extract likers info from notifications
+            const likers = (user.notifications || []).map(n => ({
+                userId: n.userId,
+                image: n.image,
+                email: n.email,
+                message: n.message,
+                petId: n.petId,
+                timestamp: n.timestamp
+            }));
+
+            // Also store recentlyViewed & favorites in session (optional)
+            req.session.favorites = favorites;
+
+            // Render the other user's profile page
+            res.render('otheruser', {
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                email: user.email || '',
+                userStory: user.userStory || '',
+                profileImage: user.profileImage || '',
+                loggedIn: !!req.session.userID,
+                favorites,
+                myPets,
+                createdAt: user.createdAt || null
+            });
+        } catch (err) {
+            console.error('Error in /otheruser/:id:', err);
+            res.status(500).send('Server error');
+        }
+    })
+
+
+
     .get('/detail/:id', async (req, res) => {
         const petId = req.params.id;
         const userId = req.user?.id; // <-- assuming you're using req.user
@@ -289,7 +341,7 @@ app
         }
     })
 
-    .get("/detail/:id", loadDetail)
+    .get("/otheruser/:id", loadDetail)
     .get('/fave/:id', async (req, res) => {
         const petId = req.params.id;
 
@@ -331,8 +383,15 @@ app
 
                         await userCollection.updateOne(
                             { _id: ownerId },
-                            { $push: { notifications: { image, message, petId, timestamp: Date.now() } } }
+                            {
+                                $push: {
+                                    notifications: {
+                                        userId: liker._id.toString(), image, message, petId, timestamp: Date.now(), status: 'pending', type: 'contact_request', _id: new ObjectId(), ownerId: ownerId.toString(), petName: customPet.name,
+                                    }
+                                }
+                            }
                         );
+
                     }
                 }
 
@@ -470,7 +529,7 @@ app
     })
 
     // POST form submission
-    .post('/post-pet', uploads.single('photo'), async (req, res) => {
+    .post('/post-pet', uploads.array('photos', 5), async (req, res) => {
 
         async function generateCustomId() {
             let id;
@@ -485,20 +544,22 @@ app
         const {
             petname, description, type, breed, size, gender, age, coat, children, dogs, cats, house_trained, shots_current, isCastrated, isComfystrangers, isAloneOften, isPlayful, isPaired, activity } = req.body;
 
-        let processedPhotoPath = null;
+        let processedPhotoPaths = [];
 
         function toBoolean(value) {
             return value === 'true' ? true : value === 'false' ? false : undefined;
         }
 
         try {
-            if (req.file) {
-                const outputPath = `uploads/post-a-pet/${req.file.filename}.jpg`;
-                await sharp(req.file.path)
-                    .resize(300, 300)
-                    .toFile(outputPath);
+            if (req.files && req.files.length > 0) {
+                for (const file of req.files) {
+                    const outputPath = `uploads/post-a-pet/${file.filename}.jpg`;
+                    await sharp(file.path)
+                        .resize(300, 300)
+                        .toFile(outputPath);
 
-                processedPhotoPath = `/${outputPath}`;
+                    processedPhotoPaths.push({ medium: `/${outputPath}` });
+                }
             }
 
             const id = await generateCustomId();
@@ -530,7 +591,7 @@ app
                     isPlayful,
                     isPaired
                 },
-                photos: processedPhotoPath ? [{ medium: processedPhotoPath }] : [],
+                photos: processedPhotoPaths.length > 0 ? processedPhotoPaths : [],
                 addedByUserId: req.session.userID || null
             };
 
@@ -541,6 +602,71 @@ app
             res.status(500).send('An error occurred while posting the pet.');
         }
     })
+
+    .post('/notifications/respond', async (req, res) => {
+        const { notificationId, response } = req.body;
+
+        if (!ObjectId.isValid(notificationId)) {
+            return res.status(400).send('Invalid notification ID.');
+        }
+
+        const noteObjectId = new ObjectId(notificationId);
+
+        try {
+            // Find the owner who received this notification
+            const owner = await userCollection.findOne({ 'notifications._id': noteObjectId });
+
+            if (!owner) {
+                return res.status(404).send('Notification not found.');
+            }
+
+            // Find the specific notification in owner's notifications array
+            const selectedNotification = owner.notifications.find(n => n._id?.toString() === notificationId);
+
+            if (!selectedNotification) {
+                return res.status(404).send('Notification not found in user.');
+            }
+
+            const likerId = selectedNotification.userId;
+
+            if (response === 'approved') {
+                const ownerInfo = {
+                    name: owner.firstName,
+                    email: owner.email
+                    // Optional: phone number, etc.
+                };
+
+                // Send contact info to the liker in a new notification
+                await userCollection.updateOne(
+                    { _id: new ObjectId(likerId) },
+                    {
+                        $push: {
+                            notifications: {
+                                _id: new ObjectId(), // ✅ ensure new notification has _id
+                                message: `The owner of pet "${selectedNotification.petName}" shared their contact info.`,
+                                image: owner.profileImage,
+                                contactInfo: ownerInfo,
+                                userId: owner._id.toString(), 
+                                timestamp: Date.now()
+                            }
+                        }
+                    }
+                );
+            }
+
+            // Update the original notification to reflect the response
+            await userCollection.updateOne(
+                { 'notifications._id': noteObjectId },
+                { $set: { 'notifications.$.status': response } }
+            );
+
+            res.redirect('/account');
+        } catch (err) {
+            console.error("Error in /notifications/respond:", err);
+            res.status(500).send("Server error.");
+        }
+    })
+
 
     .post('/notifications/clear', async (req, res) => {
         if (!req.session.userID) return res.status(401).send('Unauthorized');
@@ -643,13 +769,19 @@ function loadLogin(req, res) {
         req.session.destroy();
     }
     const userID = req.session.userID || null;
-    res.render("login.ejs", { userID });
+    res.render("login.ejs", {
+        userID, emailError: null,
+        passwordError: null
+    });
 }
 
 
 function loadPasswordChange(req, res) {
     const userID = req.session.userID || null;
-    res.render("passwordchange.ejs", { userID });
+    res.render("passwordchange.ejs", {
+        userID, emailError: null,
+        passwordError: null
+    });
 }
 
 async function loadDetail(req, res) {
@@ -789,31 +921,43 @@ function loadRegistry(req, res) {
 
 // LOGIN ////////////////////////////////////////////////////////////////////////////////////////
 async function processLogin(req, res) {
-    const email = req.body.email;
-    const password = req.body.password;
+    const { email, password } = req.body;
 
     try {
         const user = await userCollection.findOne({ email });
 
-        if (user && await bcrypt.compare(password, user.password)) {
-            req.session.userID = user._id.toString();
-            req.session.email = user.email;
-            req.session.firstName = user.firstName;
-            req.session.profileImage = user.profileImage || '/static/default.png';
-            req.session.userStory = user.story || '';
-            req.session.recentlyViewed = user.recentlyViewed || [];
-            req.session.favorites = user.favorites || [],
-                req.session.createdAt = user.createdAt
-
-            res.redirect("/account");
-        } else {
-            res.render("login.ejs", { data: "Invalid credentials" });
+        if (!user) {
+            return res.render("login", {
+                emailError: "Email not found",
+                passwordError: null
+            });
         }
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            return res.render("login", {
+                emailError: null,
+                passwordError: "Incorrect password"
+            });
+        }
+
+        // Success — log in
+        req.session.userID = user._id.toString();
+        req.session.email = user.email;
+        req.session.firstName = user.firstName;
+        req.session.profileImage = user.profileImage || '/static/default.png';
+        req.session.userStory = user.story || '';
+        req.session.recentlyViewed = user.recentlyViewed || [];
+        req.session.favorites = user.favorites || [];
+        req.session.createdAt = user.createdAt;
+
+        res.redirect("/account");
     } catch (error) {
         console.error("Error during login:", error);
-        res.status(500).render("login", { data: "An error occurred during login." });
-
-        app.post("/register", uploads.single('profileImage'), processRegistration);
+        res.status(500).render("login", {
+            emailError: "Something went wrong.",
+            passwordError: null
+        });
     }
 }
 
@@ -940,20 +1084,35 @@ async function changePassword(req, res) {
     try {
         const existingemail = await userCollection.findOne({ email });
 
-        if (existingemail && newpassword == confirmpassword) {
-            console.log("Password is changed");
-            userCollection.updateOne({ email: email }, { $set: { password: hashedNewPassword } })
-            console.log(existingemail);
-            res.redirect("/login");
-            return;
-        } else {
-            console.log("Change failed");
-            res.render("passwordchange.ejs");
+        // If email doesnt exist
+        if (!existingemail) {
+            return res.render("passwordchange", {
+                emailError: "Email not found.",
+                passwordError: null
+            });
         }
 
+        // If password do not match
+        if (newpassword !== confirmpassword) {
+            return res.render("passwordchange", {
+                emailError: null,
+                passwordError: "Passwords do not match."
+            });
+        }
+
+        await userCollection.updateOne(
+            { email },
+            { $set: { password: hashedNewPassword } }
+        );
+
+        console.log("Password changed for:", email);
+        res.redirect("/login");
     } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).render("login", { data: "An error occurred during change." });
+        console.error("Error during password change:", error);
+        res.status(500).render("passwordchange", {
+            emailError: "An unexpected error occurred.",
+            passwordError: null
+        });
     }
 }
 
