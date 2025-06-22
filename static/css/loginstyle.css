@@ -1,3 +1,5 @@
+@import url(style.css);
+
 :root {
     --primary-color: #90A5EC;
     --primary-color-hover: #6979af;
@@ -56,10 +58,10 @@ body {
     padding: 2.5rem;
     border-radius: 1em;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    width: 80%;
+    width: 70%;
     height: 70%;
     max-width: 400px;
-    margin: 3rem auto 0 auto;
+    margin: 5rem auto 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -71,6 +73,7 @@ body {
 }
 
 @media (max-width: 768px) {
+
     #loginPage,
     #registerPage,
     #passwordPage {
@@ -81,7 +84,7 @@ body {
     #registerPage form,
     #passwordPage form {
         padding: 1.5rem;
-        width: 80vw;
+        width: 70%;
     }
 }
 
@@ -242,3 +245,41 @@ hr {
     margin: 1rem 0;
 }
 
+@media (prefers-color-scheme: dark) {
+
+    #loginPage form,
+    #registerPage form,
+    #passwordPage form {
+        background-color: var(--background-color-black);
+    }
+
+    #loginPage h1:first-of-type,
+    #registerPage h1:first-of-type,
+    #passwordPage h1:first-of-type {
+        color: var(--font-color-white);
+    }
+
+    #loginPage input[type=submit],
+    #registerPage input[type=submit],
+    #passwordPage input[type=submit] {
+        background-color: var(--background-color-darkblue);
+        color: white;
+    }
+
+    #passwordPage button[name=backButton] {
+        color: var(--font-color-white);
+    }
+
+    #loginPage {
+        background-image: url('/static/img/Login_Background_Darkmode.jpg');
+    }
+
+    #registerPage {
+        background-image: url('/static/img/Register_Background_Darkmode.jpg');
+    }
+
+    #passwordPage {
+        background-image: url('/static/img/Passwordchange_Background_Darkmode.jpg');
+    }
+
+}

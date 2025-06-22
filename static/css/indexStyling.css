@@ -468,7 +468,7 @@ section:nth-of-type(4) .container {
 
   section:nth-of-type(2) .card-title {
     color: var(--font-color-white);
-}
+  }
 
   .card {
     background: var(--background-color-black);
@@ -482,6 +482,12 @@ section:nth-of-type(4) .container {
 
   .viewDetail {
     background-color: var(--background-color-darkgrey);
+  }
+
+  .viewDetail:hover {
+    background: var(--background-color-blue);
+    color: var(--background-color-black);
+    border: 2px solid #000;
   }
 
 

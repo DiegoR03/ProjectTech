@@ -32,8 +32,8 @@
 }
 
 .like-button .heart-icon {
-    height: 100px;
-    width: 100px;
+    height: 80px;
+    width: 80px;
     background: url("/static/images/heart.png");
     background-position: left;
     background-size: cover;

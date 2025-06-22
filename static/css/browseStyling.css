@@ -453,7 +453,7 @@ body>main>section>a:nth-of-type(1):hover {
 
 #pet-scroll-container {
   position: relative;
-  height: 70vh;
+  height: 80vh;
   width: 194%;
   overflow-y: auto;
   border: 1px solid #ccc;
@@ -469,4 +469,39 @@ body>main>section>a:nth-of-type(1):hover {
 #scroll-sentinel {
   height: 16px;
   background: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  body>main>section>p:nth-of-type(1) {
+    color: var(--font-color-white);
+  }
+
+  .filters label {
+    color: var(--font-color-white);
+  }
+
+  .card {
+    background: var(--background-color-black);
+    color: var(--font-color-white);
+    border: 1px solid var(--background-color-darkgrey);
+  }
+
+  .pet-gender,
+  .pet-breed {
+    color: var(--white-text-color);
+  }
+
+  .pet-name {
+    color: var(--primary-orange-lightercolor);
+  }
+
+  .viewDetail {
+    background-color: var(--background-color-darkgrey);
+  }
+
+  .viewDetail:hover {
+        background: var(--background-color-blue);
+        color: var(--background-color-black);
+        border: 2px solid #000;
+    }
 }
