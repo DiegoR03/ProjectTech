@@ -67,6 +67,21 @@ const uploads = multer({
 
 let loggedIn = false;
 
+// Function to shorten pet names
+function filtersNameLength(name, maxLength = 9) {
+    if (!name) return '';
+    return name.length > maxLength ? name.slice(0, maxLength) + '...' : name;
+}
+
+// Function to deduplicate pets by ID
+function deduplicatePetsById(pets) {
+    const seen = new Set();
+    return pets.filter(pet => {
+        if (seen.has(pet.id)) return false;
+        seen.add(pet.id);
+        return true;
+    });
+}
 // Connect to MongoDB
 async function connectDB() {
     try {
@@ -743,7 +758,10 @@ async function loadHome(req, res) {
         const data = await response.json();
 
         // Now filter for pets with images and take the first 5
-        newestPets = (data.animals || []).filter(pet => pet.photos && pet.photos.length > 0).slice(0, 5);
+        newestPets = (data.animals || []).filter(pet => pet.photos && pet.photos.length > 0).slice(0, 5).map(pet => ({
+            ...pet,
+            name: filtersNameLength(pet.name, 16)
+        }));
     } catch (err) {
         console.error("Error fetching newest pets:", err);
     }
@@ -1257,7 +1275,10 @@ async function loadBrowse(req, res, options = { json: false }) {
         }
 
 
-        const displayedPets = petsWithImages
+        // After fetching and combining all pets:
+        petsWithImages = deduplicatePetsById(petsWithImages);
+        const displayedPets = petsWithImages;
+        // ...pagination and rendering as before
 
         // Step 6: Build activeFilters for UI
         const filterLabels = {
@@ -1283,16 +1304,14 @@ async function loadBrowse(req, res, options = { json: false }) {
             }
         }
 
-        console.log("Filters from query:", req.query);
-        console.log("Applied filters for API:", appliedFilters);
-        console.log("Total pets fetched from API:", petsWithImages.length);
-
 
         const offset = parseInt(req.query.offset) || 0;
         const limit = parseInt(req.query.limit) || 12;
-        console.log("Pagination - offset:", offset, "limit:", limit);
 
-        const paginatedPets = petsWithImages.slice(offset, offset + limit);
+        const paginatedPets = petsWithImages.slice(offset, offset + limit).map(pet => ({
+            ...pet,
+            name: filtersNameLength(pet.name, 16)
+        }));
         console.log("Pets sent to client:", paginatedPets.length);
 
 
@@ -1582,10 +1601,12 @@ app.get('/match', async (req, res) => {
         console.log("User selected age:", userAnswers.age);
 
 
-        const bestMatches = scored
-            .filter(p => p.photos && p.photos.length > 0)
-            .sort((a, b) => b.matchScore - a.matchScore)
-            .slice(0, 10);
+        const bestMatches = deduplicatePetsById(
+            scored
+                .filter(p => p.photos && p.photos.length > 0)
+                .sort((a, b) => b.matchScore - a.matchScore)
+                .slice(0, 10)
+        );
 
         res.json(bestMatches);
 
