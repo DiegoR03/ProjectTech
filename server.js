@@ -102,6 +102,12 @@ app
             if (req.session.userID) {
                 const user = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
 
+                if (user && user.favorites) {
+                    req.session.favorites = user.favorites;
+                } else {
+                    req.session.favorites = [];
+                }
+
                 if (user) {
                     res.locals.currentUser = {
                         _id: user._id,
@@ -353,7 +359,6 @@ app
 
         try {
             if (!req.session.userID) {
-                // Not logged in - tell client to redirect
                 return res.status(401).json({ status: 'error', message: 'Login required' });
             }
 
@@ -374,14 +379,29 @@ app
                     isCustom: true
                 };
             } else {
-                // 2. Else fetch from Petfinder API
+                // 2. Fetch from Petfinder API
                 const token = await getPetfinderToken();
                 const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const data = await response.json();
+
+                if (!data.animal) {
+                    // Pet no longer exists — remove from favorites anyway
+                    console.warn(`Pet ${petId} not found in API. Proceeding to remove it from favorites.`);
+
+                    const petIdNum = Number(petId);
+                    req.session.favorites = req.session.favorites.filter(p => String(p.id) !== String(petId));
+
+                    await userCollection.updateOne(
+                        { _id: new ObjectId(req.session.userID) },
+                        { $pull: { favorites: { id: isNaN(petIdNum) ? petId : petIdNum } } }
+                    );
+
+                    return res.json({ status: 'success', favorited: false, removedMissing: true });
+                }
+
                 pet = data.animal;
-                if (!pet) throw new Error("Pet not found");
 
                 petData = {
                     id: pet.id,
@@ -393,40 +413,39 @@ app
                 };
             }
 
-            // 3. Init session
+            // 3. Initialize session favorites array if not exists
             if (!req.session.favorites) req.session.favorites = [];
 
-            const index = req.session.favorites.findIndex(p => p.id === petId);
-
-            // 4. Toggle logic
+            const index = req.session.favorites.findIndex(p => String(p.id) === String(petId));
             const isFavorited = index !== -1;
+
+            console.log('Favorite toggle route hit for petId:', petId);
+            console.log('Current favorites:', req.session.favorites);
+            console.log('Is currently favorited?', isFavorited);
 
             if (isFavorited) {
                 // Remove from session
                 req.session.favorites.splice(index, 1);
+                const petIdNum = Number(petId);
 
-                // Remove from DB
-                if (req.session.userID) {
-                    await userCollection.updateOne(
-                        { _id: new ObjectId(req.session.userID) },
-                        { $pull: { favorites: { id: petId } } }
-                    );
-                }
-
-                res.json({ status: 'success', favorited: false });
+                // Remove from DB user favorites
+                const result = await userCollection.updateOne(
+                    { _id: new ObjectId(req.session.userID) },
+                    { $pull: { favorites: { id: isNaN(petIdNum) ? petId : petIdNum } } }
+                );
+                console.log('Remove result:', result);
+                return res.json({ status: 'success', favorited: false });
             } else {
                 // Add to session
                 req.session.favorites.unshift(petData);
 
-                // Add to DB
-                if (req.session.userID) {
-                    await userCollection.updateOne(
-                        { _id: new ObjectId(req.session.userID) },
-                        { $addToSet: { favorites: petData } }
-                    );
-                }
+                // Add to DB user favorites
+                await userCollection.updateOne(
+                    { _id: new ObjectId(req.session.userID) },
+                    { $addToSet: { favorites: petData } }
+                );
 
-                // Notify owner if custom pet
+                // Notify owner if custom pet and liker is different user (optional)
                 if (petData.isCustom && pet.addedByUserId && req.session.userID !== pet.addedByUserId.toString()) {
                     const ownerId = new ObjectId(pet.addedByUserId);
                     const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
@@ -454,54 +473,12 @@ app
                     );
                 }
 
-                res.json({ status: 'success', favorited: true, pet: petData });
+                return res.json({ status: 'success', favorited: true, pet: petData });
             }
 
         } catch (err) {
             console.error("Error in /fave/:id route:", err);
             res.status(500).json({ status: 'error', message: 'Error toggling favorite.' });
-        }
-    })
-
-
-
-    .get('/removefavorite/:id', async (req, res) => {
-        const petId = req.params.id;
-
-        try {
-            if (!req.session.favorites) req.session.favorites = [];
-
-            req.session.favorites = req.session.favorites.filter(p => String(p.id) !== String(petId));
-
-            if (req.session.userID) {
-                await userCollection.updateOne(
-                    { _id: new ObjectId(req.session.userID) },
-                    // // Use $pull to remove the pet from favorites (Help from ChatGPT)
-                    { $pull: { favorites: { id: isNaN(petId) ? petId : Number(petId) } } }
-                );
-            }
-
-            const customPet = await db.collection('customPets').findOne({ id: petId });
-
-            if (customPet) {
-                return res.redirect('/account');
-            }
-
-            const token = await getPetfinderToken();
-            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            const data = await response.json();
-            const pet = data.animal;
-            if (!pet) throw new Error("Pet not found");
-
-            res.redirect('/account');
-
-        } catch (err) {
-            console.error("Error removing notifucation", err);
-            res.status(500).send('Error removing pet from favorites.');
         }
     })
 

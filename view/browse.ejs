@@ -142,8 +142,7 @@
         <div id="pet-scroll-container">
           <div id="pet-list" class="grid">
             <% pets.forEach(pet=> {
-              const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id));
-              %>
+              const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id));%>
               <div class="pet-card">
                 <div class="card">
                   <img src="<%= pet.photos?.[0]?.medium || 'No image available' %>" alt="<%= pet.name %>" class="" />
@@ -161,9 +160,9 @@
                     </div>
                     <div class="card-links">
                       <div class="like-container">
-                        <a href="/fave/<%= pet.id %>" class="like-button">
+                        <a href="/fave/<%= pet.id %>" class="like-button" aria-label="Like <%= pet.name %>">
                           <span class="heart-bg">
-                            <span class="heart-icon <%= isFavorited ? 'liked' : '' %>" style="height: 80px; width: 80px;"></span>
+                             <span class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
                           </span>
                         </a>
                       </div>

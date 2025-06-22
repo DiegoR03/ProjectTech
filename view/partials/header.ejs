@@ -49,7 +49,7 @@
                             <% if (currentUser.notifications.length> 0) { %>
                                 <% currentUser.notifications.slice().reverse().forEach(note=> { %>
                                     <div
-                                        style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; border-bottom: 1px solid #ccc; padding-bottom: 1rem;">
+                                        style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; padding-bottom: 1rem;">
                                         <a href="/otheruser/<%= note.userId %>"
                                             style="display: flex; align-items: center; text-decoration: none; flex: 1; gap: 10px;">
                                             <img src="<%= note.image %>" class="noteImage" alt="Notification Image"

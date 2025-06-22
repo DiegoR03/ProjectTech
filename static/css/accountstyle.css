@@ -1,4 +1,5 @@
 :root {
+    --white-text-color: #ffffff;
     --button-text-color: #ffffff;
     --button-select-color: #ffffff;
     --active-filters: #46c0975a;
@@ -6,9 +7,14 @@
     --removal-color: #aa0000;
     --primary-removal-color: #aa0000;
     --primary-title-color: #F47429;
+    --primary-orange-lightercolor: #f48d52;
 
     --background-color-white: #fff;
     --background-color-blue: #4177BE;
+
+    --background-color-black: #000000;
+    --background-color-darkgrey: #1A1A1A;
+    --background-color-darkblue: #033b85;
 }
 
 /* ===== Layout ===== */
@@ -28,7 +34,7 @@ section {
 
 h2 {
     font-weight: 600;
-} 
+}
 
 /* ===== Utility Hidden Elements ===== */
 .toggle-section,
@@ -92,11 +98,11 @@ h2 {
     font-weight: 700;
     border-bottom: solid 3px var(--primary-color-2);
 }
-  
+
 #accountNav div button:hover {
     color: var(--primary-color-hover-2);
 }
-  
+
 
 #navToggle {
     display: none;
@@ -203,37 +209,40 @@ h2 {
 }
 
 #myPetsList .search {
-    width: 90%;                  
-    padding: 0.5em 1em;          
-    font-size: 1rem;            
-    line-height: 1.4;  
-    color: var(--font-color); 
-    background-color: var(--background-color-white); 
-    border: 1px solid var(--footer-border);  
-    border-radius: 0.375rem;  
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    width: 90%;
+    padding: 0.5em 1em;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--font-color);
+    background-color: var(--background-color-white);
+    border: 1px solid var(--footer-border);
+    border-radius: 0.375rem;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    margin-bottom: 1rem;  
+    margin-bottom: 1rem;
 }
 
 /* ===== Favorites / Recently Viewed ===== */
-#Favorites,#recentlyViewed, #searchProfiles {
+#Favorites,
+#recentlyViewed,
+#searchProfiles {
     max-width: 80%;
     margin: auto;
 }
 
-#recentlyViewed .search, #Favorites .search {
-    width: 50vw;                  
-    padding: 0.5em 1em;          
-    font-size: 1rem;            
-    line-height: 1.4;  
-    color: var(--font-color); 
-    background-color: var(--background-color-white); 
-    border: 1px solid var(--footer-border);  
-    border-radius: 0.375rem;  
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+#recentlyViewed .search,
+#Favorites .search {
+    width: 50vw;
+    padding: 0.5em 1em;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--font-color);
+    background-color: var(--background-color-white);
+    border: 1px solid var(--footer-border);
+    border-radius: 0.375rem;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    margin-bottom: 1rem;  
+    margin-bottom: 1rem;
 }
 
 
@@ -444,6 +453,13 @@ h2 {
     font-size: 1rem;
 }
 
+input::file-selector-button {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--background-color-darkgrey);
+    font: inherit;
+}
+
 .PetPhoto {
     margin-bottom: 2rem;
     width: 100%;
@@ -511,7 +527,6 @@ textarea {
 
 #loadSearch,
 #deleteSearch {
-    background-color: #000;
     color: var(--white);
     padding: 6px 10px;
     border-radius: 1rem;
@@ -706,6 +721,124 @@ textarea {
     }
 
     #searchProfiles .container {
-    flex-direction: column;
+        flex-direction: column;
+    }
 }
+
+@media (prefers-color-scheme: dark) {
+
+    /* ACCOUNT GENERAL DARK MODE */
+    h2 {
+        color: var(--white-text-color);
+    }
+
+    #accountNav {
+        background-color: var(--background-color-darkblue);
+    }
+
+    #accountNav div button.active-button {
+        color: var(--primary-orange-lightercolor);
+        border-bottom: solid 3px var(--primary-orange-lightercolor);
+    }
+
+    textarea {
+        background-color: var(--background-color-black);
+        color: var(--white-text-color);
+    }
+
+    .card {
+        background: var(--background-color-black);
+        border: 1px solid var(--background-color-darkgrey);
+    }
+
+    .card::after,
+    .card::before {
+        background-color: var(--primary-orange-lightercolor);
+    }
+
+    .viewDetail {
+        background-color: var(--background-color-darkgrey);
+    }
+
+
+    .pet-gender,
+    .pet-breed {
+        color: var(--white-text-color);
+    }
+
+    .pet-name {
+        color: var(--primary-orange-lightercolor);
+    }
+
+    /* MY INFO DARK MODE */
+    #myInfoCollection {
+        color: var(--white-text-color);
+    }
+
+    #myInfo input[disabled] {
+        color: var(--white-text-color);
+        ;
+    }
+
+    #myInfo fieldset label,
+    #canEdit label {
+        color: var(--white-text-color);
+    }
+
+    #accountNav .nav-buttons button {
+        color: var(--white-text-color);
+        background-color: var(--background-color-black);
+        border: 1px solid var(--background-color-darkgrey);
+    }
+
+    /* POST A PET DARK MODE */
+    #postAPetContent label {
+        color: var(--white-text-color);
+    }
+
+    .PetPhoto input[type="file" i] {
+        color: var(--white-text-color);
+    }
+
+    input::file-selector-button {
+        color: var(--white-text-color);
+        background-color: var(--background-color-black);
+        border: 1px solid var(--background-color-darkgrey);
+    }
+
+    .PetName p {
+        color: var(--white-text-color);
+    }
+
+    .dropdown-petcontent {
+        background-color: var(--background-color-black);
+        border: 1px solid var(--background-color-black);
+    }
+
+    .form-group p {
+        color: var(--white-text-color);
+    }
+
+    #postAPetContent label input[type="text"],
+    .dropPetbtn {
+        border: 1px solid var(--background-color-darkgrey);
+        background-color: var(--background-color-black);
+        color: var(--white-text-color);
+    }
+
+    .dropPetbtn:hover {
+        background-color: var(--background-color-darkgrey);
+        border: 1px solid var(--button-select-color);
+    }
+
+    /*  Search Profiles */
+    .answer-group {
+        background: var(--background-color-black);
+        border: 1px solid var(--background-color-darkgrey);
+        color: var(--white-text-color);
+    }
+
+    #loadSearch {
+        background-color: var(--background-color-darkgrey);
+    }
 }

@@ -142,10 +142,12 @@
 
                     <div id="recentlyViewed-grid" class="grid list">
                         <% if (recentlyViewed.length===0) { %>
-                            <p>You haven't viewed any pets yet.</p>
+                            <p>You haven't favorited any pets yet.</p>
                             <% } else { %>
-                                <% recentlyViewed.forEach(pet=> { %>
-                                    <div class="card list-item">
+                                <% recentlyViewed.forEach(pet=> {
+                                    const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) ===
+                                    String(pet.id));%>
+                                    <div class="card list-item" data-pet-id="<%= pet.id %>">
                                         <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
                                         <div class="card-content">
                                             <div class="pet-info">
@@ -161,12 +163,15 @@
                                             </div>
                                             <div class="card-links">
                                                 <div class="like-container">
-                                                    <a href="/fave/<%= pet.id %>" class="like-button">
-                                                        <span class="heart-bg">
-                                                            <span class="heart-icon"
-                                                                style="height: 80px; width: 80px;"></span>
-                                                        </span>
-                                                    </a>
+                                                    <div class="like-container">
+                                                        <a href="/fave/<%= pet.id %>" class="like-button"
+                                                            aria-label="Like <%= pet.name %>">
+                                                            <span class="heart-bg">
+                                                                <span
+                                                                    class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                                 <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                                             </div>
@@ -174,6 +179,7 @@
                                     </div>
                                     <% }) %>
                                         <% } %>
+
                     </div>
                 </div>
             </section>
@@ -189,7 +195,8 @@
                         <% if (favorites.length===0) { %>
                             <p>You haven't favorited any pets yet.</p>
                             <% } else { %>
-                                <% favorites.forEach(pet=> { const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)); %>
+                                <% favorites.forEach(pet=> { const isFavorited = currentUser?.favorites?.some(fav =>
+                                    String(fav.id) === String(pet.id)); %>
                                     <div class="card list-item">
                                         <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
                                         <div class="card-content">
@@ -206,12 +213,15 @@
                                             </div>
                                             <div class="card-links">
                                                 <div class="like-container">
-                                                    <a href="/fave/<%= pet.id %>" class="like-button">
-                                                        <span class="heart-bg">
-                                                            <span class="heart-icon <%= isFavorited ? 'liked' : '' %>"
-                                                                style="height: 80px; width: 80px;"></span>
-                                                        </span>
-                                                    </a>
+                                                    <div class="like-container">
+                                                        <a href="/fave/<%= pet.id %>" class="like-button"
+                                                            aria-label="Like <%= pet.name %>">
+                                                            <span class="heart-bg">
+                                                                <span
+                                                                    class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                                 <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                                             </div>
