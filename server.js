@@ -109,6 +109,7 @@ app
                         lastName: user.lastName || '',
                         profileImage: user.profileImage,
                         notifications: user.notifications || [],
+                        favorites: user.favorites || []
                     };
                 } else {
                     res.locals.currentUser = null;
@@ -121,6 +122,11 @@ app
             res.locals.currentUser = null;
         }
 
+        if (!req.session.userID && req.method === 'GET' && !req.path.startsWith('/login')) {
+            if (req.headers.accept && req.headers.accept.includes('text/html')) {
+                req.session.returnTo = req.originalUrl;
+            }
+        }
         next();
     })
 
@@ -183,7 +189,7 @@ app
         res.redirect("/login");
     })
 
-    .get('/account', async (req, res) => {
+    .get('/account', requireLogin, async (req, res) => {
         const userId = req.session.userID;
         let recentlyViewed = [];
         let favorites = [];
@@ -285,14 +291,14 @@ app
     .get('/detail/:id', async (req, res) => {
         const petId = req.params.id;
         const userId = req.user?.id; // <-- assuming you're using req.user
-    
+
         try {
             const now = Date.now();
-    
+
             const mongoPet = await petCollection.findOne({ id: petId });
-    
+
             let pet;
-    
+
             if (mongoPet) {
                 pet = mongoPet;
             } else {
@@ -304,14 +310,14 @@ app
                 pet = data.animal;
                 if (!pet) throw new Error("Pet not found");
             }
-    
+
             // Handle recently viewed
             if (!req.session.recentlyViewed) req.session.recentlyViewed = [];
-    
+
             req.session.recentlyViewed = req.session.recentlyViewed
                 .filter(p => now - p.timestamp < 120 * 60 * 60 * 1000)
                 .filter(p => p.id !== pet.id);
-    
+
             const petData = {
                 id: pet.id,
                 name: pet.name || pet.petname,
@@ -320,20 +326,20 @@ app
                 breed: pet.breed || pet.breeds?.primary,
                 timestamp: now
             };
-    
+
             req.session.recentlyViewed.unshift(petData);
             req.session.recentlyViewed = req.session.recentlyViewed.slice(0, 5);
-    
+
             if (req.session.email) {
                 await users.updateOne(
                     { email: req.session.email },
                     { $set: { recentlyViewed: req.session.recentlyViewed } }
                 );
             }
-    
+
             // ✅ Fetch favorite pet IDs
             const favoritePetIds = userId ? await getFavoritesForUser(userId) : [];
-    
+
             res.render('detail', { pet, favoritePetIds }); // ✅ Pass them to EJS
         } catch (err) {
             console.error("Error in /detail route:", err);
@@ -346,12 +352,20 @@ app
         const petId = req.params.id;
 
         try {
-            // First, try to find pet in customPets (local)
+            if (!req.session.userID) {
+                // Not logged in - tell client to redirect
+                return res.status(401).json({ status: 'error', message: 'Login required' });
+            }
+
+            let petData;
+            let pet;
+
+            // 1. Try to find pet in local DB
             const customPet = await db.collection('customPets').findOne({ id: petId });
 
             if (customPet) {
-                // It's a custom pet
-                const petData = {
+                pet = customPet;
+                petData = {
                     id: customPet.id,
                     name: customPet.name,
                     photo: customPet.photos?.[0]?.medium || null,
@@ -359,86 +373,97 @@ app
                     breed: customPet.breeds?.primary || '',
                     isCustom: true
                 };
+            } else {
+                // 2. Else fetch from Petfinder API
+                const token = await getPetfinderToken();
+                const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await response.json();
+                pet = data.animal;
+                if (!pet) throw new Error("Pet not found");
 
-                if (!req.session.favorites) req.session.favorites = [];
-
-                // Check if already favorited
-                const alreadyFavorited = req.session.favorites.some(p => p.id === petId);
-                if (!alreadyFavorited) {
-                    req.session.favorites.unshift(petData);
-
-                    if (req.session.userID) {
-                        await userCollection.updateOne(
-                            { _id: new ObjectId(req.session.userID) },
-                            { $addToSet: { favorites: petData } }
-                        );
-                    }
-
-                    // Notify owner if liker is not the owner
-                    if (customPet.addedByUserId && req.session.userID !== customPet.addedByUserId.toString()) {
-                        const ownerId = new ObjectId(customPet.addedByUserId);
-                        const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
-                        const message = `${liker.firstName} liked your pet "${customPet.name}"`;
-                        const image = liker.profileImage;
-
-                        await userCollection.updateOne(
-                            { _id: ownerId },
-                            {
-                                $push: {
-                                    notifications: {
-                                        userId: liker._id.toString(), image, message, petId, timestamp: Date.now(), status: 'pending', type: 'contact_request', _id: new ObjectId(), ownerId: ownerId.toString(), petName: customPet.name,
-                                    }
-                                }
-                            }
-                        );
-
-                    }
-                }
-
-                // Render detail with the local pet
-                return res.render('detail', { pet: customPet });
+                petData = {
+                    id: pet.id,
+                    name: pet.name,
+                    photo: pet.photos?.[0]?.medium || null,
+                    gender: pet.gender,
+                    breed: pet.breeds.primary,
+                    isCustom: false
+                };
             }
 
-            // Pet from Petfinder API
-            const token = await getPetfinderToken();
-            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            const data = await response.json();
-            const pet = data.animal;
-            if (!pet) throw new Error("Pet not found");
-
-            const petData = {
-                id: pet.id,
-                name: pet.name,
-                photo: pet.photos?.[0]?.medium || null,
-                gender: pet.gender,
-                breed: pet.breeds.primary,
-                isCustom: false
-            };
-
+            // 3. Init session
             if (!req.session.favorites) req.session.favorites = [];
 
-            const alreadyFavorited = req.session.favorites.some(p => p.id === petId);
-            if (!alreadyFavorited) {
+            const index = req.session.favorites.findIndex(p => p.id === petId);
+
+            // 4. Toggle logic
+            const isFavorited = index !== -1;
+
+            if (isFavorited) {
+                // Remove from session
+                req.session.favorites.splice(index, 1);
+
+                // Remove from DB
+                if (req.session.userID) {
+                    await userCollection.updateOne(
+                        { _id: new ObjectId(req.session.userID) },
+                        { $pull: { favorites: { id: petId } } }
+                    );
+                }
+
+                res.json({ status: 'success', favorited: false });
+            } else {
+                // Add to session
                 req.session.favorites.unshift(petData);
 
+                // Add to DB
                 if (req.session.userID) {
                     await userCollection.updateOne(
                         { _id: new ObjectId(req.session.userID) },
                         { $addToSet: { favorites: petData } }
                     );
                 }
+
+                // Notify owner if custom pet
+                if (petData.isCustom && pet.addedByUserId && req.session.userID !== pet.addedByUserId.toString()) {
+                    const ownerId = new ObjectId(pet.addedByUserId);
+                    const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+                    const message = `${liker.firstName} liked your pet "${pet.name}"`;
+                    const image = liker.profileImage;
+
+                    await userCollection.updateOne(
+                        { _id: ownerId },
+                        {
+                            $push: {
+                                notifications: {
+                                    userId: liker._id.toString(),
+                                    image,
+                                    message,
+                                    petId,
+                                    timestamp: Date.now(),
+                                    status: 'pending',
+                                    type: 'contact_request',
+                                    _id: new ObjectId(),
+                                    ownerId: ownerId.toString(),
+                                    petName: pet.name,
+                                }
+                            }
+                        }
+                    );
+                }
+
+                res.json({ status: 'success', favorited: true, pet: petData });
             }
 
-            res.render('detail', { pet });
         } catch (err) {
             console.error("Error in /fave/:id route:", err);
-            res.status(500).send('Error fetching pet details.');
+            res.status(500).json({ status: 'error', message: 'Error toggling favorite.' });
         }
     })
+
+
 
     .get('/removefavorite/:id', async (req, res) => {
         const petId = req.params.id;
@@ -451,7 +476,8 @@ app
             if (req.session.userID) {
                 await userCollection.updateOne(
                     { _id: new ObjectId(req.session.userID) },
-                    { $pull: { favorites: { id: petId } } }
+                    // // Use $pull to remove the pet from favorites (Help from ChatGPT)
+                    { $pull: { favorites: { id: isNaN(petId) ? petId : Number(petId) } } }
                 );
             }
 
@@ -479,9 +505,6 @@ app
         }
     })
 
-
-    .get("/fave/:id", loadFave)
-
     .get("/searchForm", loadSearchForm)
     .get("/results-search-form", loadResultsSearchForm)
     .get('/load-saved-search/:index', async (req, res) => {
@@ -502,29 +525,15 @@ app
         res.render('addPetForm'); // Create this EJS view
     })
 
-    .get('/fave/:id', (req, res) => {
-        const petId = req.params.id;
-        const userId = req.user?.id;
-      
-        // Save to favorites
-        saveToFavorites(userId, petId)
-          .then(() => {
-            res.send('OK');
-          })
-          .catch(err => {
-            console.error(err);
-            res.status(500).send('Failed');
-          });
-    })
     .get('/pets', async (req, res) => {
         const userId = req.user.id;
-      
-        const allPets = await Pet.findAll(); 
+
+        const allPets = await Pet.findAll();
         const userFavorites = await getFavoritesForUser(userId);
-      
+
         res.render('pets', {
-          pets: allPets,
-          favoritePetIds: userFavorites
+            pets: allPets,
+            favoritePetIds: userFavorites
         });
     })
 
@@ -646,7 +655,7 @@ app
                                 message: `The owner of pet "${selectedNotification.petName}" shared their contact info.`,
                                 image: owner.profileImage,
                                 contactInfo: ownerInfo,
-                                userId: owner._id.toString(), 
+                                userId: owner._id.toString(),
                                 timestamp: Date.now()
                             }
                         }
@@ -749,7 +758,7 @@ async function loadHome(req, res) {
 
     try {
         const token = await getPetfinderToken();
-        
+
         const url = "https://api.petfinder.com/v2/animals?limit=100&sort=recent";
         const response = await fetch(url, {
             headers: { Authorization: `Bearer ${token}` }
@@ -832,35 +841,6 @@ async function loadDetail(req, res) {
         });
     }
 }
-
-
-//Fave page ///////////////////////////////////////////////////////////////
-async function loadFave(req, res) {
-    try {
-        const userID = req.session.userID;
-        const user = await userCollection.findOne({ _id: new ObjectId(userID) });
-        const pets = user?.favorites || [];
-
-        res.render("fave.ejs", {
-            pets,
-            pagination: null,
-            error: null,
-            request: req,
-            activeFilters: []
-        });
-
-    } catch (error) {
-        console.error("Error loading favorites:", error);
-        res.status(500).render("fave.ejs", {
-            pets: [],
-            pagination: null,
-            error: "Couldn't catch favourites.",
-            request: req,
-            activeFilters: []
-        });
-    }
-}
-
 
 function loadSearchForm(req, res) {
     const userID = req.session.userID || null;
@@ -951,7 +931,15 @@ async function processLogin(req, res) {
         req.session.favorites = user.favorites || [];
         req.session.createdAt = user.createdAt;
 
-        res.redirect("/account");
+        const redirectTo = req.session.returnTo;
+        delete req.session.returnTo;
+
+        if (!redirectTo || redirectTo.startsWith('/api') || redirectTo.endsWith('.json')) {
+            return res.redirect('/account');
+        }
+
+        res.redirect(redirectTo);
+
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).render("login", {
@@ -959,6 +947,14 @@ async function processLogin(req, res) {
             passwordError: null
         });
     }
+}
+
+function requireLogin(req, res, next) {
+    if (!req.session.userID) {
+        req.session.returnTo = req.originalUrl;
+        return res.redirect("/login");
+    }
+    next();
 }
 
 

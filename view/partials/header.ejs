@@ -1,5 +1,7 @@
 <head>
     <link rel="stylesheet" href="/static/css/headerstyle.css">
+    <link rel="stylesheet" href="/static/css/likebuttonstyling.css">
+    <script src="/static/scripts/fave.js"></script>
     <script src="/static/js/dropdown.js"></script>
 </head>
 
@@ -61,8 +63,7 @@
                                                 </small>
                                             </div>
                                             <% if (note.type==='contact_request' && note.status==='pending' ) { %>
-                                                <form method="POST" action="/notifications/respond"
-                                                     class="responses">
+                                                <form method="POST" action="/notifications/respond" class="responses">
                                                     <input type="hidden" name="notificationId" value="<%= note._id %>">
                                                     <button id="approved" name="response" value="approved"
                                                         title="Share Contact Info">&#9745;</button>

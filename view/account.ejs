@@ -121,7 +121,6 @@
                                                 </div>
 
                                                 <div class="card-links">
-                                                    <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
                                                     <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                                                 </div>
                                             </div>
@@ -161,7 +160,14 @@
                                                 </div>
                                             </div>
                                             <div class="card-links">
-                                                <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
+                                                <div class="like-container">
+                                                    <a href="/fave/<%= pet.id %>" class="like-button">
+                                                        <span class="heart-bg">
+                                                            <span class="heart-icon"
+                                                                style="height: 80px; width: 80px;"></span>
+                                                        </span>
+                                                    </a>
+                                                </div>
                                                 <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                                             </div>
                                         </div>
@@ -183,7 +189,7 @@
                         <% if (favorites.length===0) { %>
                             <p>You haven't favorited any pets yet.</p>
                             <% } else { %>
-                                <% favorites.forEach(pet=> { %>
+                                <% favorites.forEach(pet=> { const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)); %>
                                     <div class="card list-item">
                                         <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
                                         <div class="card-content">
@@ -199,7 +205,14 @@
                                                 </div>
                                             </div>
                                             <div class="card-links">
-                                                <a href="/removefavorite/<%= pet.id %>" class="remove">&#9932;</a>
+                                                <div class="like-container">
+                                                    <a href="/fave/<%= pet.id %>" class="like-button">
+                                                        <span class="heart-bg">
+                                                            <span class="heart-icon <%= isFavorited ? 'liked' : '' %>"
+                                                                style="height: 80px; width: 80px;"></span>
+                                                        </span>
+                                                    </a>
+                                                </div>
                                                 <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                                             </div>
                                         </div>

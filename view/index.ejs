@@ -5,74 +5,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/static/css/indexStyling.css">
- ">
   <title>PetMatch | Home</title>
 </head>
-  
+
 <body id="indexBody">
   <%- include('partials/header') %>
-  <main>
-    <section>
-      <div class="container">
-      <div>
-        <h1>Looking for a pet to adopt?</h1>
-        <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hesitate to adopt one of these lovely pets.</p>
-        <a href="#">Browse pets</a>
-      </div>
-      <div>
-        <img src="/static/images/homepage-dog.png" alt="Dog">
-      </div>
-    </div>
-    </section>
+    <main>
+      <section>
+        <div class="container">
+          <div>
+            <h1>Looking for a pet to adopt?</h1>
+            <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hesitate to
+              adopt one of these lovely pets.</p>
+            <a href="#">Browse pets</a>
+          </div>
+          <div>
+            <img src="/static/images/homepage-dog.png" alt="Dog">
+          </div>
+        </div>
+      </section>
 
-      <section> 
+      <section>
         <div class="container">
           <h2>What pet are you looking for?</h2>
           <div class="cards">
-    
+
             <div class="card">
               <div class="image-container">
-                <img
-                  src="/static/images/dog.png"
-                  alt="Dog"
-                  class="default-img"
-                >
-                <img
-                  src="/static/images/dog-hover.png"
-                  alt="Dog smiling"
-                  class="hover-img">
+                <img src="/static/images/dog.png" alt="Dog" class="default-img">
+                <img src="/static/images/dog-hover.png" alt="Dog smiling" class="hover-img">
               </div>
               <div class="card-title">Dogs</div>
             </div>
-    
+
             <div class="card">
               <div class="image-container">
-                <img
-                  src="/static/images/cat.png"
-                  alt="Cat"
-                  class="default-img">
-                <img
-                  src="/static/images/cat-hover.png"
-                  alt="Cat smiling"
-                  class="hover-img">
+                <img src="/static/images/cat.png" alt="Cat" class="default-img">
+                <img src="/static/images/cat-hover.png" alt="Cat smiling" class="hover-img">
               </div>
               <div class="card-title">Cats</div>
             </div>
-    
+
             <div class="card">
               <div class="image-container">
-                <img
-                  src="/static/images/rabbit.png"
-                  alt="Rodent"
-                  class="default-img">
-                <img
-                  src="/static/images/rabbit-hover.png"
-                  alt="Rodent smiling"
-                  class="hover-img">
+                <img src="/static/images/rabbit.png" alt="Rodent" class="default-img">
+                <img src="/static/images/rabbit-hover.png" alt="Rodent smiling" class="hover-img">
               </div>
               <div class="card-title">Rodents</div>
             </div>
-    
+
           </div>
         </div>
       </section>
@@ -80,14 +61,18 @@
       <section>
         <div class="container">
           <div>
-          <h2>Why adopt a pet?</h2>
-          <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of loving pets end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only gaining a loyal friend—you’re also helping reduce the number of animals in shelters and supporting a more humane world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your perfect match could be waiting for you. Adopt, and make a difference.</p>
-          <button onclick="location.href='/account?section=postAPet'">Go to Posted Pets</button>
+            <h2>Why adopt a pet?</h2>
+            <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of loving
+              pets end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only
+              gaining a loyal friend—you’re also helping reduce the number of animals in shelters and supporting a more
+              humane world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your perfect
+              match could be waiting for you. Adopt, and make a difference.</p>
+            <button onclick="location.href='/account?section=postAPet'">Go to Posted Pets</button>
+          </div>
+          <div>
+            <img src="/static/images/pets.jpg" alt="Dog">
+          </div>
         </div>
-        <div>
-          <img src="/static/images/pets.jpg" alt="Dog">
-        </div>
-      </div>
       </section>
 
       <section>
@@ -95,31 +80,38 @@
           <h2>Recently uploaded pets</h2>
           <div class="grid">
             <% if (newestPets && newestPets.length> 0) { %>
-              <% newestPets.forEach(pet=> { %>
+              <% newestPets.forEach(pet=> { const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) ===
+                String(pet.id));%>
                 <div class="pet-card">
-              <div class="card">
-                <img src="<%= pet.photos?.[0]?.medium || 'No image available' %>" alt="<%= pet.name %>"
-                  class="" />
-                <div class="card-content">
-                  <div class="pet-info">
-                    <h3 class="pet-name">
-                      <%= pet.name %>
-                    </h3>
-                    <p class="pet-gender">
-                      <%= pet.age %>, <%= pet.gender %>
-                    </p>
-                    <p class="pet-breed">
-                      <%= pet.breeds?.primary || 'Unknown breed' %>
-                    </p>
+                  <div class="card">
+                    <img src="<%= pet.photos?.[0]?.medium || 'No image available' %>" alt="<%= pet.name %>" class="" />
+                    <div class="card-content">
+                      <div class="pet-info">
+                        <h3 class="pet-name">
+                          <%= pet.name %>
+                        </h3>
+                        <p class="pet-gender">
+                          <%= pet.age %>, <%= pet.gender %>
+                        </p>
+                        <p class="pet-breed">
+                          <%= pet.breeds?.primary || 'Unknown breed' %>
+                        </p>
+                      </div>
+                      <div class="card-links">
+                        <div class="like-container">
+                          <a href="/fave/<%= pet.id %>" class="like-button">
+                            <span class="heart-bg">
+                              <span class="heart-icon <%= isFavorited ? 'liked' : '' %>"
+                                style="height: 80px; width: 80px;"></span>
+                            </span>
+                          </a>
+                        </div>
+                        <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                      </div>
+
                     </div>
-                    <div class="card-links">
-                      <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
-                      <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
-                    </div>
-                  
+                  </div>
                 </div>
-              </div>
-            </div>
                 <% }) %>
                   <% } else { %>
                     <p>No recent pets found.</p>
@@ -128,7 +120,7 @@
         </div>
       </section>
 
-  </main>
+    </main>
 
     <%- include('partials/footer') %>
 </body>
