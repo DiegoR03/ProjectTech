@@ -48,7 +48,6 @@ h2 {
 #accountNav {
     background-color: var(--background-color-blue);
     padding-top: 5em;
-    padding-bottom: 1em;
     display: flex;
     position: sticky;
     flex-direction: column;
@@ -106,7 +105,7 @@ h2 {
     font-size: 2rem;
     color: var(--button-text-color);
     cursor: pointer;
-    margin-left: 4.5rem;
+    margin-left: 9vw;
 }
 
 /* ===== Account Info Section ===== */
@@ -114,7 +113,7 @@ h2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    max-width: 80%;
+    max-width: 85%;
     margin: auto;
 }
 
@@ -656,6 +655,7 @@ textarea {
 @media (max-width: 900px) {
     #navToggle {
         display: block;
+        padding-bottom: 0.5em;
     }
 
     #accountNav .nav-buttons {
@@ -667,6 +667,7 @@ textarea {
 
     #accountNav.show-menu .nav-buttons {
         display: flex;
+        padding-bottom: 1em;
     }
 
     #accountNav .nav-buttons button {
@@ -697,10 +698,14 @@ textarea {
     }
 
     .answer-group {
-        width: 100%;
+        width: auto;
     }
 
     #myInfo form textarea {
         width: 70vw;
     }
+
+    #searchProfiles .container {
+    flex-direction: column;
+}
 }

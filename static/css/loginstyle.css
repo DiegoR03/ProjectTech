@@ -11,6 +11,7 @@
     --footer-text: #8E8E8E;
     --footer-background: #fff;
     --active-filters: #46c0975a;
+    --error: #ff2323;
 }
 
 /* GENERAL STYLES */
@@ -92,7 +93,6 @@ body {
     font-weight: 700;
     margin-bottom: 1.5rem;
     text-align: center;
-    margin-top: 7rem;
 }
 
 /* FORM INPUTS */
@@ -227,6 +227,11 @@ body {
     border: none;
     text-decoration: none;
     font: inherit;
+}
+
+/* Error message */
+#errorMessage {
+    color: var(--error);
 }
 
 /* HR STYLING */
