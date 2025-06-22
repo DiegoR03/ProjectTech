@@ -458,7 +458,7 @@ body>main>section>a:nth-of-type(1):hover {
   overflow-y: auto;
   border: 1px solid #ccc;
   padding: 1rem;
-  background-color: var(--active-filters);
+  background-color: transparent;
 
 }
 

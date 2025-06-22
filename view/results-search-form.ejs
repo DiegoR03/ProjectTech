@@ -73,12 +73,9 @@
   <%- include('partials/footer') %>
 
   <script>
-
-    
-
-
-
-
+  const userAnswers = <%- JSON.stringify(userAnswers) %>;
+  </script>
+  <script>
         const answerOptions = {
           type: ['Dog', 'Cat', 'Rabbit'],
           size: ['Small', 'Medium', 'Large', 'No preference'],
