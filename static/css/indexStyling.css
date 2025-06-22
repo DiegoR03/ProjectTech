@@ -63,14 +63,14 @@ section:nth-of-type(1) .container {
   max-width: 80%;
   margin-inline: auto;
   padding-top: 5em;
-      padding-bottom: 1rem;
+  padding-bottom: 1rem;
 }
 
 section:nth-of-type(1) img {
   max-width: 400px;
   height: auto;
   border-radius: 8px;
-   mask-image: linear-gradient(to top, rgba(0,0,0,0) 0%,var(--background-color-blue) 30%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0%, var(--background-color-blue) 30%);
 }
 
 section:nth-of-type(1) p {
@@ -461,6 +461,14 @@ section:nth-of-type(4) .container {
     margin-top: 0;
     color: var(--font-color-light);
   }
+
+  section:nth-of-type(2) .card {
+    background-color: var(--background-color-black);
+  }
+
+  section:nth-of-type(2) .card-title {
+    color: var(--font-color-white);
+}
 
   .card {
     background: var(--background-color-black);

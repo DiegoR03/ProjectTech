@@ -80,7 +80,8 @@
           <h2>Recently uploaded pets</h2>
           <div class="grid">
             <% if (newestPets && newestPets.length> 0) { %>
-              <% newestPets.forEach(pet=> { const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) ===
+              <% newestPets.forEach(pet=> {
+                const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) ===
                 String(pet.id));%>
                 <div class="pet-card">
                   <div class="card">
@@ -99,12 +100,14 @@
                       </div>
                       <div class="card-links">
                         <div class="like-container">
-                          <a href="/fave/<%= pet.id %>" class="like-button">
-                            <span class="heart-bg">
-                              <span class="heart-icon <%= isFavorited ? 'liked' : '' %>"
-                                style="height: 80px; width: 80px;"></span>
-                            </span>
-                          </a>
+                          <div class="like-container">
+                            <a href="/fave/<%= pet.id %>" class="like-button" aria-label="Like <%= pet.name %>">
+                              <span class="heart-bg">
+                                <span
+                                  class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+                              </span>
+                            </a>
+                          </div>
                         </div>
                         <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                       </div>

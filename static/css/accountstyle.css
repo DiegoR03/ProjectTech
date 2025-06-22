@@ -308,7 +308,7 @@ h2 {
 
 .card-links {
     display: grid;
-    gap: 8px;
+    gap: 20px;
     justify-items: end;
 }
 
@@ -758,6 +758,12 @@ textarea {
 
     .viewDetail {
         background-color: var(--background-color-darkgrey);
+    }
+
+    .viewDetail:hover {
+        background: var(--background-color-blue);
+        color: var(--background-color-black);
+        border: 2px solid #000;
     }
 
 

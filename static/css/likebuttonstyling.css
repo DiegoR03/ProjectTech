@@ -44,8 +44,6 @@
 
 .like-button .heart-icon.liked {
     animation: like-anim 0.7s steps(28) forwards;
-    width: 75px;
-    height: 75px;
 }
 
 .heart-icon.liked {
