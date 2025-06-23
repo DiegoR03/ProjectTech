@@ -42,16 +42,16 @@ body {
 }
 
 #loginPage {
-    background-image: url('/static/img/Login_Background.jpg');
+    background-image: url('/static/images/Login_Background.jpg');
 }
 
 #registerPage {
-    background-image: url('/static/img/Register_Background.jpg');
+    background-image: url('/static/images/Register_Background.jpg');
     display: none;
 }
 
 #passwordPage {
-    background-image: url('/static/img/Passwordchange_Background.jpg');
+    background-image: url('/static/imimagesg/Passwordchange_Background.jpg');
 }
 
 /* FORM STYLES */
@@ -280,15 +280,15 @@ hr {
     }
 
     #loginPage {
-        background-image: url('/static/img/Login_Background_Darkmode.jpg');
+        background-image: url('/static/images/Login_Background_Darkmode.jpg');
     }
 
     #registerPage {
-        background-image: url('/static/img/Register_Background_Darkmode.jpg');
+        background-image: url('/static/images/Register_Background_Darkmode.jpg');
     }
 
     #passwordPage {
-        background-image: url('/static/img/Passwordchange_Background_Darkmode.jpg');
+        background-image: url('/static/images/Passwordchange_Background_Darkmode.jpg');
     }
 
 }
