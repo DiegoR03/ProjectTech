@@ -18,10 +18,7 @@
 }
 
 main {
-  margin-left: 12%;
-  width: 70%;
   padding: 4rem;
-  margin-top: 5rem;
 }
 
 .step-container {
@@ -704,10 +701,8 @@ footer {
   transform: scaleY(1);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   main {
-    margin-left: 0;
-    width: 80%;
     padding: 4rem;
   }
 

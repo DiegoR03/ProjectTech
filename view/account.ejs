@@ -8,7 +8,7 @@
     <title>PetThing | Account</title>
 </head>
 
-<body class="body">
+<body class="bodyaccount">
     <%- include('partials/header') %>
         <main>
             <nav id="accountNav">
@@ -163,15 +163,13 @@
                                             </div>
                                             <div class="card-links">
                                                 <div class="like-container">
-                                                    <div class="like-container">
-                                                        <a href="/fave/<%= pet.id %>" class="like-button"
-                                                            aria-label="Like <%= pet.name %>">
-                                                            <span class="heart-bg">
-                                                                <span
-                                                                    class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
-                                                            </span>
-                                                        </a>
-                                                    </div>
+                                                    <a href="/fave/<%= pet.id %>" class="like-button"
+                                                        aria-label="Like <%= pet.name %>">
+                                                        <span class="heart-bg">
+                                                            <span
+                                                                class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+                                                        </span>
+                                                    </a>
                                                 </div>
                                                 <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                                             </div>

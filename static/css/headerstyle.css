@@ -113,6 +113,7 @@ header a {
   font-weight: 600;
   text-decoration: none;
   overflow: hidden;
+  font-size: 2.5vh;
 }
 
 header a:hover {
@@ -129,7 +130,7 @@ header a:active {
 header a::after {
   content: "";
   position: absolute;
-  bottom: 0.125em;
+  bottom: -0.03em;
   left: 0;
   height: 3px;
   width: 0;
@@ -241,6 +242,7 @@ header a:hover::after {
   padding-bottom: 0.6em;
   color: var(--text-color);
   text-decoration: none;
+  font-size: 2.5vh;
 }
 
 .notifications-btn:hover {
@@ -313,7 +315,7 @@ header a:hover::after {
 
 /* Footer Styling */
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   header {
     padding-right: 0;
     padding-left: 0;

@@ -10,19 +10,20 @@
 
 <body id="indexBody">
   <%- include('partials/header') %>
-  <main>
-    <section>
-      <div class="container">
-      <div>
-        <h1>Looking for a pet to adopt?</h1>
-        <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hesitate to adopt one of these lovely pets.</p>
-        <a href="/browse">Browse pets</a>
-      </div>
-      <div>
-        <img src="/static/images/homepage-dog.png" alt="Dog">
-      </div>
-    </div>
-    </section>
+    <main>
+      <section>
+        <div class="container">
+          <div>
+            <h1>Looking for a pet to adopt?</h1>
+            <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hesitate to
+              adopt one of these lovely pets.</p>
+            <a href="/browse">Browse pets</a>
+          </div>
+          <div>
+            <img src="/static/images/homepage-dog.png" alt="Dog">
+          </div>
+        </div>
+      </section>
 
       <section>
         <div class="container">
@@ -50,7 +51,7 @@
                 <img src="/static/images/rabbit.png" alt="Rodent" class="default-img">
                 <img src="/static/images/rabbit-hover.png" alt="Rodent smiling" class="hover-img">
               </div>
-              <div class="card-title">Rodents</div>
+              <div class="card-title">Rabbits</div>
             </div>
 
           </div>
@@ -60,13 +61,26 @@
       <section>
         <div class="container">
           <div>
-            <h2>Why adopt a pet?</h2>
-            <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of loving
-              pets end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only
-              gaining a loyal friend—you’re also helping reduce the number of animals in shelters and supporting a more
-              humane world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your perfect
-              match could be waiting for you. Adopt, and make a difference.</p>
-            <button onclick="location.href='/account?section=postAPet'">Go to Posted Pets</button>
+            <% if (currentUser) { %>
+              <h2>Why post a pet?</h2>
+              <p>Posting a pet helps connect animals with the loving homes they deserve. Whether you’re helping a
+                rescue, supporting a local shelter, or assisting a friend or foster animal, sharing their profile gives
+                them a real chance at adoption. Our community relies on caring people like you to shine a light on pets
+                who are looking for a second chance. By posting, you're helping make that connection possible—and making
+                a direct impact in an animal’s journey to a better life.</p>
+              <button onclick="location.href='/account?section=postAPet'">Go to Post a Pets</button>
+              <% } else {%>
+                <h2>Why adopt a pet?</h2>
+                <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of
+                  loving
+                  pets end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only
+                  gaining a loyal friend—you’re also helping reduce the number of animals in shelters and supporting a
+                  more
+                  humane world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your
+                  perfect
+                  match could be waiting for you. Adopt, and make a difference.</p>
+                <button onclick="location.href='/login'">Login</button>
+                <% } %>
           </div>
           <div>
             <img src="/static/images/pets.jpg" alt="Dog">
@@ -76,7 +90,7 @@
 
       <section>
         <div class="container">
-          <h2>Recently uploaded pets</h2>
+          <h2 style="text-align: center;">Recently uploaded pets</h2>
           <div class="grid">
             <% if (newestPets && newestPets.length> 0) { %>
               <% newestPets.forEach(pet=> {

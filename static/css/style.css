@@ -182,9 +182,10 @@ footer ul li:nth-of-type(1) a:hover {
 }
 
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   .body {
     background-image: url("/static/img/Background_PetchMatch_Mobile.png");
+    background: linear-gradient(to bottom, var(--background-color-blue) 0%, var(--background-color-blue) 4%, rgba(0, 0, 0, 0) 10%);
   }
 
   .dropdown img {

@@ -8,6 +8,7 @@
     --primary-removal-color: #aa0000;
     --primary-title-color: #F47429;
     --primary-orange-lightercolor: #f48d52;
+    --font-color-gray: #cbcbcb;
 
     --background-color-white: #fff;
     --background-color-blue: #4177BE;
@@ -18,14 +19,23 @@
 }
 
 /* ===== Layout ===== */
-
-body {
+.bodyaccount {
+    background: linear-gradient(to bottom,
+            var(--background-color-blue) 0%,
+            var(--background-color-blue) 10%,
+            rgba(0, 0, 0, 0) 20%);
     font-family: 'Montserrat';
+    margin: 0;
+    margin-inline: auto;
 }
 
 main {
     margin-inline: auto;
-    margin-bottom: 10rem;
+    padding-bottom: 10rem;
+    background-image: url("/static/img/Background_PetchMatch.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 section {
@@ -53,7 +63,7 @@ h2 {
 /* ===== Account Navigation ===== */
 #accountNav {
     background-color: var(--background-color-blue);
-    padding-top: 5em;
+    padding-top: 3em;
     display: flex;
     position: sticky;
     flex-direction: column;
@@ -64,7 +74,6 @@ h2 {
 
 #accountNav h2 {
     color: var(--button-text-color);
-    padding-top: 2em;
     padding-bottom: 0.8em;
     max-width: 80%;
     margin: auto;
@@ -291,6 +300,7 @@ h2 {
     width: 100%;
     height: 180px;
     object-fit: cover;
+    border-bottom: 2px solid var(--background-color-white);
 }
 
 .card-content {
@@ -357,6 +367,7 @@ h2 {
     font-size: 0.9rem;
     cursor: pointer;
     transition: background 0.2s ease;
+        text-decoration: none;
 }
 
 .viewDetail {
@@ -417,7 +428,7 @@ h2 {
     max-width: 80%;
     margin: auto;
     /* padding: 3rem; */
-    gap: 2em;
+    gap: 5em;
     font: inherit;
 }
 
@@ -669,6 +680,10 @@ textarea {
 
 /* ===== Responsive Rules ===== */
 @media (max-width: 900px) {
+    main {
+        background-image: url("/static/img/Background_PetchMatch_Mobile.png");
+    }
+
     #navToggle {
         display: block;
         padding-bottom: 0.5em;
@@ -729,6 +744,23 @@ textarea {
 @media (prefers-color-scheme: dark) {
 
     /* ACCOUNT GENERAL DARK MODE */
+    main {
+        background-image: url("/static/img/Background_PetchMatch_Darkmode.png");
+    }
+
+    .bodyaccount {
+        background: linear-gradient(to bottom,
+                var(--background-color-darkblue) 0%,
+                var(--background-color-darkblue) 10%,
+                rgba(0, 0, 0, 0) 20%);
+    }
+
+    @media (max-width: 900px) {
+        main {
+            background-image: url("/static/img/Background_PetchMatch_Mobile_Darkmode.png");
+        }
+    }
+
     h2 {
         color: var(--white-text-color);
     }
@@ -752,13 +784,21 @@ textarea {
         border: 1px solid var(--background-color-darkgrey);
     }
 
+    .card img {
+        border-bottom: 2px solid var(--background-color-darkgrey);
+    }
+
     .card::after,
     .card::before {
         background-color: var(--primary-orange-lightercolor);
     }
 
+    .card-content {
+        background-color: var(--background-color-darkblue);
+    }
+
     .viewDetail {
-        background-color: var(--background-color-darkgrey);
+        background-color: var(--primary-title-color);
     }
 
     .viewDetail:hover {
@@ -767,14 +807,13 @@ textarea {
         border: 2px solid #000;
     }
 
-
     .pet-gender,
     .pet-breed {
-        color: var(--white-text-color);
+        color: var(--font-color-gray);
     }
 
     .pet-name {
-        color: var(--primary-orange-lightercolor);
+        color: var(--white-text-color);
     }
 
     /* MY INFO DARK MODE */

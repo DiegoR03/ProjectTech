@@ -23,6 +23,7 @@
   --primary-orange-lightercolor: #f48d52;
 
   --font-color: #0d3149;
+  --font-color-gray: #cbcbcb;
   --font-color-light: #1f70a6;
   --font-color-white: #ffffff;
   --footer-text: #8E8E8E;
@@ -31,8 +32,8 @@
 #indexBody {
   font-family: 'Montserrat';
   color: var(--font-color);
-  background-color: var(--background-color-white);
   margin: 0;
+  background: linear-gradient(to bottom, var(--background-color-blue) 0%, var(--background-color-blue) 8%, rgba(0, 0, 0, 0) 12%);
 }
 
 h1 {
@@ -238,7 +239,6 @@ section:nth-of-type(4) {
 }
 
 section:nth-of-type(4) .container {
-  text-align: center;
   max-width: 80%;
   margin-inline: auto;
 }
@@ -410,7 +410,6 @@ section:nth-of-type(4) .container {
 /* Hover animation for .card on browse page */
 .card {
   position: relative;
-  border: 1px solid #ddd;
   transition: border 0.3s ease, box-shadow 0.3s ease;
   z-index: 0;
   /* Ensure stacking context */
@@ -451,7 +450,11 @@ section:nth-of-type(4) .container {
   transform: scaleY(1);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
+  #indexbody {
+    background: linear-gradient(to bottom, var(--background-color-darkblue) 0%, var(--background-color-darkblue) 4%, rgba(0, 0, 0, 0) 15%);
+  }
+
   section:nth-of-type(1) {
     height: 650px;
     clip-path: ellipse(100% 100% at 40% 0);
@@ -460,11 +463,16 @@ section:nth-of-type(4) .container {
 
 @media (prefers-color-scheme: dark) {
   #indexBody {
-    background-color: var(--background-color-darkgrey);
+    background: linear-gradient(to bottom, var(--background-color-darkblue) 0%, var(--background-color-darkblue) 7%, rgba(0, 0, 0, 0) 15%);
   }
 
-  section:nth-of-type(1), section:nth-of-type(3) {
+  section:nth-of-type(1),
+  section:nth-of-type(3) {
     background-color: var(--background-color-darkblue);
+  }
+
+  main {
+    background-color: var(--background-color-darkgrey);
   }
 
   section:nth-of-type(2),
@@ -475,11 +483,11 @@ section:nth-of-type(4) .container {
   section:nth-of-type(2) h2,
   section:nth-of-type(4) h2 {
     margin-top: 0;
-    color: var(--font-color-light);
+    color: var(--font-color-white);
   }
 
   section:nth-of-type(2) .card {
-    background-color: var(--background-color-black);
+    background-color: var(--background-color-darkblue);
   }
 
   section:nth-of-type(2) .card-title {
@@ -487,8 +495,11 @@ section:nth-of-type(4) .container {
   }
 
   .card {
-    background: var(--background-color-black);
-    border: 1px solid var(--background-color-darkgrey);
+    background: var(--background-color-darkblue);
+  }
+
+  .card img{
+    border-bottom: 2px solid var(--background-color-darkgrey);
   }
 
   .card::after,
@@ -497,7 +508,7 @@ section:nth-of-type(4) .container {
   }
 
   .viewDetail {
-    background-color: var(--background-color-darkgrey);
+    background-color: var(--primary-color-2);
   }
 
   .viewDetail:hover {
@@ -509,10 +520,10 @@ section:nth-of-type(4) .container {
 
   .pet-gender,
   .pet-breed {
-    color: var(--font-color-white);
+    color: var(--font-color-gray);
   }
 
   .pet-name {
-    color: var(--primary-orange-lightercolor);
+    color: var(--font-color-white);
   }
 }

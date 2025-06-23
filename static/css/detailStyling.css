@@ -219,7 +219,7 @@ h2 {
 }
 
 /* Responsive design medium screen */
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
     section {
         display: flex;
         flex-direction: column;
@@ -232,101 +232,7 @@ h2 {
         display: none;
     }
 
-    .pet-name-heading-mobile {
-        order: 0;
-        display: block;
-        width: 100%;
-        font-size: 1.8em;
-        font-weight: bold;
-        margin: 0 0 1em;
-        text-align: center;
-        color: var(--primary-color-action);
-    }
-
-    h2 {
-        font-size: 2em;
-    }
-
-    .text-section {
-        gap: 0.8em;
-        order: 3;
-    }
-
-    .traits-list {
-        order: 2;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.5em;
-        margin-top: 1em;
-    }
-
-    .traits-list li {
-        padding: 10px 15px;
-        font-size: 0.9em;
-    }
-
-    .slider {
-        order: 1;
-        width: 100%;
-        height: auto;
-        margin: 0 auto;
-    }
-
-    .slider .list {
-        width: 100%;
-        height: auto;
-    }
-
-    .slider .item {
-        width: 100%;
-        height: auto;
-    }
-
-    .list img {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-    }
-
-    .pet-basics {
-        flex-direction: column;
-        gap: 0.5em;
-        text-align: center;
-    }
-
-    .buttons button {
-        width: 40px;
-        height: 40px;
-    }
-
-    .dots li {
-        margin: 10px;
-    }
-
-    .extra-traits {
-        margin-top: 1em;
-    }
-
-    .like-container {
-        position: absolute;
-        top: 6.5em;
-        right: 4em;
-        z-index: 10;
-    }
-
-}
-
-/* Responsive design small screen */
-@media (max-width: 720px) {
-    section {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5em;
-        padding: 1em;
-        margin: 4em 1em 2em;
-    }
-
-    .pet-name-heading {
+    #pet-like-button {
         display: none;
     }
 
@@ -411,8 +317,8 @@ h2 {
         right: 2em;
         z-index: 10;
     }
-
 }
+
 
 @media (prefers-color-scheme: dark) {
     section {

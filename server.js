@@ -427,16 +427,10 @@ app
                     isCustom: false
                 };
             }
-
-            // 3. Initialize session favorites array if not exists
             if (!req.session.favorites) req.session.favorites = [];
 
             const index = req.session.favorites.findIndex(p => String(p.id) === String(petId));
             const isFavorited = index !== -1;
-
-            console.log('Favorite toggle route hit for petId:', petId);
-            console.log('Current favorites:', req.session.favorites);
-            console.log('Is currently favorited?', isFavorited);
 
             if (isFavorited) {
                 // Remove from session
@@ -451,16 +445,13 @@ app
                 console.log('Remove result:', result);
                 return res.json({ status: 'success', favorited: false });
             } else {
-                // Add to session
                 req.session.favorites.unshift(petData);
 
-                // Add to DB user favorites
                 await userCollection.updateOne(
                     { _id: new ObjectId(req.session.userID) },
                     { $addToSet: { favorites: petData } }
                 );
 
-                // Notify owner if custom pet and liker is different user (optional)
                 if (petData.isCustom && pet.addedByUserId && req.session.userID !== pet.addedByUserId.toString()) {
                     const ownerId = new ObjectId(pet.addedByUserId);
                     const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });

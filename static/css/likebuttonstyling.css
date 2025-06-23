@@ -42,7 +42,7 @@
     position: absolute;
 }
 
-.like-button .heart-icon.liked {
+.like-button {
     animation: like-anim 0.7s steps(28) forwards;
 }
 

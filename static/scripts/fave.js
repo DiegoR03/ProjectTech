@@ -7,9 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const heartIcon = button.querySelector('.heart-icon');
             const petCard = button.closest('.card');
 
-            // Restart animation
+            // Remove liked before animation for single-pet detail
+            heartIcon.classList.remove('liked');
             heartIcon.classList.remove('animate');
-            void heartIcon.offsetWidth;
+            void heartIcon.offsetWidth; // Force reflow
             heartIcon.classList.add('animate');
 
             try {
@@ -24,7 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (data.status === 'success') {
                     if (data.favorited) {
-                        heartIcon.classList.add('liked');
+                        // Add liked after animation starts
+                        setTimeout(() => {
+                            heartIcon.classList.add('liked');
+                        }, 0);
                     } else {
                         heartIcon.classList.remove('liked');
 

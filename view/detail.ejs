@@ -8,94 +8,107 @@
 
   <link rel="stylesheet" href="/static/css/accountstyle.css">
   <link rel="stylesheet" href="/static/css/detailStyling.css">
-  <link rel="stylesheet" href="/static/css/likebuttonstyling.css">
 </head>
 
 <body class="body">
   <%- include('partials/header') %>
-  <main>
-    <section>
-      <% if (pet) { %>
-        <div class="slider">
-          <div class="slider" tabindex="0" role="region" aria-label="Pet photo gallery">
-            <div class="list">
-              <% if (pet.photos && pet.photos.length) { %>
-                <% pet.photos.forEach(function(photo) { %>
-                  <div class="item">
-                    <img src="<%= photo.medium || '/static/default.jpg' %>" alt="Pet photo">
-                  </div>
-                <% }) %>
-              <% } else { %>
-                <div class="item">
-                  <img src="/static/default.jpg" alt="Default pet photo">
-                </div>
-              <% } %>
+    <main>
+      <section>
+        <% if (pet) { const isFavorited=currentUser?.favorites?.some(fav=> String(fav.id) ===
+          String(pet.id));%>
+          <div class="slider">
+            <div class="slider" tabindex="0" role="region" aria-label="Pet photo gallery">
+              <div class="list">
+                <% if (pet.photos && pet.photos.length) { %>
+                  <% pet.photos.forEach(function(photo) { %>
+                    <div class="item">
+                      <img src="<%= photo.medium || '/static/default.jpg' %>" alt="Pet photo">
+                    </div>
+                    <% }) %>
+                      <% } else { %>
+                        <div class="item">
+                          <img src="/static/default.jpg" alt="Default pet photo">
+                        </div>
+                        <% } %>
+              </div>
             </div>
-          </div>
-          <% if (pet.photos && pet.photos.length > 1) { %>
-            <!-- Button prev and next -->
-            <div class="buttons">
-              <button id="prev"><</button>
-              <button id="next">></button>
-            </div>
-        
-            <!-- Dots -->
-            <ul class="dots">
-              <% for (let i = 0; i < pet.photos.length; i++) { %>
-                <li class="<%= i === 0 ? 'active' : '' %>"></li>
-              <% } %>
-            </ul>
-          <% } %>
-        </div>
-        <ul class="traits-list">
-          <li>
-              <%= pet.breeds.primary %>
-          </li>
-          <li>
-              <%= pet.species %>
-          </li>
-          <li>
-            <%= pet.gender %>
-          </li>
-          <li>
-            <%= pet.age %>
-          </li>
-        </ul>
-        <div class="like-container">
-          <a href="/fave/<%= pet.id %>" class="like-button">
-            <span class="heart-bg">
-              <span class="heart-icon"></span>
-            </span>
-          </a>
-        </div>
+            <% if (pet.photos && pet.photos.length> 1) { %>
+              <!-- Button prev and next -->
+              <div class="buttons">
+                <button id="prev">
+                  << /button>
+                    <button id="next">></button>
+              </div>
 
-        <!-- Only show on mobile!!!! -->
-        <h2 class="pet-name-heading-mobile">
-          <%= pet.name %>
-        </h2>
-        <div class="text-section">
-          <!-- Only show on big screens!!! -->
-          <h2 class="pet-name-heading">
-            <%= pet.name %>
-          </h2>
-          <div class="text-content">
-            <h3>Description</h3>
-            <p style="white-space: pre-wrap;"><%- pet.description || "No description available." %></p>
-            <!-- A - insted of = excludes code like lang in the description -->
-            <% } else { %>
-              <p class="error">
-                <%= error %>
-              </p>
+              <!-- Dots -->
+              <ul class="dots">
+                <% for (let i=0; i < pet.photos.length; i++) { %>
+                  <li class="<%= i === 0 ? 'active' : '' %>"></li>
+                  <% } %>
+              </ul>
               <% } %>
           </div>
-          <div class="extra-traits">
-            <ul>
-              <!-- Active Yes or no? -->
-              <li class="information-card">
-                <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                    width="100%" viewBox="0 0 90 90" enable-background="new 0 0 90 90" xml:space="preserve">
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+          <ul class="traits-list">
+            <li>
+              <%= pet.breeds.primary %>
+            </li>
+            <li>
+              <%= pet.species %>
+            </li>
+            <li>
+              <%= pet.gender %>
+            </li>
+            <li>
+              <%= pet.age %>
+            </li>
+          </ul>
+          <div class="like-container" id="pet-like-button">
+            <a href="/fave/<%= pet.id %>" class="like-button" aria-label="Like <%= pet.name %>">
+              <span class="heart-bg">
+                <span
+                  class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+              </span>
+            </a>
+          </div>
+
+
+          <!-- Only show on mobile!!!! -->
+          <div class="pet-name-heading-mobile">
+            <h2>
+              <%= pet.name %>
+            </h2>
+            <div class="like-container">
+              <a href="/fave/<%= pet.id %>" class="like-button" aria-label="Like <%= pet.name %>">
+                <span class="heart-bg">
+                  <span
+                    class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+                </span>
+              </a>
+            </div>
+          </div>
+          <div class="text-section">
+            <!-- Only show on big screens!!! -->
+            <h2 class="pet-name-heading">
+              <%= pet.name %>
+            </h2>
+            <div class="text-content">
+              <h3>Description</h3>
+              <p style="white-space: pre-wrap;"><%- pet.description || "No description available." %></p>
+              <!-- A - insted of = excludes code like lang in the description -->
+              <% } else { %>
+                <p class="error">
+                  <%= error %>
+                </p>
+                <% } %>
+            </div>
+            <div class="extra-traits">
+              <ul>
+                <!-- Active Yes or no? -->
+                <li class="information-card">
+                  <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%" viewBox="0 0 90 90"
+                    enable-background="new 0 0 90 90" xml:space="preserve">
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M54.250732,68.336456 
                     C51.235558,74.059555 48.438896,79.468216 45.627594,84.905182 
                     C43.859455,84.905182 42.202965,84.905182 39.405918,84.905182 
@@ -108,61 +121,56 @@
                     C54.249672,39.800980 60.448261,39.800980 67.680626,39.800980 
                     C66.766785,43.092808 66.454506,45.829250 65.284241,48.129108 
                     C61.862637,54.853394 58.098904,61.403587 54.250732,68.336456 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M22.739262,25.707962 
                     C19.525585,23.692471 16.305338,21.705709 13.824833,19.032522 
                     C12.794142,17.921768 13.342672,15.345624 13.173066,13.435853 
                     C15.184604,13.547250 17.522509,13.054034 19.126740,13.919990 
                     C21.227598,15.054026 22.956171,17.100557 24.467976,19.047283 
                     C26.408106,21.545555 26.505354,23.995937 22.739262,25.707962 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M66.756470,70.341843 
                     C66.973770,65.065804 70.878578,66.491066 72.764137,67.601334 
                     C75.302490,69.095993 77.207703,71.894188 78.919174,74.445198 
                     C79.546661,75.380501 79.306946,77.535828 78.603859,78.522606 
                     C78.046616,79.304703 75.554329,79.822395 74.997269,79.303139 
                     C72.128784,76.629326 69.607536,73.582993 66.756470,70.341843 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M72.507080,13.995770 
                     C74.676117,13.416934 76.533806,13.083822 78.387245,12.751471 
                     C79.399017,18.616842 76.138168,23.734848 70.717438,24.963366 
                     C69.602165,25.216124 67.782196,25.036234 67.213860,24.320158 
                     C66.563354,23.500557 66.420769,21.525457 66.983322,20.641825 
                     C68.450935,18.336582 70.424149,16.353224 72.507080,13.995770 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M18.549686,78.809677 
                     C16.317493,78.873779 13.516381,80.987679 12.989527,77.453423 
                     C12.739944,75.779167 13.372646,73.471939 14.471451,72.198662 
                     C17.052366,69.207924 19.578588,65.432312 24.625137,67.329956 
                     C26.763626,73.157532 21.635656,75.298477 18.549686,78.809677 
-                  z"/>
-                </svg>
-                <div class="text-group">
-                  <span class="label">Activity Level:</span>
-                  <span class="value">
-                    <% const isPlayful = pet.description?.toLowerCase().includes('play') ||
-                    pet.tags?.includes('playful') ||
-                    pet.tags?.includes('energetic') ||
-                    pet.tags?.includes('active'); %>
+                  z" />
+                  </svg>
+                  <div class="text-group">
+                    <span class="label">Activity Level:</span>
+                    <span class="value">
+                      <% const isPlayful=pet.description?.toLowerCase().includes('play') ||
+                        pet.tags?.includes('playful') || pet.tags?.includes('energetic') ||
+                        pet.tags?.includes('active'); %>
 
-                    <%= isPlayful ? "Active" : "Calm" %>
-                  </span>
-                </div>
-              </li>
-              <!-- Good with children -->
-              <li class="information-card">
-                <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                  width="100%" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                  d="
+                        <%= isPlayful ? "Active" : "Calm" %>
+                    </span>
+                  </div>
+                </li>
+                <!-- Good with children -->
+                <li class="information-card">
+                  <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%" viewBox="0 0 100 100"
+                    enable-background="new 0 0 100 100" xml:space="preserve">
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M54.224632,91.260643 
                   C42.485577,101.536995 25.210926,101.699005 14.104358,93.039757 
                   C7.438074,87.842369 3.680602,81.042419 3.040194,72.660149 
@@ -186,9 +194,8 @@
                   C75.624046,69.582535 72.083641,67.726784 68.632790,65.405334 
                   C67.095741,64.371338 65.776596,62.599380 62.910015,62.681301 
                   C64.086403,73.231247 62.307415,83.086662 54.224632,91.260643 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                  d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M21.853508,83.332275 
                   C10.541209,73.575668 13.563622,55.355724 29.259329,51.374313 
                   C31.901384,50.704124 33.883091,50.002197 35.454941,54.580906 
@@ -196,9 +203,8 @@
                   C51.459400,69.014900 51.269287,70.496971 50.666859,72.692581 
                   C47.340385,84.816246 34.508942,90.859192 23.884356,84.424263 
                   C23.331751,84.089569 22.707129,83.873779 21.853508,83.332275 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                  d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M93.983742,24.396931 
                   C91.163948,30.749250 87.160378,35.002880 79.922676,33.953846 
                   C74.158058,33.118328 71.049393,36.986309 68.059723,40.598305 
@@ -208,9 +214,8 @@
                   C67.622871,12.859780 73.388824,8.007110 81.225937,8.014746 
                   C88.636459,8.021966 93.922188,12.973400 94.001053,19.990765 
                   C94.015999,21.319933 93.998627,22.649466 93.983742,24.396931 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                  d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M39.689434,28.257561 
                   C38.874985,25.689274 36.326218,24.014790 37.800571,19.777685 
                   C50.667496,36.942303 64.700516,51.833672 81.803398,63.466347 
@@ -222,9 +227,8 @@
                   C39.306034,53.348450 39.778225,51.689751 42.021408,49.427795 
                   C48.331390,43.065002 48.371109,41.263245 43.361641,33.866642 
                   C42.178925,32.120331 41.065674,30.326973 39.689434,28.257561 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                  d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M13.977924,56.132065 
                   C8.543344,63.743355 8.668973,74.631241 14.206652,82.528427 
                   C19.497110,90.073059 30.053669,93.817459 38.467754,91.133812 
@@ -235,24 +239,24 @@
                   C6.400596,79.781227 5.581005,68.125076 9.875436,58.940022 
                   C14.742560,48.530075 22.921999,41.853603 38.821766,44.969170 
                   C29.241791,45.737846 19.926203,47.071957 13.977924,56.132065 
-                  z"/>
-                </svg>
-                <div class="text-group">
-                  <span class="label">Compatibility with children:</span>
-                  <span class="value">
-                    <% if (pet.environment?.children === true) { %>Good
-                    <% } else if (pet.environment?.children === false) { %>Not good
-                    <% } else { %>Unknown<% } %>
-                  </span>
-                </div>
-              </li>
+                  z" />
+                  </svg>
+                  <div class="text-group">
+                    <span class="label">Compatibility with children:</span>
+                    <span class="value">
+                      <% if (pet.environment?.children===true) { %>Good
+                        <% } else if (pet.environment?.children===false) { %>Not good
+                          <% } else { %>Unknown<% } %>
+                    </span>
+                  </div>
+                </li>
 
-              <!-- Good with dogs -->
-              <li class="information-card">
-                <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                  width="100%" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                  d="
+                <!-- Good with dogs -->
+                <li class="information-card">
+                  <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%" viewBox="0 0 100 100"
+                    enable-background="new 0 0 100 100" xml:space="preserve">
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                 M87.262657,56.382416 
                     C84.731461,58.140720 82.405449,59.569603 79.010056,61.655411 
                     C77.844612,68.259979 76.396660,76.374275 74.985962,84.495056 
@@ -318,9 +322,8 @@
                   M55.129105,83.668839 
                     C51.987259,83.668839 48.845417,83.668839 45.703571,83.668839 
                     C49.981087,86.808929 53.675114,86.596489 55.129105,83.668839 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M37.311211,17.034357 
                     C39.968185,16.645529 42.202347,16.282866 45.455944,15.754719 
                     C44.955162,27.223551 44.762363,38.260113 43.779922,49.225925 
@@ -336,9 +339,8 @@
                     C40.357147,43.821960 37.185139,42.849243 35.707588,43.247707 
                     C34.519211,43.568184 33.396137,45.847031 33.103592,47.417084 
                     C32.488361,50.718945 34.820381,51.194370 38.287136,50.988873 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M57.182602,46.353546 
                     C57.048523,36.112782 57.048523,26.298544 57.048523,15.797206 
                     C67.233162,18.497499 77.752914,19.460159 83.753883,29.319960 
@@ -354,9 +356,8 @@
                     C68.603340,45.845463 67.478302,43.568432 66.289139,43.247959 
                     C64.812256,42.849949 61.640652,43.824741 61.394421,44.774967 
                     C60.841537,46.908604 59.517059,50.264488 64.570915,50.997940 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M62.202934,62.718292 
                     C68.530190,67.575012 70.942940,73.746063 69.912613,81.180756 
                     C69.691498,82.776276 68.735489,84.672493 67.495262,85.557526 
@@ -384,45 +385,42 @@
                     C51.601906,16.531849 52.878170,17.925533 52.905838,19.343576 
                     C53.087608,28.660351 53.233700,37.990131 52.924889,47.300190 
                     C52.686417,54.489685 56.256432,59.007057 62.202934,62.718292 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M55.460106,83.844055 
                     C53.675114,86.596489 49.981087,86.808929 45.703571,83.668839 
                     C48.845417,83.668839 51.987259,83.668839 55.460106,83.844055 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M37.859356,50.993454 
                     C34.820381,51.194370 32.488361,50.718945 33.103592,47.417084 
                     C33.396137,45.847031 34.519211,43.568184 35.707588,43.247707 
                     C37.185139,42.849243 40.357147,43.821960 40.604637,44.773067 
                     C41.159763,46.906429 42.482292,50.260731 37.859356,50.993454 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M64.143188,50.993217 
                     C59.517059,50.264488 60.841537,46.908604 61.394421,44.774967 
                     C61.640652,43.824741 64.812256,42.849949 66.289139,43.247959 
                     C67.478302,43.568432 68.603340,45.845463 68.896568,47.415108 
                     C69.513115,50.715397 67.183731,51.195072 64.143188,50.993217 
-                  z"/>
-                </svg>
-                <div class="text-group">
-                  <span class="label">Compatability with dogs:</span>
-                  <span class="value">
-                    <% if (pet.environment?.dogs===true) { %>Good
-                    <% } else if (pet.environment?.dogs===false) { %>Not good
-                    <% } else { %>Unknown<% } %>
-                  </span>
-                </div>
-              </li>
-              <!-- Good with cats -->
-              <li class="information-card">
-                <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                  width="100%" viewBox="0 0 96 96" enable-background="new 0 0 96 96" xml:space="preserve">
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                  </svg>
+                  <div class="text-group">
+                    <span class="label">Compatability with dogs:</span>
+                    <span class="value">
+                      <% if (pet.environment?.dogs===true) { %>Good
+                        <% } else if (pet.environment?.dogs===false) { %>Not good
+                          <% } else { %>Unknown<% } %>
+                    </span>
+                  </div>
+                </li>
+                <!-- Good with cats -->
+                <li class="information-card">
+                  <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%" viewBox="0 0 96 96"
+                    enable-background="new 0 0 96 96" xml:space="preserve">
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M97.000000,68.600006 
                     C94.797623,68.706985 92.522530,68.668869 90.408607,68.065796 
                     C86.480827,66.945259 84.730911,69.314682 82.789429,72.268845 
@@ -475,9 +473,8 @@
                     C77.608360,62.712517 79.276787,62.035248 80.604553,60.943619 
                     C81.913292,59.867649 83.878334,58.329975 83.825294,57.067554 
                     C83.537987,50.229012 82.714180,43.413010 82.569626,35.899658 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M82.322418,36.244450 
                     C82.714180,43.413010 83.537987,50.229012 83.825294,57.067554 
                     C83.878334,58.329975 81.913292,59.867649 80.604553,60.943619 
@@ -519,49 +516,46 @@
                     C42.826828,65.132751 43.369209,67.677986 43.897152,67.781548 
                     C46.842285,68.359230 49.998123,68.882355 52.860348,68.312065 
                     C53.867252,68.111443 54.246712,64.761749 54.434818,62.126518 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M29.118799,48.719635 
                     C31.591852,45.351837 34.474297,43.548149 38.141590,45.755566 
                     C42.668636,48.480492 41.324394,53.248810 40.612812,56.973980 
                     C40.291492,58.656101 36.386230,60.850304 34.314816,60.651093 
                     C32.400059,60.466949 30.212912,57.661774 29.176048,55.513615 
                     C28.333794,53.768654 29.018244,51.286781 29.118799,48.719635 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M62.995674,45.002335 
                     C68.668915,46.374344 70.062920,48.956593 68.950478,56.059452 
                     C68.428123,59.394661 66.088921,61.803085 62.820225,60.785076 
                     C60.558979,60.080830 57.602016,57.605637 57.242653,55.526527 
                     C56.007416,48.380081 57.422493,46.360691 62.995674,45.002335 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M54.673740,62.488216 
                     C54.246712,64.761749 53.867252,68.111443 52.860348,68.312065 
                     C49.998123,68.882355 46.842285,68.359230 43.897152,67.781548 
                     C43.369209,67.677986 42.826828,65.132751 43.148170,63.947182 
                     C43.448269,62.839966 44.871311,61.272556 45.829311,61.251728 
                     C48.690121,61.189533 51.565269,61.786797 54.673740,62.488216 
-                  z"/>
-                </svg>
-                <div class="text-group">
-                  <span class="label">Compatability with cats:</span>
-                  <span class="value">
-                    <% if (pet.environment?.cats===true) { %>Good
-                    <% } else if (pet.environment?.cats===false) { %>Not good
-                    <% } else { %>Unknown<% } %>
-                  </span>
-                </div>
-              </li>
-              <!-- House trained -->
-              <li class="information-card">
-                <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                    width="100%" viewBox="0 0 90 90" enable-background="new 0 0 90 90" xml:space="preserve">
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                  </svg>
+                  <div class="text-group">
+                    <span class="label">Compatability with cats:</span>
+                    <span class="value">
+                      <% if (pet.environment?.cats===true) { %>Good
+                        <% } else if (pet.environment?.cats===false) { %>Not good
+                          <% } else { %>Unknown<% } %>
+                    </span>
+                  </div>
+                </li>
+                <!-- House trained -->
+                <li class="information-card">
+                  <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%" viewBox="0 0 90 90"
+                    enable-background="new 0 0 90 90" xml:space="preserve">
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M61.992798,78.999939 
                     C47.343876,78.999817 33.192368,78.892799 19.044146,79.061638 
                     C14.521596,79.115616 12.797476,77.404434 12.939967,72.902672 
@@ -591,9 +585,8 @@
                     C65.670776,44.675644 61.188988,41.562080 57.222698,36.793633 
                     C53.860569,32.751541 50.156048,28.994253 46.152962,24.619022 
                     C39.639549,31.367521 34.096466,37.110668 27.739132,42.976452 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M28.146259,42.915134 
                     C34.096466,37.110668 39.639549,31.367521 46.152962,24.619022 
                     C50.156048,28.994253 53.860569,32.751541 57.222698,36.793633 
@@ -618,41 +611,39 @@
                     C58.367172,55.431717 58.367172,58.130592 58.367172,60.627850 
                     C61.441032,60.627850 64.139839,60.627850 67.869316,60.627850 
                     C66.891571,57.375122 66.086784,54.697762 64.350113,52.003132 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M33.998169,57.889702 
                     C33.189671,59.233047 32.502113,60.670189 31.549957,60.874554 
                     C29.678257,61.276283 27.659485,60.992794 25.351406,60.992794 
                     C25.351406,58.098202 25.351406,55.399414 25.351406,52.346104 
                     C27.912331,52.346104 30.611115,52.346104 33.999496,52.346104 
                     C33.999496,53.961639 33.999496,55.693935 33.998169,57.889702 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M64.816055,52.011765 
                     C66.086784,54.697762 66.891571,57.375122 67.869316,60.627850 
                     C64.139839,60.627850 61.441032,60.627850 58.367172,60.627850 
                     C58.367172,58.130592 58.367172,55.431717 58.367172,52.003132 
                     C60.239231,52.003132 62.294674,52.003132 64.816055,52.011765 
-                  z"/>
-                </svg>
-                <div class="text-group">
-                  <span class="label">House trained:</span>
-                  <span class="value">
-                    <% if (pet.attributes?.house_trained===true) { %>Yes
-                    <% } else if (pet.attributes?.house_trained===false) { %>No
-                    <% } else { %>Unknown<% } %>
-                  </span>
-                </div>
-              </li>
-              
-              <!-- Vaccinations -->
-              <li class="information-card">
-                <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                  width="100%" viewBox="0 0 90 90" enable-background="new 0 0 90 90" xml:space="preserve">
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                  </svg>
+                  <div class="text-group">
+                    <span class="label">House trained:</span>
+                    <span class="value">
+                      <% if (pet.attributes?.house_trained===true) { %>Yes
+                        <% } else if (pet.attributes?.house_trained===false) { %>No
+                          <% } else { %>Unknown<% } %>
+                    </span>
+                  </div>
+                </li>
+
+                <!-- Vaccinations -->
+                <li class="information-card">
+                  <svg class="icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%" viewBox="0 0 90 90"
+                    enable-background="new 0 0 90 90" xml:space="preserve">
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M22.706924,76.012070 
                     C20.423903,77.618240 18.789858,79.727951 16.644506,80.657181 
                     C14.748238,81.478523 12.282255,80.984520 10.067812,81.071259 
@@ -680,9 +671,8 @@
                     C44.421070,39.233078 33.546169,50.105736 21.763693,61.885784 
                     C23.956499,61.705410 25.812847,62.076885 26.956535,61.340904 
                     C28.872179,60.108166 30.333355,58.169193 32.481689,56.025742 
-                  z"/>
-                  <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#000" id="svg-icon-border" opacity="1.000000" stroke="none" d="
                   M74.081467,8.567278 
                     C77.039818,11.549795 80.058350,14.007043 82.345383,17.019625 
                     C83.786087,18.917398 84.131721,21.646515 84.968590,24.002697 
@@ -693,9 +683,8 @@
                     C66.441177,16.411438 69.090248,13.912643 66.608658,9.862729 
                     C66.292892,9.347401 67.114670,7.395741 67.329178,7.408991 
                     C69.506416,7.543468 71.666962,7.948055 74.081467,8.567278 
-                  z"/>
-                  <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" 
-                    d="
+                  z" />
+                    <path fill="#e4eaff" id="svg-icon-filling" opacity="1.000000" stroke="none" d="
                   M32.233738,56.276588 
                     C30.333355,58.169193 28.872179,60.108166 26.956535,61.340904 
                     C25.812847,62.076885 23.956499,61.705410 21.763693,61.885784 
@@ -709,26 +698,26 @@
                     C40.662605,47.906670 39.210579,49.500217 37.687294,51.171974 
                     C38.145184,52.774063 38.675484,54.629498 39.388844,57.125443 
                     C36.505795,56.666428 34.493740,56.346085 32.233738,56.276588 
-                  z"/>
-                </svg>
-                <div class="text-group">
-                  <span class="label">Vacination status:</span>
-                  <span class="value">
-                    <% if (pet.attributes?.shots_current ===true) { %>Up to date
-                    <% } else if (pet.attributes?.shots_current ===false) { %>Not up to date
-                    <% } else { %>Unknown<% } %>
-                  </span>
-                </div>
-              </li>
+                  z" />
+                  </svg>
+                  <div class="text-group">
+                    <span class="label">Vacination status:</span>
+                    <span class="value">
+                      <% if (pet.attributes?.shots_current===true) { %>Up to date
+                        <% } else if (pet.attributes?.shots_current===false) { %>Not up to date
+                          <% } else { %>Unknown<% } %>
+                    </span>
+                  </div>
+                </li>
 
-            </ul>
+              </ul>
+            </div>
           </div>
-        </div>
-    </section>
-  </main>
-  <%- include('partials/footer') %>
-  <script src="/static/scripts/likebutton.js"></script>
-  <script src="/static/scripts/detail.js"></script>
+      </section>
+    </main>
+    <%- include('partials/footer') %>
+      <script src="/static/scripts/likebutton.js"></script>
+      <script src="/static/scripts/detail.js"></script>
 </body>
 
 </html>
