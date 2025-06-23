@@ -315,13 +315,15 @@ body>main>section>a:nth-of-type(1):hover {
 
 .favorite,
 .viewDetail {
-  background-color: var(--primary-color-2);
+  background-color: var(--primary-color);
   color: var(--white);
   padding: 6px 10px;
+  border: 3px solid var(--primary-color);
   border-radius: 50%;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.
+  transition: 0.3 ease; 
+  font-weight: 600;
 }
 
 .favorite {
@@ -333,23 +335,22 @@ body>main>section>a:nth-of-type(1):hover {
   text-decoration: none;
 }
 
-.viewDetail:hover{
-  border: solid 2px #000;
-  background: transparent;
-  color: #000;
+.viewDetail:hover, .favorite:hover{
+  background-color: transparent;
+  color: var(--primary-color);
   transition: 0.2s ease-in-out;
 }
 
-.favorite:hover {
+/* .favorite:hover {
     background-color: var(--primary-color);
-    border: solid 2px var(--primary-color-hover);
+    border: solid 2px var(--primary-color-hover); */
 
-}
+
 .pet-name {
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: var(--font-color);
+  color: var(--primary-color-2);
 }
 
 .pet-gender {
