@@ -23,16 +23,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await res.json();
 
+                if (!data.favorited) {
+                    heartIcon.classList.remove('liked');
+                    heartIcon.classList.remove('animate');
+                }
+
                 if (data.status === 'success') {
                     if (data.favorited) {
-                        // Add liked after animation starts
+                        heartIcon.classList.remove('liked');
+                        heartIcon.classList.remove('animate');
+                        void heartIcon.offsetWidth; // trigger reflow
+                        heartIcon.classList.add('animate');
+
+                        // Add .liked only after the animation completes
                         setTimeout(() => {
                             heartIcon.classList.add('liked');
-                        }, 0);
+                            heartIcon.classList.remove('animate');
+                        }, 300); // match the CSS transition duration (0.3s)
                     } else {
                         heartIcon.classList.remove('liked');
 
-                        if (petCard) {
+                        if (petCard && window.location.pathname === '/account') {
                             // Create undo element
                             const undoWrapper = document.createElement('div');
                             undoWrapper.classList.add('undo-wrapper');
