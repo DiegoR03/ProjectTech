@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "minify:css": "npx postcss static/css/style.css > public/output.css"
+    "minify-css": "npx postcss static/css/*.css --dir static/css_minify/"
   },
   "author": "Diego Ramon",
   "license": "ISC",
@@ -33,7 +33,7 @@
     "eslint": "^9.26.0",
     "eslint-plugin-prettier": "^5.4.0",
     "globals": "^16.1.0",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
     "prettier": "^3.5.3"
   }
