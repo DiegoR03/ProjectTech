@@ -31,7 +31,7 @@
 #indexBody {
   font-family: 'Montserrat';
   color: var(--font-color);
-  background-color: var(--background-color-blue);
+  background-color: var(--background-color-white);
   margin: 0;
 }
 
@@ -53,6 +53,10 @@ p {
 
 section:nth-of-type(1) {
   color: var(--font-color-white);
+  height: 600px;
+  background: var(--primary-color);
+  clip-path: ellipse(100% 100% at 30% 0);
+  z-index: -1;
 }
 
 section:nth-of-type(1) .container {
@@ -180,6 +184,7 @@ section:nth-of-type(2) .card-title {
 
 section:nth-of-type(3) {
   color: var(--font-color-white);
+  background: var(--primary-color);
 }
 
 section:nth-of-type(3) .container {
@@ -446,8 +451,19 @@ section:nth-of-type(4) .container {
   transform: scaleY(1);
 }
 
+@media (max-width: 900px) {
+  section:nth-of-type(1) {
+    height: 650px;
+    clip-path: ellipse(100% 100% at 40% 0);
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   #indexBody {
+    background-color: var(--background-color-darkgrey);
+  }
+
+  section:nth-of-type(1), section:nth-of-type(3) {
     background-color: var(--background-color-darkblue);
   }
 
