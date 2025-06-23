@@ -1,0 +1,890 @@
+:root {
+    --white-text-color: #ffffff;
+    --button-text-color: #ffffff;
+    --button-select-color: #ffffff;
+    --active-filters: #46c0975a;
+    --background-box: #ffffff;
+    --removal-color: #aa0000;
+    --primary-removal-color: #aa0000;
+    --primary-title-color: #F47429;
+    --primary-orange-lightercolor: #f48d52;
+    --font-color-gray: #cbcbcb;
+
+    --background-color-white: #fff;
+    --background-color-blue: #4177BE;
+
+    --background-color-black: #000000;
+    --background-color-darkgrey: #1A1A1A;
+    --background-color-darkblue: #033b85;
+}
+
+/* ===== Layout ===== */
+.bodyaccount {
+    background: linear-gradient(to bottom,
+            var(--background-color-blue) 0%,
+            var(--background-color-blue) 10%,
+            rgba(0, 0, 0, 0) 20%);
+    font-family: 'Montserrat';
+    margin: 0;
+    margin-inline: auto;
+}
+
+main {
+    margin-inline: auto;
+    padding-bottom: 10rem;
+    background-image: url("/static/img/Background_PetchMatch.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+section {
+    margin-top: 1rem;
+}
+
+h2 {
+    font-weight: 600;
+}
+
+/* ===== Utility Hidden Elements ===== */
+.toggle-section,
+.toggleEdit {
+    display: none;
+}
+
+#postAPet {
+    display: none;
+}
+
+#onlyView {
+    display: block;
+}
+
+/* ===== Account Navigation ===== */
+#accountNav {
+    background-color: var(--background-color-blue);
+    padding-top: 3em;
+    display: flex;
+    position: sticky;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    z-index: 10;
+}
+
+#accountNav h2 {
+    color: var(--button-text-color);
+    padding-bottom: 0.8em;
+    max-width: 80%;
+    margin: auto;
+    font-size: 2em;
+    font-weight: 600;
+}
+
+#accountNav .nav-buttons {
+    display: flex;
+    justify-content: flex-start;
+    padding: 0 1rem;
+    flex-wrap: wrap;
+    max-width: 80%;
+    margin: auto;
+}
+
+#accountNav .nav-buttons button {
+    margin-right: 0.2em;
+    cursor: pointer;
+    padding: 0.7rem 1.5rem;
+    color: var(--font-color);
+    background-color: var(--background-color);
+    border: 1px solid #ccc;
+    border-radius: 5px 5px 0 0;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+#accountNav div button.active-button {
+    color: var(--primary-color-2);
+    font-weight: 700;
+    border-bottom: solid 3px var(--primary-color-2);
+}
+
+#accountNav div button:hover {
+    color: var(--primary-color-hover-2);
+}
+
+
+#navToggle {
+    display: none;
+    background-color: transparent;
+    border: none;
+    font-size: 2rem;
+    color: var(--button-text-color);
+    cursor: pointer;
+    margin-left: 9vw;
+}
+
+/* ===== Account Info Section ===== */
+#myInfo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 85%;
+    margin: auto;
+}
+
+
+#profileImg {
+    margin: auto;
+    width: 13rem;
+    height: auto;
+    text-align: center;
+    border-radius: 50%;
+    box-shadow: #b8b8b8 4px 4px 10px;
+}
+
+#myInfo fieldset {
+    border: none;
+    border-radius: 1rem;
+    padding-top: 1em;
+    width: 45vw;
+    margin: auto;
+    align-self: start;
+}
+
+#onlyView form,
+#canEdit form {
+    display: inline-block;
+    border: none;
+    position: relative;
+    width: 45vw;
+}
+
+#canEdit form {
+    top: 4rem;
+    width: 20vw;
+}
+
+#myInfo fieldset label,
+#canEdit label {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+#myInfo form textarea {
+    width: 35vw;
+    height: 8vh;
+    margin: 1rem 0;
+    border: none;
+    border-radius: 0.5rem;
+}
+
+#myInfo input,
+#myInfo input[disabled] {
+    margin-top: 0.8rem;
+    border-radius: 0.4em;
+    font: inherit;
+    background-color: #e3e3e3;
+    color: #000;
+}
+
+#myInfo input[disabled] {
+    background-color: transparent;
+    border: none;
+}
+
+#myInfo input[type="submit"] {
+    padding: 0.5rem 1rem;
+    color: var(--primary-color);
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    border-radius: 1rem;
+    cursor: pointer;
+}
+
+#editProfile {
+    position: relative;
+    top: -2rem;
+    right: -22rem;
+}
+
+#editProfileBtn {
+    margin-top: 0.8rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--text-color);
+    border-radius: 1rem;
+    color: var(--text-color);
+    font: inherit;
+    cursor: pointer;
+}
+
+#myPetsList .search {
+    width: 90%;
+    padding: 0.5em 1em;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--font-color);
+    background-color: var(--background-color-white);
+    border: 1px solid var(--footer-border);
+    border-radius: 0.375rem;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+/* ===== Favorites / Recently Viewed ===== */
+#Favorites,
+#recentlyViewed,
+#searchProfiles {
+    max-width: 80%;
+    margin: auto;
+}
+
+#recentlyViewed .search,
+#Favorites .search {
+    width: 50vw;
+    padding: 0.5em 1em;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: var(--font-color);
+    background-color: var(--background-color-white);
+    border: 1px solid var(--footer-border);
+    border-radius: 0.375rem;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+
+#Favorites {
+    padding-bottom: 2rem;
+}
+
+/* ===== Pet Card Grid ===== */
+.grid,
+.my-pets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+#myInfoCollection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: center;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+}
+
+/* ===== Card Styles ===== */
+.card {
+    background: var(--white);
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    z-index: 0;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--background-color-white);
+}
+
+.card-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 12px;
+}
+
+.pet-info {
+    display: grid;
+    gap: 4px;
+}
+
+.card-links {
+    display: grid;
+    gap: 20px;
+    justify-items: end;
+}
+
+.card::after,
+.card::before {
+    content: "";
+    position: absolute;
+    background-color: var(--primary-color-2);
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.card::after {
+    height: 4px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+}
+
+.card::before {
+    width: 4px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    transform: scaleY(0);
+    transform-origin: top;
+}
+
+.card:hover::after {
+    transform: scaleX(1);
+}
+
+.card:hover::before {
+    transform: scaleY(1);
+}
+
+.favorite,
+.viewDetail,
+.remove {
+    background-color: #000;
+    color: var(--white);
+    padding: 6px 10px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+        text-decoration: none;
+}
+
+.viewDetail {
+    border-radius: 999px;
+}
+
+.viewDetail:hover {
+    background: transparent;
+    color: #000;
+    border: 2px solid #000;
+}
+
+.favorite:hover {
+    background-color: var(--primary-color);
+    border: 2px solid var(--primary-color-hover);
+}
+
+.remove:hover {
+    background-color: var(--removal-color);
+    border: 2px solid var(--primary-removal-color);
+}
+
+/* ===== Card Text ===== */
+.pet-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color-2);
+    margin-bottom: 0.5rem;
+}
+
+.pet-gender,
+.pet-breed {
+    color: #777;
+}
+
+.pet-gender {
+    font-size: 1rem;
+}
+
+.pet-breed {
+    font-size: 0.8em;
+}
+
+.no-photo {
+    width: 100%;
+    height: 150px;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+/* ===== Post a Pet ===== */
+#postAPetContent {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 80%;
+    margin: auto;
+    /* padding: 3rem; */
+    gap: 5em;
+    font: inherit;
+}
+
+#postAPetContent>div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#photoPreview {
+    width: 220px;
+    border-radius: 50%;
+    background-color: transparent;
+    object-fit: cover;
+    padding: 2rem;
+    margin: auto;
+}
+
+#postAPetContent label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font: inherit;
+    display: block;
+}
+
+#postAPetContent label input[type="text"] {
+    width: 80%;
+    padding: 0.8em;
+    margin: 0.5em 0;
+    border-radius: 0.6em;
+    border: 1px solid #ccc;
+    background-color: #e3e3e3;
+    font-size: 1rem;
+}
+
+input::file-selector-button {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--background-color-darkgrey);
+    font: inherit;
+}
+
+.PetPhoto {
+    margin-bottom: 2rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.PetName {
+    width: 100%;
+    margin: auto;
+}
+
+textarea {
+    width: 75%;
+    height: 100px;
+    border-radius: 16px;
+    background-color: #ddd;
+    border: none;
+    padding: 0.75rem 1rem;
+    font: inherit;
+    resize: none;
+}
+
+.post-pet-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* ===== Search Profile Section styles ===== */
+
+#searchProfiles .container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.answer-group {
+    width: 20rem;
+    min-width: 220px;
+    background: var(--white);
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    z-index: 0;
+    border-style: none;
+    padding: 1rem;
+}
+
+.answer-groups-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+#groupTitle h3 {
+    color: var(--primary-title-color);
+    font-weight: 800;
+}
+
+#loadSearch,
+#deleteSearch {
+    color: var(--white);
+    padding: 6px 10px;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border-style: none;
+}
+
+#loadSearch {
+    background-color: #000;
+}
+
+#deleteSearch {
+    background-color: var(--removal-color);
+}
+
+/* ===== Dropdown styles ===== */
+.dropdownPet {
+    display: block;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.dropPetbtn {
+    width: 80%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    background: #fff;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.dropPetbtn:hover {
+    background-color: #f2f4f8;
+}
+
+.dropdown-petcontent {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 0.5rem;
+    z-index: 10;
+    padding: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.dropdownPet.active .dropdown-petcontent {
+    display: block;
+}
+
+/* Scrollbar styles */
+.dropdown-petcontent::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dropdown-petcontent::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.dropdown-petcontent::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.dropdown-petcontent::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.form-group {
+    margin-bottom: 0.75rem;
+}
+
+.form-group p {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.form-group input[type="radio"] {
+    margin-right: 0.5rem;
+    accent-color: #6c8df5;
+}
+
+.post-pet-form button[type="submit"] {
+    padding: 0.6rem 1.5rem;
+    background-color: #8ea3e0;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+#profileImgWrapper {
+    position: relative;
+    display: inline-block;
+    width: 13rem;
+    height: 13rem;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: default;
+    /* default cursor when not editable */
+}
+
+#profileImgWrapper.editable {
+    cursor: pointer;
+    /* pointer cursor when editable */
+}
+
+#overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.35);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+#profileImgWrapper.editable #overlay {
+    display: flex;
+    /* show overlay only when editable */
+}
+
+
+/* ===== Responsive Rules ===== */
+@media (max-width: 900px) {
+    main {
+        background-image: url("/static/img/Background_PetchMatch_Mobile.png");
+    }
+
+    #navToggle {
+        display: block;
+        padding-bottom: 0.5em;
+    }
+
+    #accountNav .nav-buttons {
+        flex-direction: column;
+        display: none;
+        padding-top: 1rem;
+        gap: 0.3rem;
+    }
+
+    #accountNav.show-menu .nav-buttons {
+        display: flex;
+        padding-bottom: 1em;
+    }
+
+    #accountNav .nav-buttons button {
+        width: 100%;
+        text-align: left;
+        border-radius: 5px;
+    }
+
+    #myInfoCollection,
+    #myInfo {
+        grid-template-columns: 1fr;
+    }
+
+    #myInfo fieldset {
+        width: 80vw;
+    }
+
+    .dropPetbtn {
+        width: 100%;
+    }
+
+    #postAPetContent {
+        justify-items: center;
+        align-items: center;
+        grid-template-columns: 1fr;
+        padding: 2rem;
+        gap: 2rem;
+    }
+
+    .answer-group {
+        width: auto;
+    }
+
+    #myInfo form textarea {
+        width: 70vw;
+    }
+
+    #searchProfiles .container {
+        flex-direction: column;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+
+    /* ACCOUNT GENERAL DARK MODE */
+    main {
+        background-image: url("/static/img/Background_PetchMatch_Darkmode.png");
+    }
+
+    .bodyaccount {
+        background: linear-gradient(to bottom,
+                var(--background-color-darkblue) 0%,
+                var(--background-color-darkblue) 10%,
+                rgba(0, 0, 0, 0) 20%);
+    }
+
+    @media (max-width: 900px) {
+        main {
+            background-image: url("/static/img/Background_PetchMatch_Mobile_Darkmode.png");
+        }
+    }
+
+    h2 {
+        color: var(--white-text-color);
+    }
+
+    #accountNav {
+        background-color: var(--background-color-darkblue);
+    }
+
+    #accountNav div button.active-button {
+        color: var(--primary-orange-lightercolor);
+        border-bottom: solid 3px var(--primary-orange-lightercolor);
+    }
+
+    textarea {
+        background-color: var(--background-color-black);
+        color: var(--white-text-color);
+    }
+
+    .card {
+        background: var(--background-color-black);
+        border: 1px solid var(--background-color-darkgrey);
+    }
+
+    .card img {
+        border-bottom: 2px solid var(--background-color-darkgrey);
+    }
+
+    .card::after,
+    .card::before {
+        background-color: var(--primary-orange-lightercolor);
+    }
+
+    .card-content {
+        background-color: var(--background-color-darkblue);
+    }
+
+    .viewDetail {
+        background-color: var(--primary-title-color);
+    }
+
+    .viewDetail:hover {
+        background: var(--background-color-blue);
+        color: var(--background-color-black);
+        border: 2px solid #000;
+    }
+
+    .pet-gender,
+    .pet-breed {
+        color: var(--font-color-gray);
+    }
+
+    .pet-name {
+        color: var(--white-text-color);
+    }
+
+    /* MY INFO DARK MODE */
+    #myInfoCollection {
+        color: var(--white-text-color);
+    }
+
+    #myInfo input[disabled] {
+        color: var(--white-text-color);
+        ;
+    }
+
+    #myInfo fieldset label,
+    #canEdit label {
+        color: var(--white-text-color);
+    }
+
+    #accountNav .nav-buttons button {
+        color: var(--white-text-color);
+        background-color: var(--background-color-black);
+        border: 1px solid var(--background-color-darkgrey);
+    }
+
+    /* POST A PET DARK MODE */
+    #postAPetContent label {
+        color: var(--white-text-color);
+    }
+
+    .PetPhoto input[type="file" i] {
+        color: var(--white-text-color);
+    }
+
+    input::file-selector-button {
+        color: var(--white-text-color);
+        background-color: var(--background-color-black);
+        border: 1px solid var(--background-color-darkgrey);
+    }
+
+    .PetName p {
+        color: var(--white-text-color);
+    }
+
+    .dropdown-petcontent {
+        background-color: var(--background-color-black);
+        border: 1px solid var(--background-color-black);
+    }
+
+    .form-group p {
+        color: var(--white-text-color);
+    }
+
+    #postAPetContent label input[type="text"],
+    .dropPetbtn {
+        border: 1px solid var(--background-color-darkgrey);
+        background-color: var(--background-color-black);
+        color: var(--white-text-color);
+    }
+
+    .dropPetbtn:hover {
+        background-color: var(--background-color-darkgrey);
+        border: 1px solid var(--button-select-color);
+    }
+
+    /*  Search Profiles */
+    .answer-group {
+        background: var(--background-color-black);
+        border: 1px solid var(--background-color-darkgrey);
+        color: var(--white-text-color);
+    }
+
+    #loadSearch {
+        background-color: var(--background-color-darkgrey);
+    }
+}

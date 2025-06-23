@@ -4,31 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="/static/css/style.css">
-
-    <title>PetThing | Login</title>
+    <!-- <link href="/static/css/loginstyle.css" rel="stylesheet" type="text/css"> -->
+    <link href="/static/css_minify/loginstyle.css" rel="stylesheet" type="text/css">
+    <title>PetMatch | Sign Up</title>
 </head>
-<body>
-    <header>
-    <h1>PetThing</h1>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/browse">Browse</a>
-      <a href="/login" class="active">Login</a>
-      <a href="/register">Register</a>
-    </nav>
-  </header>
-   
-<form action="/login" method="POST">
-    <input type="email" name="email" placeholder="Email">
-    <input type="password" name="password" placeholder="Password">
-    <button>Login</button>
-</form>
 
-<a href="/register">I don't have an account yet</a>
+<body class="bodylogin">
+    <%- include('partials/header') %>
 
+        <section id="loginPage" class="toggle-section">
+            <form method="POST">
+                <h1>Login to your account</h1>
+                <% if (emailError) { %>
+                    <p id="errorMessage">
+                        <%= emailError %>
+                    </p>
+                    <% } %>
+                        <% if (passwordError) { %>
+                            <p id="errorMessage">
+                                <%= passwordError %>
+                            </p>
+                            <% } %>
 
-    
+                                <input type="email" name="email" placeholder="Email">
+                                <input type="password" name="password" placeholder="Password">
+                                <input type="submit" placeholder="Button" value="Login">
+                                <input type="button" id="registerButton" onclick="showSection('registerPage')"
+                                    value="Don't have an account yet?">
+                                <hr>
+                                <a href="/passwordchange">Forgot password?</a>
+            </form>
+        </section>
+
+        <section id="registerPage" class="toggle-section">
+
+            <form action="/register" method="POST" enctype="multipart/form-data">
+                <h1>Create an account</h1>
+                <input type="text" name="firstName" placeholder="First name">
+                <input type="text" name="lastName" placeholder="Last name">
+                <input type="email" name="email" placeholder="Email">
+                <input type="password" name="password" placeholder="Password">
+                <label for="fileInput" class="custom-file-upload">Choose a Profile Picture</label><input type="file"
+                    id="fileInput" name="fileInput" style="display:none;">
+
+                <input type="submit" placeholder="Button" value="Create account">
+                <input type="button" id="accountButton" onclick="showSection('loginPage')"
+                    value="I already have an account">
+            </form>
+        </section>
+
+        <script>
+            function showSection(targetId, buttonID) {
+                const sections = document.querySelectorAll('.toggle-section');
+
+                sections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.style.display = 'grid';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            }
+        </script>
+
+        <%- include('partials/footer') %>
+
 </body>
 </html>
 

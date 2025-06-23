@@ -1,0 +1,294 @@
+@import url(style.css);
+
+:root {
+    --primary-color: #90A5EC;
+    --primary-color-hover: #6979af;
+    --primary-color-action: #F47429;
+    --primary-color-2: #F47429;
+    --primary-color-hover-2: #c05c23;
+    --text-color: #333;
+    --text-color-2: #fff;
+    --background-color: #f2f2f2;
+    --white: #fff;
+    --black: #000;
+    --footer-text: #8E8E8E;
+    --footer-background: #fff;
+    --active-filters: #46c0975a;
+    --error: #ff2323;
+}
+
+/* GENERAL STYLES */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.bodylogin {
+    background: linear-gradient(to bottom, var(--white) 0%, var(--white) 10%, rgba(0, 0, 0, 0) 15%);
+}
+
+/* LOGIN, REGISTER, PASSWORD PAGES */
+#loginPage,
+#registerPage,
+#passwordPage {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    align-items: center;
+    justify-content: center;
+}
+
+#loginPage {
+    background-image: url('/static/img/Login_Background.jpg');
+}
+
+#registerPage {
+    background-image: url('/static/img/Register_Background.jpg');
+    display: none;
+}
+
+#passwordPage {
+    background-image: url('/static/img/Passwordchange_Background.jpg');
+}
+
+/* FORM STYLES */
+#loginPage form,
+#registerPage form,
+#passwordPage form {
+    position: relative;
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 1em;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 70%;
+    height: 70%;
+    max-width: 400px;
+    margin: 1rem auto 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#loginPage form,
+#registerPage form {
+    justify-content: center;
+}
+
+@media (max-width: 1000px) {
+
+    #loginPage,
+    #registerPage,
+    #passwordPage {
+        grid-template-columns: 1fr;
+    }
+
+    #loginPage form,
+    #registerPage form,
+    #passwordPage form {
+        padding: 1.5rem;
+        width: 70%;
+    }
+}
+
+/* HEADINGS */
+#loginPage h1:first-of-type,
+#registerPage h1:first-of-type,
+#passwordPage h1:first-of-type {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* FORM INPUTS */
+#loginPage form input:first-of-type,
+#loginPage form input:nth-of-type(2),
+#registerPage form input:first-of-type,
+#registerPage form input:nth-of-type(2),
+#registerPage form input:nth-of-type(3),
+#registerPage form input:nth-of-type(4),
+#registerPage form input:nth-of-type(5),
+#passwordPage form input {
+    width: 80%;
+    padding: 0.8em;
+    margin: 0.5em 0;
+    border-radius: 0.6em;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    background-color: #e3e3e3;
+}
+
+/* SUBMIT BUTTONS */
+#loginPage input[type=submit],
+#registerPage input[type=submit],
+#passwordPage input[type=submit] {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    width: 60%;
+    padding: 0.8em;
+    margin: 0.5em 0;
+    border-radius: 0.6em;
+    transition: background-color 0.2s ease;
+}
+
+#loginPage input[type=submit]:hover,
+#registerPage input[type=submit]:hover,
+#passwordPage input[type=submit]:hover {
+    background-color: var(--primary-color-hover);
+}
+
+/* LINKS */
+#loginPage a,
+#registerPage a,
+#passwordPage a {
+    color: #007bc7;
+    font-size: 0.9rem;
+    text-decoration: none;
+    margin-top: 0.8rem;
+}
+
+#registerPage a {
+    margin-top: 1rem;
+}
+
+/* TOGGLE SECTION */
+.toggle-section {
+    display: none;
+}
+
+/* BACK BUTTON */
+#passwordPage button[name=backButton] {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    border: 2px solid var(--footer-text);
+    background-color: transparent;
+    border-radius: 1rem;
+    height: 2.5rem;
+    padding: 0 1rem;
+    font: inherit;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s ease, background 0.2s ease, border 0.2s ease;
+}
+
+#passwordPage button[name=backButton]:hover {
+    color: var(--primary-color-action);
+    border-color: var(--primary-color-action);
+}
+
+/* FILE INPUT */
+#registerPage form input[type=file] {
+    background-color: transparent;
+    border-style: none;
+}
+
+#registerPage form input::file-selector-button {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    width: 40%;
+}
+
+/* CUSTOM FILE UPLOAD BUTTON */
+.custom-file-upload {
+    padding: 10px;
+    background-color: #F47429;
+    color: #fff;
+    border-radius: 5px;
+    margin: 1rem;
+    cursor: auto;
+}
+
+.custom-file-upload:hover {
+    background-color: #a7a7a7;
+    cursor: pointer;
+}
+
+/* SMALL BUTTONS */
+#loginPage button,
+#registerPage button {
+    text-align: center;
+    margin-top: 1rem;
+    color: #007bc7;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+/* SPECIAL BUTTONS */
+#registerButton,
+#accountButton {
+    color: #007bc7;
+    margin-top: 1rem;
+    background-color: transparent;
+    border: none;
+    text-decoration: none;
+    font: inherit;
+}
+
+/* Error message */
+#errorMessage {
+    color: var(--error);
+}
+
+/* HR STYLING */
+hr {
+    width: 100%;
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 1rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .bodylogin {
+        background: linear-gradient(to bottom, var(--black) 0%, var(--black) 10%, rgba(0, 0, 0, 0) 15%);
+    }
+
+    #loginPage form,
+    #registerPage form,
+    #passwordPage form {
+        background-color: var(--background-color-black);
+        border: 1px solid var(--white);
+    }
+
+    #loginPage h1:first-of-type,
+    #registerPage h1:first-of-type,
+    #passwordPage h1:first-of-type {
+        color: var(--font-color-white);
+    }
+
+    #loginPage input[type=submit],
+    #registerPage input[type=submit],
+    #passwordPage input[type=submit] {
+        background-color: var(--background-color-darkblue);
+        color: white;
+    }
+
+    #passwordPage button[name=backButton] {
+        color: var(--font-color-white);
+    }
+
+    #loginPage {
+        background-image: url('/static/img/Login_Background_Darkmode.jpg');
+    }
+
+    #registerPage {
+        background-image: url('/static/img/Register_Background_Darkmode.jpg');
+    }
+
+    #passwordPage {
+        background-image: url('/static/img/Passwordchange_Background_Darkmode.jpg');
+    }
+
+}

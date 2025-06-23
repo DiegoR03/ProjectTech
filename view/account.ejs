@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="/static/css/accountstyle.css"> -->
+    <link rel="stylesheet" href="/static/css_minify/accountstyle.css">
+    <title>PetMatch| Account</title>
+</head>
+
+<body class="bodyaccount">
+    <%- include('partials/header') %>
+        <main>
+            <nav id="accountNav">
+                <div>
+                    <h2>Welcome back <%= firstName %>
+                    </h2>
+                    <button id="navToggle" onclick="toggleNavMenu()">&#9776;</button>
+                    <div class="nav-buttons">
+                        <button id="myInfoButton" class="active-button"
+                            onclick="toggleObject('myInfo', 'myInfoButton')">MyInfo</button>
+                        <button id="ViewedButton" onclick="toggleObject('recentlyViewed', 'ViewedButton')">Recently
+                            Viewed</button>
+                        <button id="FavoritesButton"
+                            onclick="toggleObject('Favorites', 'FavoritesButton')">Favorites</button>
+                        <button id="PostPetsButton" onclick="toggleObject('postAPet', 'PostPetsButton')">Post a
+                            pet</button>
+                        <button id="SearchButton" onclick="toggleObject('searchProfiles', 'SearchButton')">Search
+                            Profiles</button>
+                    </div>
+            </nav>
+
+
+            <section id="myInfo" class="toggle-section">
+                <div>
+                    <fieldset>
+                        <form action="/account" method="POST" enctype="multipart/form-data">
+                            <div id="myInfoCollection">
+                                <div id="profileImgWrapper"
+                                    style="position: relative; display: inline-block; width: 13rem; height: 13rem; border-radius: 50%; overflow: hidden;">
+                                    <input type="file" id="profileImageInput" name="profileImage"
+                                        style="display:none; cursor:default" accept="image/*" disabled />
+                                    <img id="profileImg" src="<%= profileImage %>" alt="Profile Image"
+                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                    <div id="overlay">
+                                        <!-- Pencil icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="white"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0L15 5.59l3.75 3.75 2.66-2.66z" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div>
+                                        <label>
+                                            Full name:
+                                        </label>
+
+                                        <div>
+                                            <input type="text" id="firstName" name="firstName" value="<%= firstName %>"
+                                                disabled>
+                                            <input type="text" id="lastName" name="lastName" value="<%= lastName %>"
+                                                disabled>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 1rem;">
+                                        <label style="margin-top: 1rem;">
+                                            Account created on:
+                                        </label>
+
+                                        <p>
+                                            <%= new Date(createdAt).toLocaleDateString('en-US', { year: 'numeric' ,
+                                                month: 'long' }) %>
+                                        </p>
+                                    </div>
+
+
+
+
+                                    <button type="button" id="editProfileBtn" onclick="toggleEditProfile()">Edit
+                                        profile</button>
+                                    <input id="storySubmit" type="submit" style="display: none;" value="Save">
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1rem; justify-items: center;">
+                                <label for="storyTextarea">My story:</label>
+                                <div>
+                                    <textarea id="storyTextarea" name="userStory" placeholder="<%= userStory %>"
+                                        disabled><%= userStory %></textarea>
+                                </div>
+                            </div>
+                        </form>
+                </div>
+                <div>
+                    <h2>My Pets</h2>
+                    <div id="myPetsList">
+                        <input class="search" placeholder="Search pets…" />
+                        <div class="grid list" id="result-grid">
+                            <% if (myPets.length===0) { %>
+                                <p id="empty">You haven't posted any pets yet.</p>
+                                <% } else { %>
+                                    <% myPets.forEach(pet=> { %>
+
+                                        <div class="card list-item">
+
+                                            <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
+                                            <div class="card-content">
+                                                <div class="pet-info">
+                                                    <div class="pet-name name">
+                                                        <%= pet.name %>
+                                                    </div>
+                                                    <div class="pet-gender gender">
+                                                        <%= pet.gender %>
+                                                    </div>
+                                                    <div class="pet-breed breed">
+                                                        <%= pet.breeds.primary %>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-links">
+                                                    <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+                                            <% } %>
+                        </div>
+                    </div>
+                    </fieldset>
+            </section>
+
+
+            <section id="recentlyViewed" class="toggle-section">
+                <h2>Recently Viewed Pets</h2>
+
+                <div id="recentlyViewedList">
+
+                    <input class="search" placeholder="Search recently viewed…" />
+
+                    <div id="recentlyViewed-grid" class="grid list">
+                        <% if (recentlyViewed.length===0) { %>
+                            <p id="empty">You seen any pets yet.</p>
+                            <% } else { %>
+                                <% recentlyViewed.forEach(pet=> {
+                                    const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) ===
+                                    String(pet.id));%>
+                                    <div class="card list-item" data-pet-id="<%= pet.id %>">
+                                        <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
+                                        <div class="card-content">
+                                            <div class="pet-info">
+                                                <div class="pet-name name">
+                                                    <%= pet.name %>
+                                                </div>
+                                                <div class="pet-gender gender">
+                                                    <%= pet.gender %>
+                                                </div>
+                                                <div class="pet-breed breed">
+                                                    <%= pet.breed %>
+                                                </div>
+                                            </div>
+                                            <div class="card-links">
+                                                <div class="like-container">
+                                                    <a href="/fave/<%= pet.id %>" class="like-button"
+                                                        aria-label="Like <%= pet.name %>">
+                                                        <span class="heart-bg">
+                                                            <span
+                                                                class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                                <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } %>
+
+                    </div>
+                </div>
+            </section>
+
+
+            <section id="Favorites" class="toggle-section">
+                <h2>Favorite Pets</h2>
+
+                <div id="favoritesList">
+                    <input class="search" placeholder="Search favorites…" />
+
+                    <div id="favorites-grid" class="grid list">
+                        <% if (favorites.length===0) { %>
+                            <p id="empty">You haven't favorited any pets yet.</p>
+                            <% } else { %>
+                                <% favorites.forEach(pet=> { const isFavorited = currentUser?.favorites?.some(fav =>
+                                    String(fav.id) === String(pet.id)); %>
+                                    <div class="card list-item">
+                                        <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
+                                        <div class="card-content">
+                                            <div class="pet-info">
+                                                <div class="pet-name name">
+                                                    <%= pet.name %>
+                                                </div>
+                                                <div class="pet-gender gender">
+                                                    <%= pet.gender %>
+                                                </div>
+                                                <div class="pet-breed breed">
+                                                    <%= pet.breed %>
+                                                </div>
+                                            </div>
+                                            <div class="card-links">
+                                                <div class="like-container">
+                                                    <div class="like-container">
+                                                        <a href="/fave/<%= pet.id %>" class="like-button"
+                                                            aria-label="Like <%= pet.name %>">
+                                                            <span class="heart-bg">
+                                                                <span
+                                                                    class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } %>
+                    </div>
+                </div>
+            </section>
+
+
+            <section id="postAPet" class="toggle-section">
+                <form action="/post-pet" method="POST" enctype="multipart/form-data" class="post-pet-form"
+                    id="postAPetContent">
+                    <div>
+                        <div>
+                            <div class="PetPhoto">
+                                <label for="petPhoto">Photo:</label>
+                                <img id="photoPreview" src="/uploads/standard/Paw.png" alt="Image Preview"
+                                    style="max-width: 200px; max-height: 200px; margin-top: 10px;">
+                                <input type="file" name="photos" id="petPhoto" accept="image/*" multiple required>
+                            </div>
+
+                            <div class="PetName">
+                                <p>Petname:</p>
+                                <label><input type="text" name="petname" placeholder="The name of your pet"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="dropdownPet">
+                            <button type="button" class="dropPetbtn">General Info</button>
+                            <div class="dropdown-petcontent">
+
+                                <div class="form-group">
+                                    <p>Breed:</p>
+                                    <label><input type="text" name="breed" placeholder="Breed of your pet"></label>
+                                </div>
+
+                                <div class="form-group">
+                                    <p>Type:</p>
+                                    <label><input type="radio" name="type" value="Dog">Dog</label>
+                                    <label><input type="radio" name="type" value="Cat">Cat</label>
+                                    <label><input type="radio" name="type" value="Rabbit">Rabbit</label>
+                                </div>
+
+                                <div class="form-group">
+                                    <p>Size:</p>
+                                    <label><input type="radio" name="size" value="Small">Small</label>
+                                    <label><input type="radio" name="size" value="Medium">Medium</label>
+                                    <label><input type="radio" name="size" value="Large">Large</label>
+                                    <label><input type="radio" name="size" value="No preference">No preference</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Gender:</p>
+                                    <label><input type="radio" name="gender" value="Male">Male</label>
+                                    <label><input type="radio" name="gender" value="Female">Female</label>
+                                    <label><input type="radio" name="gender" value="No preference">No preference</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Age:</p>
+                                    <label><input type="radio" name="age" value="Baby"> Baby</label>
+                                    <label><input type="radio" name="age" value="Young"> Young</label>
+                                    <label><input type="radio" name="age" value="Adult"> Adult</label>
+                                    <label><input type="radio" name="age" value="Senior"> Senior</label>
+                                    <label><input type="radio" name="age" value="No preference"> No preference</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Castrated:</p>
+                                    <label><input type="radio" name="isCastrated" value="true">Yes</label>
+                                    <label><input type="radio" name="isCastrated" value="false">No</label>
+                                    <label><input type="radio" name="isCastrated" value="No preference"> No
+                                        preference</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Coat:</p>
+                                    <label><input type="radio" name="coat" value="Short">Short</label>
+                                    <label><input type="radio" name="coat" value="Medium">Medium</label>
+                                    <label><input type="radio" name="coat" value="Long">Long</label>
+                                    <label><input type="radio" name="coat" value="No preference">No preference</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Has shots:</p>
+                                    <label><input type="radio" name="shots_current" value="true">True</label>
+                                    <label><input type="radio" name="shots_current" value="false">False</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dropdownPet">
+                            <button type="button" class="dropPetbtn">Living Situation</button>
+                            <div class="dropdown-petcontent">
+
+                                <div class="form-group radio-group">
+                                    <p>Good with children:</p>
+                                    <label><input type="radio" name="children" value="true"> Yes</label>
+                                    <label><input type="radio" name="children" value="false"> No</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Good with cats:</p>
+                                    <label><input type="radio" name="cats" value="true"> Yes</label>
+                                    <label><input type="radio" name="cats" value="false"> No</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Good with dogs:</p>
+                                    <label><input type="radio" name="dogs" value="true"> Yes</label>
+                                    <label><input type="radio" name="dogs" value="false"> No</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Is Alone Often:</p>
+                                    <label><input type="radio" name="isAloneOften" value="true"> Yes</label>
+                                    <label><input type="radio" name="isAloneOften" value="false"> No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dropdownPet">
+                            <button type="button" class="dropPetbtn">Pet Personality</button>
+                            <div class="dropdown-petcontent">
+
+                                <div class="form-group radio-group">
+                                    <p>Is Active:</p>
+                                    <label><input type="radio" name="activity" value="true"> Yes</label>
+                                    <label><input type="radio" name="activity" value="false"> No</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Housetrained:</p>
+                                    <label><input type="radio" name="house_trained" value="true"> Yes</label>
+                                    <label><input type="radio" name="house_trained" value="false"> No</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Comfortable with Strangers:</p>
+                                    <label><input type="radio" name="isComfystrangers" value="true"> Yes</label>
+                                    <label><input type="radio" name="isComfystrangers" value="false"> No</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Playful:</p>
+                                    <label><input type="radio" name="isPlayful" value="true"> Yes</label>
+                                    <label><input type="radio" name="isPlayful" value="false"> No</label>
+                                </div>
+
+                                <div class="form-group radio-group">
+                                    <p>Paired with Another Pet:</p>
+                                    <label><input type="radio" name="isPaired" value="true"> Yes</label>
+                                    <label><input type="radio" name="isPaired" value="false"> No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="description">Description:</label>
+                            <textarea name="description" id="description" rows="4"
+                                placeholder="Tell us more about your pet..." required></textarea>
+                        </div>
+                        <button type="submit">Submit Pet</button>
+                    </div>
+                </form>
+            </section>
+
+
+            <section id="searchProfiles" class="toggle-section">
+                <% if (savedAnswers && savedAnswers.length> 0) { %>
+                    <h2>Saved Search Preferences</h2>
+                    <div class="container">
+                        <% savedAnswers.forEach(function(answers, idx) { %>
+                            <div class="answer-group" style="margin-bottom:2em;">
+                                <strong>Search #<%= idx + 1 %>:</strong>
+                                <div class="answer-groups-row">
+                                    <% for (let group in groupedAnswers) { %>
+                                        <section id="groupTitle" data-group="<%= group %>">
+                                            <h3>
+                                                <%= group %>
+                                            </h3>
+                                            <ul class="group-list">
+                                                <% groupedAnswers[group].forEach(function(key) { %>
+                                                    <% if (answers[key] !==undefined) { %>
+                                                        <li data-key="<%= key %>" data-value="<%= answers[key] %>">
+                                                            <div class="answer-row static-view">
+                                                                <span><strong>
+                                                                        <%= questionLabels[key] || key %>
+                                                                    </strong></span>
+                                                                <span>
+                                                                    <%= answers[key]==='true' ? 'Yes' :
+                                                                        answers[key]==='false' ? 'No' : answers[key] %>
+                                                                </span>
+                                                            </div>
+                                                        </li>
+                                                        <% } %>
+                                                            <% }); %>
+                                            </ul>
+                                        </section>
+                                        <% } %>
+                                </div>
+                                <form action="/load-saved-search/<%= idx %>" method="get" style="display:inline;">
+                                    <button id="loadSearch" type="submit">Load this search</button>
+                                </form>
+                                <form action="/delete-saved-search/<%= idx %>" method="post" style="display:inline;">
+                                    <button id="deleteSearch" type="submit"
+                                        class="delete-saved-search-btn">Delete</button>
+                                </form>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } else { %>
+                        <p id="empty">No saved search preferences yet.</p>
+                        <% } %>
+            </section>
+
+        </main>
+
+        <%- include('partials/footer') %>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+            <script>
+                document.querySelectorAll('input[disabled]').forEach(input => {
+                    const span = document.createElement('span');
+                    span.style.visibility = 'hidden';
+                    span.style.whiteSpace = 'pre';
+                    span.style.font = getComputedStyle(input).font;
+                    span.textContent = input.value + '1px';
+
+                    document.body.appendChild(span);
+                    input.style.width = span.offsetWidth + 'px';
+                    document.body.removeChild(span);
+                });
+
+                function toggleObject(targetId, buttonID) {
+                    const sections = document.querySelectorAll('.toggle-section');
+                    const buttons = document.querySelectorAll('button');
+                    const nav = document.getElementById("accountNav");
+
+                    nav.classList.remove("show-menu");
+
+                    sections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.style.display = 'grid';
+                        } else {
+                            section.style.display = 'none';
+                        }
+                    });
+
+                    buttons.forEach(btn => {
+                        if (btn.id === buttonID) {
+                            btn.classList.add('active-button');
+                        } else {
+                            btn.classList.remove('active-button')
+                        }
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const params = new URLSearchParams(window.location.search);
+                    const section = params.get('section');
+
+                    if (section) {
+                        toggleObject(section, section + '-btn'); // assuming your button ID follows that pattern
+                    }
+                });
+
+                function toggleEditProfile() {
+                    const firstNameInput = document.querySelector('#firstName');
+                    const lastNameInput = document.querySelector('#lastName');
+                    const storyTextarea = document.querySelector('#storyTextarea');
+                    const profileImg = document.querySelector('#profileImageInput')
+                    const submitBtn = document.querySelector('#storySubmit');
+                    const editBtn = document.querySelector('#editProfileBtn');
+                    const profileImgWrapper = document.getElementById('profileImgWrapper');
+
+
+                    const isEditing = storyTextarea.disabled === false;
+
+                    // Toggle disabled state
+                    firstNameInput.disabled = isEditing;
+                    lastNameInput.disabled = isEditing;
+                    storyTextarea.disabled = isEditing;
+                    profileImg.disabled = isEditing;
+
+
+                    // Toggle button visibility/text
+                    submitBtn.style.display = isEditing ? 'none' : 'inline-block';
+                    editBtn.innerText = isEditing ? 'Edit profile' : 'Cancel';
+
+                    if (isEditing) {
+                        // We are currently editing, so disable editing
+                        profileImgWrapper.classList.remove('editable');
+                    } else {
+                        // We are currently not editing, so enable editing
+                        profileImgWrapper.classList.add('editable');
+                    }
+                }
+
+                function previewImage(event) {
+                    const input = event.target;
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            document.getElementById('profileImg').src = e.target.result;
+                        };
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                }
+
+                // Add the event listener to the file input
+                document.getElementById('profileImageInput').addEventListener('change', previewImage);
+
+                document.getElementById('petPhoto').addEventListener('change', function (event) {
+                    const file = event.target.files[0];
+                    const preview = document.getElementById('photoPreview');
+
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            preview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.src = '/uploads/standard/Paw.png';
+                    }
+                });
+
+                function toggleNavMenu() {
+                    const nav = document.getElementById("accountNav");
+                    nav.classList.toggle("show-menu");
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const profileImgWrapper = document.getElementById('profileImgWrapper');
+                    const profileImageInput = document.getElementById('profileImageInput');
+                    profileImgWrapper.addEventListener('click', () => {
+                        if (profileImageInput) {
+                            profileImageInput.click();
+                        }
+                    });
+                });
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    var options = {
+                        valueNames: ['name', 'gender', 'breed']
+                    };
+
+                    var myPetsList = new List('myPetsList', options);
+
+                    var favoritesList = new List('favoritesList', options);
+
+                    var recentlyViewedList = new List('recentlyViewedList', options);
+                });
+            </script>
+</body>
+
+</html>

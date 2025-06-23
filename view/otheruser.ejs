@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="/static/css/accountstyle.css"> -->
+    <link href="/static/css_minify/accountstyle.css" rel="stylesheet" type="text/css">
+    <title>PetMatch | Account</title>
+</head>
+
+<body class="bodyaccount">
+    <%- include('partials/header') %>
+        <main>
+            <nav id="accountNav">
+                <div>
+                <h2>You are viewing <%= firstName %>
+                </h2>
+                <button id="navToggle" onclick="toggleNavMenu()">&#9776;</button>
+                <div class="nav-buttons">
+                    <button id="myInfoButton" class="active-button"
+                        onclick="toggleObject('myInfo', 'myInfoButton')">MyInfo</button>
+                    <button id="FavoritesButton"
+                        onclick="toggleObject('Favorites', 'FavoritesButton')">Favorites</button>
+                </div>
+            </nav>
+
+            <section id="myInfo" class="toggle-section">
+                <div>
+                    <fieldset>
+                        <form action="/account" enctype="multipart/form-data">
+                            <div id="myInfoCollection">
+                                <div id="profileImgWrapper"
+                                    style="position: relative; display: inline-block; cursor: pointer; width: 13rem; height: 13rem; border-radius: 50%; overflow: hidden;">
+                                    <input type="file" id="profileImageInput" name="profileImage"
+                                        style="display:none; cursor:default" accept="image/*" disabled />
+                                    <img id="profileImg" src="<%= profileImage %>" alt="Profile Image"
+                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                    <div id="overlay">
+                                        <!-- Pencil icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="white"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34a1.25 1.25 0 0 0 0-1.77l-2-2a1.25 1.25 0 0 0-1.77 0L15 5.59l3.75 3.75 2.66-2.66z" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div>
+                                        <label>
+                                            Full name:
+                                        </label>
+
+                                        <div>
+                                            <input type="text" id="firstName" name="firstName" value="<%= firstName %>"
+                                                disabled>
+                                            <input type="text" id="lastName" name="lastName" value="<%= lastName %>"
+                                                disabled>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 1rem;">
+                                        <label>
+                                            Email:
+                                        </label>
+
+                                        <div>
+                                            <input type="text" id="email" name="email" value="<%= email %>"
+                                                disabled>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 1rem;">
+                                        <label style="margin-top: 1rem;">
+                                            Account created on:
+                                        </label>
+
+                                        <p>
+                                            <%= new Date(createdAt).toLocaleDateString('en-US', { year: 'numeric' ,
+                                                month: 'long' }) %>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1rem; justify-items: center;">
+                                <label for="storyTextarea">Their story:</label>
+                                <div>
+                                    <textarea id="storyTextarea" name="userStory" placeholder="<%= userStory %>"
+                                        disabled><%= userStory %></textarea>
+                                </div>
+                            </div>
+                        </form>
+                </div>
+                <div>
+                    <h2>Their Pets</h2>
+                        <div id="myPetsList">
+                            <input class="search" placeholder="Search pets…" />
+                            <div class="grid list" id="result-grid">
+                                <% if (myPets.length === 0) { %>
+                                <p>They haven't posted any pets yet.</p>
+                                <% } else { %>
+                                <% myPets.forEach(pet => { %>
+
+                                    <div class="card list-item">
+
+                                    <img src="<%= pet.photos[0].medium %>" alt="<%= pet.name %>" />
+                                    <div class="card-content">
+                                        <div class="pet-info">
+                                        <div class="pet-name name"><%= pet.name %></div>
+                                        <div class="pet-gender gender"><%= pet.gender %></div>
+                                        <div class="pet-breed breed"><%= pet.breeds.primary %></div>
+                                        </div>
+
+                                        <div class="card-links">
+                                        <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                                        </div>
+                                    </div>
+                                    </div>
+                                <% }) %>
+                                <% } %>
+                            </div>
+                            </div>
+                    </fieldset>
+            </section>
+
+
+            <section id="Favorites" class="toggle-section">
+                <h2>Their Favorite Pets</h2>
+          
+                <div id="favoritesList">
+                  <input class="search" placeholder="Search favorites…" />
+          
+                  <div id="favorites-grid" class="grid list">
+                    <% if (favorites.length === 0) { %>
+                      <p>They haven't favorited any pets yet.</p>
+                    <% } else { %>
+                      <% favorites.forEach(pet => { %>
+                        <div class="card list-item">
+                          <img src="<%= pet.photo %>" alt="<%= pet.name %>" />
+                          <div class="card-content">
+                            <div class="pet-info">
+                              <div class="pet-name name"><%= pet.name %></div>
+                              <div class="pet-gender gender"><%= pet.gender %></div>
+                              <div class="pet-breed breed"><%= pet.breed %></div>
+                            </div>
+                            <div class="card-links">
+                              <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                            </div>
+                          </div>
+                        </div>
+                      <% }) %>
+                    <% } %>
+                  </div>
+                </div>
+              </section>
+        </main>
+
+        <%- include('partials/footer') %>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+            <script>
+                document.querySelectorAll('input[disabled]').forEach(input => {
+                    const span = document.createElement('span');
+                    span.style.visibility = 'hidden';
+                    span.style.whiteSpace = 'pre';
+                    span.style.font = getComputedStyle(input).font;
+                    span.textContent = input.value + '1px';
+
+                    document.body.appendChild(span);
+                    input.style.width = span.offsetWidth + 'px';
+                    document.body.removeChild(span);
+                });
+
+                function toggleObject(targetId, buttonID) {
+                    const sections = document.querySelectorAll('.toggle-section');
+                    const buttons = document.querySelectorAll('button');
+                    const nav = document.getElementById("accountNav");
+
+                    nav.classList.remove("show-menu");
+
+                    sections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.style.display = 'grid';
+                        } else {
+                            section.style.display = 'none';
+                        }
+                    });
+
+                    buttons.forEach(btn => {
+                        if (btn.id === buttonID) {
+                            btn.classList.add('active-button');
+                        } else {
+                            btn.classList.remove('active-button')
+                        }
+                    });
+                }
+
+                function toggleNavMenu() {
+                    const nav = document.getElementById("accountNav");
+                    nav.classList.toggle("show-menu");
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const profileImgWrapper = document.getElementById('profileImgWrapper');
+                    const profileImageInput = document.getElementById('profileImageInput');
+                    profileImgWrapper.addEventListener('click', () => {
+                        if (profileImageInput) {
+                            profileImageInput.click();
+                        }
+                    });
+                });
+
+                document.addEventListener('DOMContentLoaded', function() {
+                var options = {
+                    valueNames: ['name', 'gender', 'breed']
+                    };
+
+                var myPetsList = new List('myPetsList', options);
+
+                var favoritesList = new List('favoritesList', options);
+
+                var recentlyViewedList = new List('recentlyViewedList', options);
+                });
+            </script>
+</body>
+
+</html>

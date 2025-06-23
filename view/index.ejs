@@ -1,25 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/static/css/style.css">
-    <title>FetchFinder</title>
-</head>
-<body>
-    <header>
-    <h1>PetThing</h1>
-    <nav>
-      <a href="/" class="active">Home</a>
-      <a href="/browse">Browse</a>
-      <a href="/login">Login</a>
-      <a href="/register">Register</a>
-    </nav>
-  </header>
-    <p>
-        <%= userID %>
-    </p>
 
-    
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <link rel="stylesheet" href="/static/css/indexStyling.css"> -->\
+  <link rel="stylesheet" href="/static/css_minify/indexStyling.css">
+
+  <title>PetMatch | Home</title>
+
+</head>
+
+<body id="indexBody">
+  <%- include('partials/header') %>
+    <main>
+      <section>
+        <div class="container">
+          <div>
+            <h1>Looking for a pet to adopt?</h1>
+            <p>Are you loooking for a furry friend to play with, cuddle and give all your love to? Don't hesitate to
+              adopt one of these lovely pets.</p>
+            <a href="/browse">Browse pets</a>
+          </div>
+          <div>
+            <img src="/static/images/homepage-dog.png" alt="Dog">
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="container">
+          <h2>What pet are you looking for?</h2>
+          <div class="cards">
+
+            <div class="card">
+              <div class="image-container">
+                <img src="/static/images/dog.png" alt="Dog" class="default-img">
+                <img src="/static/images/dog-hover.png" alt="Dog smiling" class="hover-img">
+              </div>
+              <div class="card-title">Dogs</div>
+            </div>
+
+            <div class="card">
+              <div class="image-container">
+                <img src="/static/images/cat.png" alt="Cat" class="default-img">
+                <img src="/static/images/cat-hover.png" alt="Cat smiling" class="hover-img">
+              </div>
+              <div class="card-title">Cats</div>
+            </div>
+
+            <div class="card">
+              <div class="image-container">
+                <img src="/static/images/rabbit.png" alt="Rodent" class="default-img">
+                <img src="/static/images/rabbit-hover.png" alt="Rodent smiling" class="hover-img">
+              </div>
+              <div class="card-title">Rabbits</div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="container">
+          <div>
+            <% if (currentUser) { %>
+              <h2>Why post a pet?</h2>
+              <p>Posting a pet helps connect animals with the loving homes they deserve. Whether you’re helping a
+                rescue, supporting a local shelter, or assisting a friend or foster animal, sharing their profile gives
+                them a real chance at adoption. Our community relies on caring people like you to shine a light on pets
+                who are looking for a second chance. By posting, you're helping make that connection possible—and making
+                a direct impact in an animal’s journey to a better life.</p>
+              <button onclick="location.href='/account?section=postAPet'">Go to Post a Pets</button>
+              <% } else {%>
+                <h2>Why adopt a pet?</h2>
+                <p>Adopting a pet means giving an animal a second chance at a happy life. Every year, thousands of
+                  loving
+                  pets end up in shelters, waiting for someone to take them home. By choosing adoption, you're not only
+                  gaining a loyal friend—you’re also helping reduce the number of animals in shelters and supporting a
+                  more
+                  humane world. Whether you’re looking for a playful pup, a gentle cat, or a small companion, your
+                  perfect
+                  match could be waiting for you. Adopt, and make a difference.</p>
+                <button onclick="location.href='/login'">Login</button>
+                <% } %>
+          </div>
+          <div>
+            <img src="/static/images/pets.jpg" alt="Dog">
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="container">
+          <h2 style="text-align: center;">Recently uploaded pets</h2>
+          <div class="grid">
+            <% if (newestPets && newestPets.length> 0) { %>
+              <% newestPets.forEach(pet=> {
+                const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) ===
+                String(pet.id));%>
+                <div class="pet-card">
+                  <div class="card">
+                    <img src="<%= pet.photos?.[0]?.medium || 'No image available' %>" alt="<%= pet.name %>" class="" />
+                    <div class="card-content">
+                      <div class="pet-info">
+                        <h3 class="pet-name">
+                          <%= pet.name %>
+                        </h3>
+                        <p class="pet-gender">
+                          <%= pet.age %>, <%= pet.gender %>
+                        </p>
+                        <p class="pet-breed">
+                          <%= pet.breeds?.primary || 'Unknown breed' %>
+                        </p>
+                      </div>
+                      <div class="card-links">
+                        <div class="like-container">
+                          <div class="like-container">
+                            <a href="/fave/<%= pet.id %>" class="like-button" aria-label="Like <%= pet.name %>">
+                              <span class="heart-bg">
+                                <span
+                                  class="heart-icon <%= currentUser?.favorites?.some(fav => String(fav.id) === String(pet.id)) ? 'liked' : '' %>"></span>
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                        <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+                <% }) %>
+                  <% } else { %>
+                    <p>No recent pets found.</p>
+                    <% } %>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <%- include('partials/footer') %>
 </body>
+
 </html>
