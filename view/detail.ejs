@@ -39,6 +39,13 @@
                 <button id="prev"><</button>
                   <button id="next">></button>
               </div>
+
+              <!-- Dots -->
+              <ul class="dots">
+                <% for (let i=0; i < pet.photos.length; i++) { %>
+                  <li class="<%= i === 0 ? 'active' : '' %>"></li>
+                  <% } %>
+              </ul>
               <% } %>
           </div>
           <ul class="traits-list">
