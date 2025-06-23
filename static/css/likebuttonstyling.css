@@ -4,11 +4,13 @@
     display: inline-flex;
     align-items: center;
     position: relative;
-    text-decoration: none; /* removes underline */
-    border: none; /* prevents weird clickable box */
+    text-decoration: none;
+    /* removes underline */
+    border: none;
+    /* prevents weird clickable box */
     background: transparent;
 }
-  
+
 .like-button:visited,
 .like-button:link {
     color: inherit;
@@ -24,23 +26,29 @@
     justify-content: center;
     transition: all 100ms ease;
 }
-  
+
 .like-button .heart-bg:hover {
     background: rgba(255, 192, 200, 0.7);
 }
-  
+
 .like-button .heart-icon {
-    height: 100px;
-    width: 100px;
+    height: 80px;
+    width: 80px;
     background: url("/static/images/heart.png");
     background-position: left;
-    background-size: cover; /* just in case */
+    background-size: cover;
+    /* just in case */
     cursor: pointer;
     position: absolute;
 }
-  
-.like-button .heart-icon.liked {
+
+.like-button {
     animation: like-anim 0.7s steps(28) forwards;
+}
+
+.heart-icon.liked {
+    background-position: right;
+    /* last frame of sprite */
 }
 
 .heart-icon.animate {
@@ -51,9 +59,41 @@
     outline: none;
     box-shadow: none;
 }
- 
+
+.undo-wrapper {
+    margin-top: 8px;
+    text-align: center;
+    margin: auto;
+}
+
+.undo-btn {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 1rem;
+}
+
+.undo-message {
+    color: var(--font-color);
+}
+
+.undo-btn:hover {
+    background-color: #e64949;
+}
+
+
 @keyframes like-anim {
     to {
-      background-position: right;
+        background-position: right;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .undo-message {
+        color: var(--font-color-white);
     }
 }

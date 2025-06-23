@@ -19,16 +19,23 @@
   --font-color: #0d3149;
   --font-color-white: #ffffff;
 
+  --logo-lighter: #f48d52;
+
   --background-color-white: #fff;
   --background-color-blue: #4177BE;
+
+  --background-color-black: #000000;
+  --background-color-darkblue: #033b85;
+  --background-color-darkgrey: #1A1A1A;
 
   --footer-border: #d3d3d3;
   --footer-text: #8E8E8E;
 
-  --approved-color: #4CAF50; 
-  --declined-color: #F44336; 
+  --approved-color: #4CAF50;
+  --declined-color: #F44336;
 }
 
+/* Header styling */
 header {
   margin-top: 1em;
   position: sticky;
@@ -37,6 +44,10 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  top: -0.5rem;
+  left: 0;
+  right: 0;
+  z-index: 12;
 }
 
 header nav {
@@ -46,6 +57,13 @@ header nav {
   background-color: none;
   translate: 0;
   transition: 0.5s;
+}
+
+header h1 {
+  text-align: left;
+  font-size: 1.8rem;
+  margin: 0;
+  color: var(--text-color);
 }
 
 header ul:nth-of-type(1) {
@@ -66,7 +84,6 @@ header img {
   height: 25px;
 }
 
-
 header nav ul {
   padding: 0;
 }
@@ -79,6 +96,7 @@ header nav li {
 .navbar {
   padding: 0.5em;
   border-radius: 5px;
+  background-color: var(--background-color-white);
 }
 
 header nav ul:nth-of-type(1) {
@@ -88,9 +106,14 @@ header nav ul:nth-of-type(1) {
 }
 
 header a {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.4em;
   color: var(--text-color);
   font-weight: 600;
   text-decoration: none;
+  overflow: hidden;
+  font-size: 2.5vh;
 }
 
 header a:hover {
@@ -98,6 +121,37 @@ header a:hover {
 }
 
 header a:active {
+  color: var(--primary-color-2);
+  font-weight: 700;
+  border-bottom: solid 3px var(--primary-color-2);
+}
+
+/* Button hover animation */
+header a::after {
+  content: "";
+  position: absolute;
+  bottom: -0.03em;
+  left: 0;
+  height: 3px;
+  width: 0;
+  background-color: var(--primary-color-hover-2);
+}
+
+header a:hover::after {
+  animation: underline-grow 0.3s ease-in-out forwards;
+}
+
+@keyframes underline-grow {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.active {
   color: var(--primary-color-2);
   font-weight: 700;
   border-bottom: solid 3px var(--primary-color-2);
@@ -176,8 +230,70 @@ header a:active {
 }
 
 /* Notifications */
-.responses{
-  display: flex; 
+.notifications-btn {
+  border: none;
+  cursor: pointer;
+  background: var(--text-color-2);
+  font: inherit;
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+  align-items: center;
+  padding-bottom: 0.6em;
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 2.5vh;
+}
+
+.notifications-btn:hover {
+  color: var(--primary-color-hover-2);
+}
+
+.notifications-btn:hover:after {
+  animation: underline-grow 0.3s ease-in-out forwards;
+}
+
+/* Button hover animation */
+.notifications-btn:after {
+  content: "";
+  position: absolute;
+  bottom: 0.4em;
+  left: 0;
+  height: 3.5px;
+  width: 0;
+  background-color: var(--primary-color-hover-2);
+  z-index: 1;
+}
+
+/* Notifications badge */
+.notifications-btn .badge {
+  position: absolute;
+  top: 1.2rem;
+  background-color: red;
+  color: white;
+  font: inherit;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  line-height: 1.5rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Dropdown content specific to notifications */
+.notifications-dropdown .dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 19rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  border-radius: 0.5rem;
+  top: 3.5rem;
+}
+
+.responses {
+  display: flex;
   gap: 0.5rem;
 }
 
@@ -199,7 +315,7 @@ header a:active {
 
 /* Footer Styling */
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   header {
     padding-right: 0;
     padding-left: 0;
@@ -233,11 +349,11 @@ header a:active {
     box-sizing: border-box;
   }
 
-  header nav ul li{
+  header nav ul li {
     width: 40%;
   }
 
-  header nav ul a{
+  header nav ul a {
     width: 100%;
   }
 
@@ -255,5 +371,53 @@ header a:active {
 
   .logo {
     justify-content: center;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo p {
+    color: var(--text-color-2);
+  }
+
+  .logo path {
+    fill: var(--logo-lighter);
+  }
+
+  .navbar {
+    background-color: var(--background-color-black);
+  }
+
+  #menuButton {
+    background-color: var(--background-color-black);
+    color: var(--text-color-2);
+  }
+
+  header nav {
+    background-color: var(--background-color-black);
+  }
+
+  header nav ul li,
+  header nav ul a {
+    color: var(--text-color-2);
+  }
+
+  .active {
+    color: var(--primary-color-2);
+    font-weight: 700;
+    border-bottom: solid 3px var(--primary-color-2);
+  }
+
+  .notifications-btn {
+    background: var(--background-color-black);
+    color: var(--text-color-2);
+  }
+
+  .notifications-dropdown .dropdown-content {
+    background-color: var(--background-color-black);
+    border: 1px solid var(--background-color-darkgrey);
+  }
+
+  .dropbtn {
+    background: var(--background-color-black);
   }
 }

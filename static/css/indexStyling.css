@@ -1,12 +1,14 @@
+@import url(style.css);
+
 :root {
   /* Colors */
- 
+
   --font-color: #0d3149;
   --font-color-white: #ffffff;
- 
+
   --primary-color: #4177BE;
   --background-color-blue: #4177BE;
- 
+
   --primary-color-2: #C74F0A;
   --primary-color-hover-2: #E66F3A;
   --background-color: #f2f2f2;
@@ -14,7 +16,15 @@
   --footer-header-background: #fff;
   --active-filters: #46c0975a;
 
+  --background-color-black: #000000;
+  --background-color-darkgrey: #1A1A1A;
+  --background-color-darkblue: #033b85;
+
+  --primary-orange-lightercolor: #f48d52;
+
   --font-color: #0d3149;
+  --font-color-gray: #cbcbcb;
+  --font-color-light: #1f70a6;
   --font-color-white: #ffffff;
   --footer-text: #8E8E8E;
 }
@@ -22,8 +32,8 @@
 #indexBody {
   font-family: 'Montserrat';
   color: var(--font-color);
-  background-color: var(--background-color-blue);
   margin: 0;
+  background: linear-gradient(to bottom, var(--background-color-blue) 0%, var(--background-color-blue) 8%, rgba(0, 0, 0, 0) 12%);
 }
 
 h1 {
@@ -44,6 +54,10 @@ p {
 
 section:nth-of-type(1) {
   color: var(--font-color-white);
+  height: 600px;
+  background: var(--primary-color);
+  clip-path: ellipse(100% 100% at 30% 0);
+  z-index: -1;
 }
 
 section:nth-of-type(1) .container {
@@ -54,13 +68,14 @@ section:nth-of-type(1) .container {
   max-width: 80%;
   margin-inline: auto;
   padding-top: 5em;
-  
+  padding-bottom: 1rem;
 }
 
 section:nth-of-type(1) img {
   max-width: 400px;
   height: auto;
   border-radius: 8px;
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0%, var(--background-color-blue) 30%);
 }
 
 section:nth-of-type(1) p {
@@ -83,7 +98,7 @@ section:nth-of-type(1) a {
 
 section:nth-of-type(1) a:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   background-color: var(--primary-color-hover-2);
 }
 
@@ -95,41 +110,47 @@ section:nth-of-type(2) {
   padding-top: 3em;
   padding-bottom: 3em;
 }
+
 section:nth-of-type(2) .container {
   max-width: 80%;
   margin-inline: auto;
   text-align: center;
 }
+
 section:nth-of-type(2) h2 {
   margin-top: 0;
   color: var(--font-color);
 }
+
 section:nth-of-type(2) .cards {
   display: flex;
   gap: 1em;
   flex-wrap: wrap;
   justify-content: center;
 }
+
 section:nth-of-type(2) .card {
   background-color: var(--background-color-cards);
-  position: relative;       
+  position: relative;
   border-radius: 12px;
-  box-shadow: rgba(0,0,0,0.1) 0px 4px 12px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
   overflow: hidden;
   cursor: pointer;
   flex: 1 1 260px;
   transition: transform .2s, box-shadow .2s;
 }
+
 section:nth-of-type(2) .card:hover {
   transform: translateY(-8px);
-  box-shadow: rgba(0,0,0,0.15) 0px 8px 16px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 8px 16px;
 }
 
 .image-container {
   position: relative;
   width: 100%;
-  background: white; 
+  background: white;
 }
+
 .image-container img {
   display: block;
   width: 100%;
@@ -137,15 +158,18 @@ section:nth-of-type(2) .card:hover {
   object-fit: contain;
   transition: opacity .2s ease-in-out;
 }
+
 .image-container .hover-img {
   position: absolute;
   top: 0;
   left: 0;
   opacity: 0;
 }
+
 .card:hover .hover-img {
   opacity: 1;
 }
+
 .card:hover .default-img {
   opacity: 0;
 }
@@ -161,6 +185,7 @@ section:nth-of-type(2) .card-title {
 
 section:nth-of-type(3) {
   color: var(--font-color-white);
+  background: var(--primary-color);
 }
 
 section:nth-of-type(3) .container {
@@ -184,7 +209,8 @@ section:nth-of-type(3) p {
   line-height: 1.4;
 }
 
-section:nth-of-type(3) a {
+section:nth-of-type(3) a,
+section:nth-of-type(3) button {
   text-decoration: none;
   display: inline-block;
   padding: 0.75em 1.5em;
@@ -200,7 +226,7 @@ section:nth-of-type(3) a {
 
 section:nth-of-type(3) a:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   background-color: var(--primary-color-hover-2);
 }
 
@@ -213,7 +239,6 @@ section:nth-of-type(4) {
 }
 
 section:nth-of-type(4) .container {
-  text-align: center;
   max-width: 80%;
   margin-inline: auto;
 }
@@ -231,7 +256,7 @@ section:nth-of-type(4) .container {
   p {
     font-size: 1em;
   }
-  
+
   section:nth-of-type(1) .container {
     flex-direction: column-reverse;
     text-align: center;
@@ -265,7 +290,7 @@ section:nth-of-type(4) .container {
 }
 
 /* RECENTLY ADDED ////////////////////////////////////////////////////////////////////////////////////// */
-.grid{
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
@@ -275,6 +300,7 @@ section:nth-of-type(4) .container {
   align-items: stretch;
 
 }
+
 .card {
   background: var(--white);
   border-radius: 12px;
@@ -384,7 +410,6 @@ section:nth-of-type(4) .container {
 /* Hover animation for .card on browse page */
 .card {
   position: relative;
-  border: 1px solid #ddd;
   transition: border 0.3s ease, box-shadow 0.3s ease;
   z-index: 0;
   /* Ensure stacking context */
@@ -423,4 +448,82 @@ section:nth-of-type(4) .container {
 
 .card:hover::before {
   transform: scaleY(1);
+}
+
+@media (max-width: 1000px) {
+  #indexbody {
+    background: linear-gradient(to bottom, var(--background-color-darkblue) 0%, var(--background-color-darkblue) 4%, rgba(0, 0, 0, 0) 15%);
+  }
+
+  section:nth-of-type(1) {
+    height: 650px;
+    clip-path: ellipse(100% 100% at 40% 0);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  #indexBody {
+    background: linear-gradient(to bottom, var(--background-color-darkblue) 0%, var(--background-color-darkblue) 7%, rgba(0, 0, 0, 0) 15%);
+  }
+
+  section:nth-of-type(1),
+  section:nth-of-type(3) {
+    background-color: var(--background-color-darkblue);
+  }
+
+  main {
+    background-color: var(--background-color-darkgrey);
+  }
+
+  section:nth-of-type(2),
+  section:nth-of-type(4) {
+    background-color: var(--background-color-darkgrey);
+  }
+
+  section:nth-of-type(2) h2,
+  section:nth-of-type(4) h2 {
+    margin-top: 0;
+    color: var(--font-color-white);
+  }
+
+  section:nth-of-type(2) .card {
+    background-color: var(--background-color-darkblue);
+  }
+
+  section:nth-of-type(2) .card-title {
+    color: var(--font-color-white);
+  }
+
+  .card {
+    background: var(--background-color-darkblue);
+  }
+
+  .card img{
+    border-bottom: 2px solid var(--background-color-darkgrey);
+  }
+
+  .card::after,
+  .card::before {
+    background-color: var(--primary-orange-lightercolor);
+  }
+
+  .viewDetail {
+    background-color: var(--primary-color-2);
+  }
+
+  .viewDetail:hover {
+    background: var(--background-color-blue);
+    color: var(--background-color-black);
+    border: 2px solid #000;
+  }
+
+
+  .pet-gender,
+  .pet-breed {
+    color: var(--font-color-gray);
+  }
+
+  .pet-name {
+    color: var(--font-color-white);
+  }
 }

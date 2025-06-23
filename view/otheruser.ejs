@@ -8,7 +8,7 @@
     <title>PetMatch | Account</title>
 </head>
 
-<body class="body">
+<body class="bodyaccount">
     <%- include('partials/header') %>
         <main>
             <nav id="accountNav">
@@ -111,7 +111,6 @@
                                         </div>
 
                                         <div class="card-links">
-                                        <a href="/fave/<%= pet.id %>" class="favorite">&#x2661;</a>
                                         <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                                         </div>
                                     </div>
@@ -144,7 +143,6 @@
                               <div class="pet-breed breed"><%= pet.breed %></div>
                             </div>
                             <div class="card-links">
-                              <a href="/removefavorite/<%= pet.id %>" class="remove">&#9932;</a>
                               <a href="/detail/<%= pet.id %>" class="viewDetail">View &#8594;</a>
                             </div>
                           </div>
