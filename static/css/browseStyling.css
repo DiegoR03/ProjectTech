@@ -2,15 +2,20 @@
 @import url(style.css);
 
 :root {
-    --primary-color: #90A5EC;
-    --primary-color-hover: #6b7bac;
-    --primary-color-2: #F47429;
-    --primary-color-hover-2: #c05c23;
-    --text-color: #333;
-    --background-color: #f2f2f2;
-    --footer-text: #8E8E8E;
-    --active-filters: #c6cff0;
-  }
+  --primary-color: #4177BE;
+  --background-color-blue: #4177BE;
+ 
+  --primary-color-2: #C74F0A;
+  --primary-color-hover-2: #E66F3A;
+  --background-color: #f2f2f2;
+  --background-color-cards: #fff;
+  --footer-header-background: #fff;
+  --active-filters: #46c0975a;
+
+  --font-color: #0d3149;
+  --font-color-white: #ffffff;
+  --footer-text: #8E8E8E;
+}
 
 
 main {
@@ -69,6 +74,7 @@ body>main>section>p:nth-of-type(1) {
 body>main>section>a:nth-of-type(1) {
   text-align: center;
   display: inline-block;
+  font-weight: 600;
   
   padding: 1rem;
   margin: 1em auto;
@@ -103,8 +109,9 @@ body>main>section>a:nth-of-type(1):hover {
 .filters label {
   display: flex;
   flex-direction: column;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 0.95rem;
+  color: var(--font-color);
 }
 
 .filters select {
@@ -129,7 +136,7 @@ body>main>section>a:nth-of-type(1):hover {
 
 .filters button {
   padding: 0.5rem 1.2rem;
-  background-color: var(--primary-color);
+  background-color: var(--primary-color-2);
   color: var(--white);
   border: none;
   border-radius: 6px;
@@ -158,9 +165,9 @@ body>main>section>a:nth-of-type(1):hover {
 /* Advanced filters /////////////////////////////////////////////////////// */
 #toggle-advanced {
   padding: 0.37rem 0.7rem;
-  background-color: #000;
+  background-color: var(--primary-color);
   color: var(--white);
-  border: 2px solid #000; 
+  border: 3px solid var(--primary-color); 
   border-radius: 6px;
   cursor: pointer;
   align-self: end;
@@ -169,17 +176,17 @@ body>main>section>a:nth-of-type(1):hover {
 
 #toggle-advanced:hover {
   background-color: transparent;
-  color: #000;
+  color: var(--primary-color);
 }
 
 #toggle-advanced.openFilters {
   background-color: transparent;
-  color: #000;
+  color: var(--primary-color);
 }
 
 
 .filters button:hover {
-  background-color: var(--primary-color-hover);
+  background-color: var(--primary-color-hover-2);
 }
 /* Active filters//////////////////////////////////////////////////////////////////// */
 .active-filters {
@@ -308,7 +315,7 @@ body>main>section>a:nth-of-type(1):hover {
 
 .favorite,
 .viewDetail {
-  background-color: #000;
+  background-color: var(--primary-color-2);
   color: var(--white);
   padding: 6px 10px;
   border-radius: 50%;
@@ -340,20 +347,20 @@ body>main>section>a:nth-of-type(1):hover {
 }
 .pet-name {
   font-size: 1.2rem;
-  font-weight: bold;
+  font-weight: 600;
   margin-bottom: 0.5rem;
-  color: var(--primary-color-2);
+  color: var(--font-color);
 }
 
 .pet-gender {
-  color: #777;
+  color: var(--footer-text);
   font-size: 1rem;
   margin: 0;
 }
 
 .pet-breed{
   font-size: 0.8em;
-  color: #777;
+  color: var(--footer-text);
   margin: 0;
 }
 

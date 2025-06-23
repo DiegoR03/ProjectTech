@@ -71,7 +71,7 @@ header nav ul {
 
 header nav li {
   list-style: none;
-  padding: 1em;
+  padding-left: 1em;
 }
 
 .navbar {
