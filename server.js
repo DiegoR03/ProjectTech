@@ -370,123 +370,117 @@ app
 
     .get("/otheruser/:id", loadDetail)
     .get('/fave/:id', async (req, res) => {
-        const petId = req.params.id;
+    const petId = req.params.id;
 
-        try {
-            if (!req.session.userID) {
-                return res.status(401).json({ status: 'error', message: 'Login required' });
-            }
+    try {
+        if (!req.session.userID) {
+            return res.status(401).json({ status: 'error', message: 'Login required' });
+        }
 
-            let petData;
-            let pet;
+        let petData;
+        let pet;
 
-            // 1. Try to find pet in local DB
-            const customPet = await db.collection('customPets').findOne({ id: petId });
+        const customPet = await db.collection('customPets').findOne({ id: petId });
 
-            if (customPet) {
-                pet = customPet;
-                petData = {
-                    id: customPet.id,
-                    name: customPet.name,
-                    photo: customPet.photos?.[0]?.medium || null,
-                    gender: customPet.gender,
-                    breed: customPet.breeds?.primary || '',
-                    isCustom: true
-                };
-            } else {
-                // 2. Fetch from Petfinder API
-                const token = await getPetfinderToken();
-                const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const data = await response.json();
+        if (customPet) {
+            pet = customPet;
+            petData = {
+                id: customPet.id,
+                name: customPet.name,
+                photo: customPet.photos?.[0]?.medium || null,
+                gender: customPet.gender,
+                breed: customPet.breeds?.primary || '',
+                isCustom: true
+            };
+        } else {
+            const token = await getPetfinderToken();
+            const response = await fetch(`https://api.petfinder.com/v2/animals/${petId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await response.json();
 
-                if (!data.animal) {
-                    // Pet no longer exists — remove from favorites anyway
-                    console.warn(`Pet ${petId} not found in API. Proceeding to remove it from favorites.`);
+            if (!data.animal) {
+                console.warn(`Pet ${petId} not found in API. Removing from favorites anyway.`);
 
-                    const petIdNum = Number(petId);
-                    req.session.favorites = req.session.favorites.filter(p => String(p.id) !== String(petId));
-
-                    await userCollection.updateOne(
-                        { _id: new ObjectId(req.session.userID) },
-                        { $pull: { favorites: { id: isNaN(petIdNum) ? petId : petIdNum } } }
-                    );
-
-                    return res.json({ status: 'success', favorited: false, removedMissing: true });
-                }
-
-                pet = data.animal;
-
-                petData = {
-                    id: pet.id,
-                    name: pet.name,
-                    photo: pet.photos?.[0]?.medium || null,
-                    gender: pet.gender,
-                    breed: pet.breeds.primary,
-                    isCustom: false
-                };
-            }
-            if (!req.session.favorites) req.session.favorites = [];
-
-            const index = req.session.favorites.findIndex(p => String(p.id) === String(petId));
-            const isFavorited = index !== -1;
-
-            if (isFavorited) {
-                // Remove from session
-                req.session.favorites.splice(index, 1);
-                const petIdNum = Number(petId);
-
-                // Remove from DB user favorites
-                const result = await userCollection.updateOne(
-                    { _id: new ObjectId(req.session.userID) },
-                    { $pull: { favorites: { id: isNaN(petIdNum) ? petId : petIdNum } } }
-                );
-                console.log('Remove result:', result);
-                return res.json({ status: 'success', favorited: false });
-            } else {
-                req.session.favorites.unshift(petData);
+                req.session.favorites = req.session.favorites.filter(p => String(p.id) !== String(petId));
 
                 await userCollection.updateOne(
                     { _id: new ObjectId(req.session.userID) },
-                    { $addToSet: { favorites: petData } }
+                    { $pull: { favorites: { id: petId } } }
                 );
 
-                if (petData.isCustom && pet.addedByUserId && req.session.userID !== pet.addedByUserId.toString()) {
-                    const ownerId = new ObjectId(pet.addedByUserId);
-                    const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
-                    const message = `${liker.firstName} liked your pet "${pet.name}"`;
-                    const image = liker.profileImage;
-
-                    await userCollection.updateOne(
-                        { _id: ownerId },
-                        {
-                            $push: {
-                                notifications: {
-                                    userId: liker._id.toString(),
-                                    image,
-                                    message,
-                                    petId,
-                                    timestamp: Date.now(),
-                                    status: 'pending',
-                                    type: 'contact_request',
-                                    _id: new ObjectId(),
-                                    ownerId: ownerId.toString(),
-                                    petName: pet.name,
-                                }
-                            }
-                        }
-                    );
-                }
-
-                return res.json({ status: 'success', favorited: true, pet: petData });
+                return res.json({ status: 'success', favorited: false, removedMissing: true });
             }
 
-        } catch (err) {
-            console.error("Error in /fave/:id route:", err);
-            res.status(500).json({ status: 'error', message: 'Error toggling favorite.' });
+            pet = data.animal;
+
+            petData = {
+                id: String(pet.id),
+                name: pet.name,
+                photo: pet.photos?.[0]?.medium || null,
+                gender: pet.gender,
+                breed: pet.breeds.primary,
+                isCustom: false
+            };
         }
-    })
+
+        if (!req.session.favorites) req.session.favorites = [];
+
+        const index = req.session.favorites.findIndex(p => String(p.id) === String(petId));
+        const isFavorited = index !== -1;
+
+        if (isFavorited) {
+            req.session.favorites.splice(index, 1);
+
+            const result = await userCollection.updateOne(
+                { _id: new ObjectId(req.session.userID) },
+                { $pull: { favorites: { id: petId } } }
+            );
+
+            console.log('Removed favorite. Mongo result:', result);
+            return res.json({ status: 'success', favorited: false });
+        } else {
+            req.session.favorites.unshift(petData);
+
+            await userCollection.updateOne(
+                { _id: new ObjectId(req.session.userID) },
+                { $addToSet: { favorites: petData } }
+            );
+
+            if (petData.isCustom && pet.addedByUserId && req.session.userID !== pet.addedByUserId.toString()) {
+                const ownerId = new ObjectId(pet.addedByUserId);
+                const liker = await userCollection.findOne({ _id: new ObjectId(req.session.userID) });
+
+                await userCollection.updateOne(
+                    { _id: ownerId },
+                    {
+                        $push: {
+                            notifications: {
+                                userId: liker._id.toString(),
+                                image: liker.profileImage,
+                                message: `${liker.firstName} liked your pet "${pet.name}"`,
+                                petId,
+                                timestamp: Date.now(),
+                                status: 'pending',
+                                type: 'contact_request',
+                                _id: new ObjectId(),
+                                ownerId: ownerId.toString(),
+                                petName: pet.name,
+                            }
+                        }
+                    }
+                );
+            }
+
+            return res.json({ status: 'success', favorited: true, pet: petData });
+        }
+
+    } catch (err) {
+        console.error("Error in /fave/:id route:", err);
+        res.status(500).json({ status: 'error', message: 'Error toggling favorite.' });
+    }
+})
+
 
     .get("/searchForm", loadSearchForm)
     .get("/results-search-form", loadResultsSearchForm)
