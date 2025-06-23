@@ -32,7 +32,7 @@
 main {
     margin-inline: auto;
     padding-bottom: 10rem;
-    background-image: url("/static/img/Background_PetchMatch.png");
+    background-image: url("/static/images/Background_PetchMatch.png");
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
@@ -681,7 +681,7 @@ textarea {
 /* ===== Responsive Rules ===== */
 @media (max-width: 900px) {
     main {
-        background-image: url("/static/img/Background_PetchMatch_Mobile.png");
+        background-image: url("/static/images/Background_PetchMatch_Mobile.png");
     }
 
     #navToggle {
@@ -745,7 +745,7 @@ textarea {
 
     /* ACCOUNT GENERAL DARK MODE */
     main {
-        background-image: url("/static/img/Background_PetchMatch_Darkmode.png");
+        background-image: url("/static/images/Background_PetchMatch_Darkmode.png");
     }
 
     .bodyaccount {
@@ -757,7 +757,7 @@ textarea {
 
     @media (max-width: 900px) {
         main {
-            background-image: url("/static/img/Background_PetchMatch_Mobile_Darkmode.png");
+            background-image: url("/static/images/Background_PetchMatch_Mobile_Darkmode.png");
         }
     }
 

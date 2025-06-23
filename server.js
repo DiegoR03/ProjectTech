@@ -238,7 +238,7 @@ app
         }
 
         // Add these lines to provide grouping and labels for saved answers
-        const { questionLabels } = require('./static/js/search-form');
+        const { questionLabels } = require('./static/scripts/search-form');
         const groupedAnswers = {
             "General Info": ['type', 'size', 'gender', 'age'],
             "Living Situation": ['hasKids', 'hasCats', 'hasDogs', 'floor', 'hasGarden'],
@@ -834,7 +834,7 @@ function loadSearchForm(req, res) {
 
 
     // Retrieves questionlist from 'search-form.js'
-    const { questions, questionLabels } = require('./static/js/search-form');
+    const { questions, questionLabels } = require('./static/scripts/search-form');
 
     const questionNum = parseInt(req.query.stepIndex) || 0;
     const step = questions[questionNum];
@@ -866,7 +866,7 @@ function loadSearchForm(req, res) {
 async function loadResultsSearchForm(req, res) {
     const userID = req.session.userID || null;
     const userAnswers = req.session.answers || {};
-    const { question, questionLabels } = require('./static/js/search-form');
+    const { question, questionLabels } = require('./static/scripts/search-form');
 
     const groupedAnswers = {
         "General Info": ['type', 'size', 'gender', 'age'],
@@ -956,7 +956,7 @@ function processForm(req, res) {
     }
 
     // Load questions
-    const { questions, questionLabels } = require('./static/js/search-form');
+    const { questions, questionLabels } = require('./static/scripts/search-form');
     const currentQuestion = questions[step];
 
     if (currentQuestion && currentQuestion.name) {
@@ -1601,4 +1601,3 @@ app.get('/match', async (req, res) => {
         res.status(500).json({ error: "Matching failed." });
     }
 });
-

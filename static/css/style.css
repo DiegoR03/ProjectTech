@@ -34,7 +34,7 @@
 
 .body {
   font-family: 'Montserrat';
-  background-image: url("/static/img/Background_PetchMatch.png");
+  background-image: url("/static/images/Background_PetchMatch.png");
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
@@ -152,28 +152,15 @@ footer .container {
   margin-inline: auto;
 }
 
-footer ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+header nav a:hover {
+  color: var(--primary-color);
+  border-bottom: solid 2px var(--primary-color);
+
+  
 }
 
-footer ul li {
-  margin-top: 0.5em;
-}
-
-footer ul li a {
-  color: var(--footer-text);
-  margin-top: 0.5em;
-  text-decoration: none;
-}
-
-footer ul li a:hover {
-  color: var(--font-color);
-}
-
-footer ul li:nth-of-type(1) a {
-  color: var(--text-color);
+.active {
+  color: var(--primary-color);
   font-weight: 600;
 }
 
@@ -184,7 +171,7 @@ footer ul li:nth-of-type(1) a:hover {
 
 @media (max-width: 1000px) {
   .body {
-    background-image: url("/static/img/Background_PetchMatch_Mobile.png");
+    background-image: url("/static/images/Background_PetchMatch_Mobile.png");
     background: linear-gradient(to bottom, var(--background-color-blue) 0%, var(--background-color-blue) 4%, rgba(0, 0, 0, 0) 10%);
   }
 
@@ -211,12 +198,12 @@ footer ul li:nth-of-type(1) a:hover {
 
 @media (prefers-color-scheme: dark) {
   .body {
-    background-image: url("/static/img/Background_PetchMatch_Darkmode.png");
+    background-image: url("/static/images/Background_PetchMatch_Darkmode.png");
   }
 
   @media (max-width: 900px) {
     .body {
-      background-image: url("/static/img/Background_PetchMatch_Mobile_Darkmode.png");
+      background-image: url("/static/images/Background_PetchMatch_Mobile_Darkmode.png");
     }
   }
 
