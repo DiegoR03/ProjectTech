@@ -1,32 +1,10 @@
-// SECURITY ////////////////////////////////////////////////////////////////////////////////////////
-
-// XSS (detects and blocks scripts in forms)
-var xss = require("xss");
-var html = xss('<script>alert("xss");</script>');
-
-
-//Validator restricts and unifies user input
-const validator = require('validator');
-
-//Hides sensitive info from the browser
-const helmet = require("helmet");
-
-
-// APP SET UP ///////////////////////////////////////////////////////////////////////////
-
 require("dotenv").config();
 
 const express = require("express");
-
-const bcrypt = require("bcryptjs")
+const validator = require('validator');
 const app = express();
 const session = require("express-session");
 const port = 3000;
-const multer = require("multer");
-
-const path = require("path");
-const fs = require("fs");
-const sharp = require("sharp");
 
 const { MongoClient, ObjectId } = require("mongodb");
 const uri = process.env.URI;
@@ -92,12 +70,12 @@ async function connectDB() {
         console.log(error);
     }
 }
+
 connectDB();
 
 app
     .use("/static", express.static("static"))
     .use(express.urlencoded({ extended: true }))
-    .use(express.json())
     .use(
         session({
             resave: false,
@@ -105,10 +83,6 @@ app
             saveUninitialized: false,
 
             secret: process.env.SESSION_SECRET,
-
-            cookie: {
-                maxAge: 1000 * 60 * 60 * 24 // 1 day
-            }
         }),
     )
 
@@ -1180,14 +1154,18 @@ async function getPetfinderToken() {
 // REQUEST API QUERY & FILTERING ////////////////////////////////////////////////////////
 async function loadBrowse(req, res, options = { json: false }) {
     try {
-
-        res.locals.isFetching = true; // Set flag before API call
         const token = await getPetfinderToken();
 
         const allowedFilters = [
-            "type", "gender", "size", "age", "coat",
-            "good_with_children", "good_with_dogs",
-            "good_with_cats", "house_trained"
+            "type",        // species
+            "gender",      // gender
+            "size",
+            "age",
+            "coat",
+            "good_with_children",
+            "good_with_dogs",
+            "good_with_cats",
+            "house_trained"
         ];
 
         const filterMap = {
@@ -1200,6 +1178,7 @@ async function loadBrowse(req, res, options = { json: false }) {
             good_with_dogs: "good_with_dogs",
             good_with_cats: "good_with_cats",
             house_trained: "house_trained"
+
         };
 
         // Step 1: Build query filters string
@@ -1279,13 +1258,12 @@ async function loadBrowse(req, res, options = { json: false }) {
             house_trained: "House trained"
         };
 
-        const activeFilters = [];
-        for (const key in req.query) {
-            if (req.query[key] && filterLabels[key]) {
+        for (const activeFilter in req.query) {
+            if (req.query[activeFilter] && filterLabels[activeFilter]) {
                 activeFilters.push({
-                    key,
-                    label: filterLabels[key],
-                    value: req.query[key]
+                    key: activeFilter,
+                    label: filterLabels[activeFilter],
+                    value: req.query[activeFilter]
                 });
             }
         }
@@ -1597,8 +1575,12 @@ app.get('/match', async (req, res) => {
         res.json(bestMatches);
 
     } catch (error) {
-        console.error("Matching failed:", error);
-        res.status(500).json({ error: "Matching failed." });
+        console.error("Error during registration:", error);
+        res.status(500).render("login", { data: "An error occurred during registration." });
     }
-});
+
+}
+
+
+
 

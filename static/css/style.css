@@ -1,8 +1,3 @@
-@font-face {
-  font-family: 'Montserrat';
-  src: url('../fonts/Montserrat-VariableFont_wght.ttf');
-}
-
 :root {
   --primary-color: #4177BE;
   --primary-color-hover: #2e49a9;
@@ -152,28 +147,15 @@ footer .container {
   margin-inline: auto;
 }
 
-footer ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+header nav a:hover {
+  color: var(--primary-color);
+  border-bottom: solid 2px var(--primary-color);
+
+  
 }
 
-footer ul li {
-  margin-top: 0.5em;
-}
-
-footer ul li a {
-  color: var(--footer-text);
-  margin-top: 0.5em;
-  text-decoration: none;
-}
-
-footer ul li a:hover {
-  color: var(--font-color);
-}
-
-footer ul li:nth-of-type(1) a {
-  color: var(--text-color);
+.active {
+  color: var(--primary-color);
   font-weight: 600;
 }
 
