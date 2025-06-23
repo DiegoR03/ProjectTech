@@ -534,7 +534,7 @@ app
         }
 
         const {
-            petname, description, type, breed, size, gender, age, coat, children, dogs, cats, house_trained, shots_current, isCastrated, isComfystrangers, isAloneOften, isPlayful, isPaired, activity } = req.body;
+            petname, description, type, breed, size, gender, age, coat, children, dogs, cats, house_trained, shots_current, isCastrated, isComfystrangers, isAloneOften, isPlayful, isPaired, activity } = xss(String(req.body));
 
         let processedPhotoPaths = [];
 
@@ -596,7 +596,8 @@ app
     })
 
     .post('/notifications/respond', async (req, res) => {
-        const { notificationId, response } = req.body;
+        const notificationId = xss(String(req.body.notificationId));
+        const response = xss(String(req.body.response));
 
         if (!ObjectId.isValid(notificationId)) {
             return res.status(400).send('Invalid notification ID.');
@@ -683,7 +684,7 @@ app
     .post("/searchForm", processForm)
     .post('/save-answers', async (req, res) => {
         try {
-            const answers = req.body;
+            const answers = xss(String(req.body));
 
             if (!req.session.userID) {
                 return res.status(401).json({ error: "Unauthorized" });
@@ -887,7 +888,8 @@ function loadRegistry(req, res) {
 
 // LOGIN ////////////////////////////////////////////////////////////////////////////////////////
 async function processLogin(req, res) {
-    const { email, password } = req.body;
+    const email = xss(String(req.body.email));
+    const password = xss(String(req.body.password));
 
     try {
         const user = await userCollection.findOne({ email });
@@ -945,7 +947,8 @@ function requireLogin(req, res, next) {
 
 
 function processForm(req, res) {
-    const { option, stepIndex, } = req.body;
+    const option = xss(String(req.body.option));
+    const stepIndex = xss(String(req.body.stepIndex));
     const step = parseInt(stepIndex);
 
     if (!req.session.answers) {
@@ -972,26 +975,18 @@ function processForm(req, res) {
 };
 
 app.post('/results-search-form', (req, res) => {
-    const newAnswers = req.body;
-
-    if (!req.session.answers) {
-        req.session.answers = {};
-    }
-
-
-    for (let key in newAnswers) {
-        const cleanKey = xss(key);
-        const cleanValue = xss(newAnswers[key]);
-        req.session.answers[cleanKey] = cleanValue;
+    const newAnswers = {};
+    for (let key in req.body) {
+        newAnswers[xss(String(key))] = xss(String(req.body[key]));
     }
     res.status(200).send('Answers updated');
 });
 
 async function processRegistration(req, res) {
-    const firstname = req.body.firstName;
-    const lastname = req.body.lastName;
-    const email = req.body.email;
-    const password = req.body.password;
+    const firstname = xss(String(req.body.firstName));
+    const lastname = xss(String(req.body.lastName));
+    const email = xss(String(req.body.email));
+    const password = xss(String(req.body.password));
     const hashedPassword = await bcrypt.hash(password, 8);
 
     try {
@@ -1057,9 +1052,9 @@ async function processRegistration(req, res) {
 // CHANGE PASSWORD ////////////////////////////////////////////////////////////////////////////////////////
 
 async function changePassword(req, res) {
-    const email = req.body.email;
-    const newpassword = req.body.password_new;
-    const confirmpassword = req.body.password_confirm;
+    const email = xss(String(req.body.email));
+    const newpassword = xss(String(req.body.password_new));
+    const confirmpassword = xss(String(req.body.password_confirm));
 
     const hashedNewPassword = await bcrypt.hash(newpassword, 8)
 
@@ -1122,7 +1117,7 @@ async function changeStory(req, res) {
 
         // Update text fields if changed
         for (const field of fieldsToUpdate) {
-            const newValue = req.body[field];
+            const newValue = xss(String(req.body[field]));
             if (newValue !== undefined && newValue.trim() !== "" && newValue !== user[field]) {
                 updates[field] = newValue;
             }

@@ -101,7 +101,7 @@
                         <input class="search" placeholder="Search pets…" />
                         <div class="grid list" id="result-grid">
                             <% if (myPets.length===0) { %>
-                                <p>You haven't posted any pets yet.</p>
+                                <p id="empty">You haven't posted any pets yet.</p>
                                 <% } else { %>
                                     <% myPets.forEach(pet=> { %>
 
@@ -143,7 +143,7 @@
 
                     <div id="recentlyViewed-grid" class="grid list">
                         <% if (recentlyViewed.length===0) { %>
-                            <p>You haven't favorited any pets yet.</p>
+                            <p id="empty">You seen any pets yet.</p>
                             <% } else { %>
                                 <% recentlyViewed.forEach(pet=> {
                                     const isFavorited = currentUser?.favorites?.some(fav => String(fav.id) ===
@@ -192,7 +192,7 @@
 
                     <div id="favorites-grid" class="grid list">
                         <% if (favorites.length===0) { %>
-                            <p>You haven't favorited any pets yet.</p>
+                            <p id="empty">You haven't favorited any pets yet.</p>
                             <% } else { %>
                                 <% favorites.forEach(pet=> { const isFavorited = currentUser?.favorites?.some(fav =>
                                     String(fav.id) === String(pet.id)); %>
@@ -437,7 +437,7 @@
                             <% }); %>
                     </div>
                     <% } else { %>
-                        <p>No saved search preferences yet.</p>
+                        <p id="empty">No saved search preferences yet.</p>
                         <% } %>
             </section>
 
